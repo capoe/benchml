@@ -1,3 +1,8 @@
+# A short guide to ...
+- [Transforms](#transforms)
+- [Modules](#modules)
+- [Macros](#macros)
+
 ## Transforms
 
 Transforms are the nodes of the pipeline: They act on the data stream via calls to their .map and/or .fit methods. The results are then stored in their private stream and/or parameter object. An example for the constructor call that creates a new transform instance reads as follows:
@@ -134,7 +139,7 @@ New transforms can be defined either externally or internally. In the latter cas
 ./bin/bmark.py --list_transforms
 ```
 
-## Defining a new module
+## Modules
 
 A module (also referred to as a *pipeline* or *model*) comprises a set of interdependent transforms, with at least one input transform. The module applies the transforms sequentially to the data input during the fitting and mapping stages, managing both data streams and parameters. 
 
