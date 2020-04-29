@@ -128,7 +128,13 @@ class KernelDot(Transform):
     precompute = True
 ```
 
-## Defining a module
+### How to add a plugin
+New transforms can be defined either externally or internally. In the latter case, add a source file with the implementation to the benchml/plugins folder, and subsequently import that file in benchml/plugins/__init__.py. You can check that your transforms were successfully added using bin/bmark.py:
+```bash
+./bin/bmark.py --list_transforms
+```
+
+## Defining a new module
 
 A module (also referred to as a *pipeline* or *model*) comprises a set of interdependent transforms, with at least one input transform. The module applies the transforms sequentially to the data input during the fitting and mapping stages, managing both data streams and parameters. 
 
@@ -158,7 +164,7 @@ model = Module(
 ```
 Note that except for "transforms", all arguments in this constructor are optional. Still, most pipelines will typically define some "outputs", that are returned as a dictionary after calls to model.map(stream). Hyperparameter optimization is added via "hypers". In the example above, a grid search over the kernel ridge parameters "alpha" and "power" will be performed within model.hyperfit(stream, ...). Calls to model.fit(stream) on the other hand would only consider the transform args specified in the "transforms" section of the constructor.
 
-## Using the module
+### Using the module
 
 In the simpler .fit case, where a model is to be parametrized on some predefined training data, and then applied to a prospective screen, the workflow would simply be:
 ```python
@@ -182,7 +188,7 @@ model.hyperfit(
                                 #   (read from the stream of the "input" transform).
   ```
   
-## Accessing data within a stream or model
+### Accessing data within a stream or module
 The methods model.open(data) as well as stream.split(...) return handles on a data stream. You can manually access the data stored in the stream via
 ```python
 X = stream.resolve("descriptor.X")
@@ -196,7 +202,7 @@ predictor = model.get("KernelRidge._model")
 The underscore "\_" indicates that the "model" data is to be read from the .params() of the KernelRidge transform instead of the .stream().
 
 ## Macros
-Certain transform sequences may reappear in various models. It can then be convenient to implement a macro that behaves like a single transform class when supplied to the constructor of a new module. Below we show how to combine a topological fingerprint with a dot-product kernel within a single macro:
+Certain transform sequences may reappear in various models in the same way. It can then be convenient to implement a macro that behaves like a single transform class when supplied to the constructor of a new module. Below we show how to combine a topological fingerprint with a dot-product kernel within a single macro:
 ```python
 class TopologicalKernel(Macro):
     req_inputs = ("descriptor.configs",)
@@ -215,7 +221,7 @@ class TopologicalKernel(Macro):
         }
     ]
 ```
-This macro can then be used within a module that conveniently sums two kernels with different hyperparameters into a single kernel using the Add transform:
+This macro can then be used by a module that, e.g., sums two kernels with different hyperparameters into a single kernel using the "Add" transform:
 ```python
 Module(
     transforms=[
