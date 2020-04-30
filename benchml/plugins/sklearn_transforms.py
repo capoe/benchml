@@ -20,12 +20,9 @@ class SklearnTransform(Transform):
 
 class Ridge(SklearnTransform):
     default_args = { 'alpha': 1. }
-    req_args = tuple()
     req_inputs = ('X', 'y')
     allow_params = {'model'}
     allow_stream = {'y'}
-    def __init__(self, **kwargs):
-        Transform.__init__(self, **kwargs)
     def _fit(self, inputs):
         model = sklearn.linear_model.Ridge(**self.args)
         model.fit(X=inputs["X"], y=inputs["y"])
@@ -62,4 +59,3 @@ class KernelRidge(SklearnTransform):
         y = self.params().get("model").predict(inputs["K"]**self.power)
         y = y*self.params().get("y_std") + self.params().get("y_mean")
         self.stream().put("y", y)
-

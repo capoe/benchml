@@ -5,18 +5,13 @@ import sklearn.linear_model
 import sklearn.kernel_ridge
 
 class ExtXyzInput(Transform):
-    root = True
     allow_stream = {'configs', 'y', 'meta'}
     stream_copy = ("meta",)
     stream_samples = ("configs", "y")
-    def __init__(self, **kwargs):
-        Transform.__init__(self, **kwargs)
     def _feed(self, data):
         self.stream().put("configs", data)
         self.stream().put("y", data.y)
         self.stream().put("meta", data.meta)
-    def _map(self, inputs):
-        return
 
 class Add(Transform):
     req_args = ('coeffs',)
@@ -38,8 +33,6 @@ class DescriptorRandom(Transform):
     allow_stream = {'X'}
     stream_samples = ("X",)
     precompute = True
-    def __init__(self, **kwargs):
-        Transform.__init__(self, **kwargs)
     def _map(self, inputs):
         X = np.random.uniform(0., 1., size=(len(inputs["configs"]), self.args["dim"]))
         self.stream().put("X", X)
@@ -81,7 +74,7 @@ def transform_info(tf, log, verbose=True):
         log << "requires:   args=%-15s inputs=%-15s   outputs:  %-15s   available: %s" % (
             argstr, inputstr, streamstr, available)
         log << log.endl
-  
+
 def get_bases_recursive(obj):
     bases = list(obj.__bases__)
     sub = []
@@ -97,4 +90,3 @@ def list_all(verbose=False):
         if inspect.isclass(obj):
             if Transform in get_bases_recursive(obj):
                 transform_info(obj, log=log, verbose=verbose)
-

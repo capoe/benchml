@@ -7,6 +7,9 @@ def compile(groups):
             for model in collections[group]() ]
     return selected
 
+def compile_null():
+    return []
+
 def compile_morgan():
     return [
         Module(
@@ -85,11 +88,10 @@ def compile_gylm():
                     tag="desc", 
                     inputs={"configs": "input.configs"}),
                 KernelDot(
-                    tag="kern",
                     inputs={"X": "desc.X"}),
                 KernelRidge(
                     args={"alpha": 1e-5, "power": 2},
-                    inputs={"K": "kern.K", "y": "input.y"})
+                    inputs={"K": "KernelDot.K", "y": "input.y"})
             ],
             hypers=[
                 Hyper({ "KernelRidge.alpha": np.logspace(-5,+1, 7), }),
@@ -103,4 +105,5 @@ def compile_gylm():
 collections = {
     "morgan": compile_morgan,
     "gylm": compile_gylm,
+    "null": compile_null
 }

@@ -162,8 +162,6 @@ class Transform(object):
     default_args = {}
     req_args = tuple()
     req_inputs = tuple()
-    root = False
-    cache = False
     precompute = False
     allow_stream = {}
     allow_params = {}
@@ -315,12 +313,11 @@ class Transform(object):
             self._map(inputs)
             self.stream().version(self.getHash())
     def _map(self, inputs):
-        raise NotImplementedError(self.__class__.__name__+"._map")
+        return
     # LOGGING
     def __str__(self):
         info = "%-15s <- %s" % (self.tag, str(self.inputs))
         info += "\n    State:    " + str(self.getHash())
-        info += "\n    Root:     " + str(self.root)
         info += "\n    Precomp.: " + str(self.precompute)
         info += "\n    Cache:    " + str(self.cache)
         info += "\n    Depends:"
@@ -426,7 +423,10 @@ class Module(Transform):
         return self.transforms[0].stream()
     def get(self, addr):
         tf, field = addr.split(".")
-        return self[tf].stream().get(field)
+        if field.startswith("_"):
+            return self[tf].params().get(field[1:])
+        else:
+            return self[tf].stream().get(field)
     def resolveOutputs(self):
         res = {}
         for key, addr in self.outputs.items():
@@ -528,4 +528,3 @@ class Module(Transform):
     def __str__(self):
         return "Module='%s'" % self.tag + \
             "\n  "+"\n  ".join([ str(t) for t in self.transforms ])
-
