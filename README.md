@@ -171,9 +171,11 @@ model = Module(
             inputs={"K": "kernel.K", "y": "input.y"})
     ],
     hyper=BayesianHyper(
-        Hyper({ "KernelRidge.alpha": np.linspace(-3,+3, 5), }),
-        Hyper({ "KernelRidge.power": [ 1., 2., 3. ] }),
-        convert={"KernelRidge.alpha": lambda a: 10**a}),
+        Hyper({ 
+            "KernelRidge.alpha": [-3, 3 ],
+            "KernelRidge.power": [ 1., 3. ]}),
+        convert={
+            "KernelRidge.alpha": lambda a: 10**a}),
     broadcast={ "meta": "input.meta" },           # < Data objects referenced here are broadcast to 
     outputs={ "y": "KernelRidge.y" }              #   all transforms, and can be accessed via the
 ),                                                #   inputs argument in their .\_map and .\_fit methods.
