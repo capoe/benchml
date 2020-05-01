@@ -2,7 +2,7 @@
     <img src="https://github.com/capoe/benchml/raw/master/web/bml.png" width="250px"></img>
 </div>
 
-# Pipelining concept
+# BenchML data structure
 
 <div align="center">
     <img src="https://github.com/capoe/benchml/raw/master/web/model.png" width="75%"></img>
