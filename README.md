@@ -159,15 +159,15 @@ model = Module(
             args={"alpha": 1e-5, "power": 2},
             inputs={"K": "kernel.K", "y": "input.y"})
     ],
-    hypers=[
-        Hyper({ "KernelRidge.alpha": np.logspace(-3,+1, 5), }),
-        Hyper({ "KernelRidge.power": [ 1., 2., 3. ] })
-    ],
+    hyper=BayesianHyper(
+        Hyper({ "KernelRidge.alpha": np.linspace(-3,+3, 5), }),
+        Hyper({ "KernelRidge.power": [ 1., 2., 3. ] }),
+        convert={"KernelRidge.alpha": lambda a: 10**a}),
     broadcast={ "meta": "input.meta" },           # < Data objects referenced here are broadcast to 
     outputs={ "y": "KernelRidge.y" }              #   all transforms, and can be accessed via the
 ),                                                #   inputs argument in their .\_map and .\_fit methods.
 ```
-Note that except for "transforms", all arguments in this constructor are optional. Still, most pipelines will typically define some "outputs", that are returned as a dictionary after calls to model.map(stream). Hyperparameter optimization is added via "hypers". In the example above, a grid search over the kernel ridge parameters "alpha" and "power" will be performed within model.hyperfit(stream, ...). Calls to model.fit(stream) on the other hand would only consider the transform args specified in the "transforms" section of the constructor.
+Note that except for "transforms", all arguments in this constructor are optional. Still, most pipelines will typically define some "outputs", that are returned as a dictionary after calls to model.map(stream). Hyperparameter optimization is added via "hyper". In the example above, a grid search over the kernel ridge parameters "alpha" and "power" will be performed within model.hyperfit(stream, ...). Calls to model.fit(stream) on the other hand would only consider the transform args specified in the "transforms" section of the constructor.
 
 ### Using the module
 
