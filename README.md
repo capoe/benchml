@@ -2,11 +2,17 @@
     <img src="https://github.com/capoe/benchml/raw/master/web/bml.png" width="250px"></img>
 </div>
 
+# Pipelining concept
+
+<div align="center">
+    <img src="https://github.com/capoe/benchml/raw/master/web/model.png" width="75%"></img>
+</div>
 
 # A short guide to ...
 - [Transforms](#transforms)
 - [Modules](#modules)
 - [Macros](#macros)
+- [Hyper-optimization](#hyper-optimization)
 
 ## Transforms
 
@@ -254,3 +260,63 @@ Module(
 )
 ```
 Note that streams within the macros are located within their own namespace. Hence the kernel from transform "A" is referenced outside the macro via "A/kernel.K" instead of just "kernel.K". 
+
+## Hyper-optimization
+
+The library currently allows grid-based and Bayesian hyperparameter optimization. These are added to the model definition via the "hyper" argument of the constructor. A grid-based example reads as follows:
+```python
+model = Module(
+    transforms=[
+        ...
+        KernelRidge(...)
+        ...
+    ],
+    hyper=GridHyper(
+        Hyper({ "KernelRidge.alpha": np.logspace(-3,+3, 5), }),
+        Hyper({ "KernelRidge.power": [ 1., 2., 3. ] })),          
+),                                               
+```
+As there are two independent <Hyper> objects within the GridHyper constructor, a complete combinatorial sweep will be performed, testing all combinations of "KernelRidge.alpha" and "KernelRidge.power" (here: 5x3 = 15). Hyperparameters contained within the same Hyper object, by contrast, are swept over in a linear fashion:    
+```python
+model = Module(
+    transforms=[
+        ...
+        KernelRidge(...)
+        ...
+    ],
+    hyper=GridHyper(
+        Hyper({ 
+            "KernelRidge.alpha": np.logspace(-3,+3, 3), # < Only three combinations considered:
+            "KernelRidge.power": [ 1., 2., 3. ]         #   (alpha, power) = (-3,1), (0,2), (3,3)
+        }))
+)                                               
+```
+    
+As the number of hyperparameters increases, the grid-based sweep becomes increasingly expensive. Bayesian optimization can then be a more efficient choice:
+```python
+model = Module(
+    transforms=[
+        ...
+        KernelRidge(...)
+        ...
+    ],
+    hyper=BayesianHyper(
+        Hyper({ 
+            "KernelRidge.alpha": [ -3, 3 ],
+            "KernelRidge.power": [ 1., 3. ] }),
+        convert={"KernelRidge.alpha": lambda a: 10**a}),          
+),                                               
+```
+Here we specified the lower and upper limit for each hyperparameter. The "convert" dictionary contains instructions that are applied to a hyperparameter before it is supplied to the module: For example, "KernelRidge.alpha" is exponentiated with base 10, such that the Bayesian optimization (which is hence applied to the log of the regularization alpha) experiences a smoother landscape. A similar conversion is necessary when integral or boolean parameters are to be optimized:
+```python
+   ...
+   hyper=BayesianHyper(
+        Hyper({ 
+            "trafo.some_boolean": [ 0., 1. ],
+            "trafo.some_integer": [ 128, 512] }),
+        convert={
+            "trafo.some_boolean": lambda b: bool(np.round(b)),
+            "trafo.some_integer": lambda f: int(f)
+        })
+    ...
+```
