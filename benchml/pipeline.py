@@ -112,17 +112,6 @@ class Stream(object):
     def items(self):
         return self.storage.items()
 
-class Hyper(object):
-    def __init__(self, instructions):
-        self.instr = instructions
-        self.n_states = len(self.instr[list(self.instr.keys())[0]])
-    def __iter__(self):
-        for s in range(self.n_states):
-            updates = {}
-            for addr, val in self.instr.items():
-                updates[addr] = val[s]
-            yield updates
-
 class Macro(object):
     req_inputs = tuple()
     req_args = tuple()
@@ -319,7 +308,6 @@ class Transform(object):
         info = "%-15s <- %s" % (self.tag, str(self.inputs))
         info += "\n    State:    " + str(self.getHash())
         info += "\n    Precomp.: " + str(self.precompute)
-        info += "\n    Cache:    " + str(self.cache)
         info += "\n    Depends:"
         if self.deps is not None:
             for dep in self.deps:
@@ -351,13 +339,13 @@ class Module(Transform):
             tag="module",
             broadcast={},
             transforms=[],
-            hypers=[],
+            hyper=[],
             **kwargs):
         Transform.__init__(self, tag=tag, **kwargs)
         self.broadcast = broadcast
         self.transforms = []
         self.map_transforms = {}
-        self.hypers = hypers
+        self.hyper = hyper
         for t in transforms:
             if hasattr(t, "is_macro"):
                 for sub in t: self.append(sub)
@@ -434,54 +422,41 @@ class Module(Transform):
             res[key] = self.map_transforms[tf].stream().get(k)
         return res
     # Hyperfit
-    def hyperUpdate(self, updates):
+    def hyperUpdate(self, updates, verbose=False):
         for addr, val in updates.items():
             tf_tag, arg_name = addr.split(".")
-            print("    Setting {0:15s}.{1:10s} = {2}".format(tf_tag, arg_name, val))
+            if verbose:
+                print("    Setting {0:15s}.{1:10s} = {2}".format(
+                    tf_tag, arg_name, val))
             self[tf_tag].args[arg_name] = val
-    def hyperfit(self,
-            stream,
+    def hyperEval(self, 
+            stream, 
+            updates, 
             split_args,
-            accu_args,
+            accu_args, 
             target,
             target_ref,
-            verbose=VERBOSE):
-        log << log.mb << "Start hyper loop on stream" << stream.tag << log.endl
-        def merge(*updates):
-            merged = {}
-            for upd in updates: merged.update(upd)
-            return merged
-        update_cache = []
-        for hyperidx, updates in enumerate(
-                itertools.product(*tuple(self.hypers))):
-            log << "  Hyper #%d" % hyperidx << log.endl
-            updates = merge(*updates)
-            self.hyperUpdate(updates)
-            if verbose:
-                log << "    Hash changed:" << log.flush
-                for tf in self.transforms:
-                    if tf.hashChanged():
-                        log << tf.tag << log.flush
-                log << log.endl
-            self.precompute(stream)
-            accu = Accumulator(**accu_args)
-            for substream_train, substream_test in stream.split(**split_args):
-                self.fit(substream_train)
-                out = self.map(substream_test)
-                accu.append("test", out[target], self.get(target_ref))
-            metric, metric_std = accu.evaluate("test")
-            update_cache.append({
-                "metric": metric,
-                "updates": updates
-            })
-        update_cache = sorted(update_cache, key=lambda cache: cache["metric"])
-        best = update_cache[0] if (Accumulator.select(**accu_args) == "smallest") \
-            else update_cache[-1]
-        log << "  Select hyper parameters:" << log.endl
-        log << "    Metrics = [ %+1.4f ... %+1.4e ]" % (
-                update_cache[0]["metric"], update_cache[-1]["metric"]) \
-            << log.endl
-        self.hyperUpdate(best["updates"])
+            verbose=True):
+        self.hyperUpdate(updates, verbose=verbose)
+        if verbose:
+            log << "    Hash changed:" << log.flush
+            for tf in self.transforms:
+                if tf.hashChanged():
+                    log << tf.tag << log.flush
+            log << log.endl
+        self.precompute(stream)
+        accu = Accumulator(**accu_args)
+        for substream_train, substream_test in stream.split(**split_args):
+            self.fit(substream_train)
+            out = self.map(substream_test)
+            accu.append("test", out[target], self.get(target_ref))
+        metric, metric_std = accu.evaluate("test")
+        return metric
+    def hyperfit(self, stream, **kwargs):
+        if self.hyper is None:
+            raise ValueError("<Module.hyperfit>: Hyper configuration is missing")
+        updates = self.hyper.optimize(self, stream, **kwargs)
+        self.hyperUpdate(updates)
         return self.fit(stream)
     # Fit, map, precompute
     def fit(self, stream, verbose=VERBOSE):

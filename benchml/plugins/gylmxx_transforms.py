@@ -33,6 +33,7 @@ class GylmTransform(Transform):
     allow_stream = ("X",)
     stream_samples = ("X",)
     precompute = True
+    log = None
     def check_available():
         return check_gylmxx_available(GylmAverage)
     def _fit(self, inputs):
@@ -65,8 +66,8 @@ def gylm_evaluate(
         dcalc, 
         reduce_molecular=None, 
         norm_molecular=False, 
-        get_centres=None,
-        log=None):
+        get_centres=None):
+    log = GylmTransform.log
     if get_centres is None:
         get_centres = lambda config: np.where(np.array(config.symbols) != 'H')[0]
     t0 = time.time()

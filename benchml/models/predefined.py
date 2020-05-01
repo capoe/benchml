@@ -19,10 +19,12 @@ def compile_morgan():
                 MorganFP(inputs={"configs": "input.configs"}),
                 Ridge(inputs={"X": "MorganFP.X", "y": "input.y"})
             ],
-            hypers=[
+            hyper=BayesianHyper(
                 Hyper({"MorganFP.length": [ 1024, 2048 ]}),
-                Hyper({"Ridge.alpha": np.logspace(-2,2,5)})
-            ],
+                Hyper({"Ridge.alpha": np.linspace(-2,2,5)}),
+                convert={
+                    "MorganFP.length": int, 
+                    "Ridge.alpha": lambda p: 10**p}),
             outputs={"y": "Ridge.y"}
         ),
         Module(
@@ -39,10 +41,9 @@ def compile_morgan():
                     args={"alpha": 1e-5, "power": 2},
                     inputs={"K": "kern.K", "y": "input.y"})
             ],
-            hypers=[
+            hyper=GridHyper(
                 Hyper({ "KernelRidge.alpha": np.logspace(-3,+1, 5), }),
-                Hyper({ "KernelRidge.power": [ 2. ] })
-            ],
+                Hyper({ "KernelRidge.power": [ 2. ] })),
             broadcast={ "meta": "input.meta" },
             outputs={ "y": "KernelRidge.y" }
         ),
@@ -65,14 +66,13 @@ def compile_morgan():
                     args={"alpha": 0.1, "power": 2},
                     inputs={"K": "Add.y", "y": "input.y"})
             ],
-            hypers=[
+            hyper=GridHyper(
                 Hyper({ "Add.coeffs": 
                     list(map(lambda f: [ f, 1.-f ], np.linspace(0.25, 0.75, 3)))
                 }),
                 Hyper({ "KernelRidge.alpha": 
                     np.logspace(-3,+1, 5),
-                })
-            ],
+                })),
             broadcast={ "meta": "input.meta" },
             outputs={ "y": "KernelRidge.y" },
         ),
@@ -93,10 +93,9 @@ def compile_gylm():
                     args={"alpha": 1e-5, "power": 2},
                     inputs={"K": "KernelDot.K", "y": "input.y"})
             ],
-            hypers=[
+            hyper=GridHyper(
                 Hyper({ "KernelRidge.alpha": np.logspace(-5,+1, 7), }),
-                Hyper({ "KernelRidge.power": [ 1., 2., 3., 6. ] })
-            ],
+                Hyper({ "KernelRidge.power": [ 1., 2., 3., 6. ] })),
             broadcast={ "meta": "input.meta" },
             outputs={ "y": "KernelRidge.y" }
         ),

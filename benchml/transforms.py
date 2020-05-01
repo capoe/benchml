@@ -1,4 +1,5 @@
-from .pipeline import Module, Macro, Transform, Hyper
+from .pipeline import Module, Macro, Transform
+from .hyper import Hyper, GridHyper, BayesianHyper
 from .logger import log
 import numpy as np
 import sklearn.linear_model

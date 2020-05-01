@@ -41,9 +41,15 @@ class Dataset(object):
     def __init__(self, ext_xyz=None, meta=None, structs=None):
         self.structs = structs
         if ext_xyz is not None:
-            self.structs = read(ext_xyz)
+            if type(ext_xyz) is str:
+                self.structs = read(ext_xyz)
+            else:
+                self.structs = []
+                for xyz in ext_xyz:
+                    self.structs.extend(read(xyz))
         self.meta = meta
-        self.y = np.array([ s.info[meta["target"]] for s in self.structs ])
+        if meta is not None and "target" in meta:
+            self.y = np.array([ s.info[meta["target"]] for s in self.structs ])
         return
     def info(self):
         return "{name:50s} #structs={size:-5d}  task={task:8s}  metrics={metrics:s}".format(
