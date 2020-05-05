@@ -2,6 +2,15 @@
     <img src="https://github.com/capoe/benchml/raw/master/web/bml.png" width="250px"></img>
 </div>
 
+# Installation
+To install from source, just clone the repository and configure your PYTHONPATH by sourcing bin/BENCHMLRC:
+```bash
+git clone https://github.com/capoe/benchml.git
+cd benchml
+./configure.py
+source bin/BENCHMLRC
+```
+
 # BenchML pipelines
 
 <div align="center">
