@@ -3,10 +3,12 @@
 </div>
 
 # Installation
-To install from source, just clone the repository and configure your PYTHONPATH by sourcing bin/BENCHMLRC:
+To install from source, clone the repository, create a new conda environment and configure your PYTHONPATH using bin/BENCHMLRC:
 ```bash
 git clone https://github.com/capoe/benchml.git
 cd benchml
+conda env create -n py3benchml -f env.yml
+conda active py3benchml
 ./configure.py
 source bin/BENCHMLRC
 ```
