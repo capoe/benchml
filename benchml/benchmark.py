@@ -1,11 +1,13 @@
 from .accumulator import Accumulator
 from .splits import Split
 
-def make_accu_id(model, dataset, mode):
-    return "mod={model};dset={data};perf={mode}".format(
+def make_accu_id(model, dataset, mode, stream_train, stream_test):
+    return "model={model};data={data};perf={mode};train:test={ntrain:d}:{ntest:d}".format(
         model=model.tag, 
         data=str(dataset).split()[0], 
-        mode=mode)
+        mode=mode,
+        ntrain=len(stream_train),
+        ntest=len(stream_test))
 
 def evaluate_model(dataset, model, accu, log, verbose=False):
     # Open and precompute
@@ -19,13 +21,14 @@ def evaluate_model(dataset, model, accu, log, verbose=False):
             split_args={"method": "random", "n_splits": 5, "train_fraction": 0.75},
             accu_args={"metric": dataset["metrics"][0]},
             target="y",
-            target_ref="input.y")
+            target_ref="input.y",
+            log=log)
         # Evaluate
         output_train = model.map(stream_train)
         output_test = model.map(stream_test)
-        accu.append(make_accu_id(model, dataset, "test"), 
+        accu.append(make_accu_id(model, dataset, "test", stream_train, stream_test), 
             output_test["y"], stream_test.resolve("input.y"))
-        accu.append(make_accu_id(model, dataset, "train"), 
+        accu.append(make_accu_id(model, dataset, "train", stream_train, stream_test), 
             output_train["y"], stream_train.resolve("input.y"))
     model.close(check=False)
 

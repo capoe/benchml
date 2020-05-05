@@ -1,4 +1,5 @@
 from .accumulator import Accumulator
+from .logger import log
 import itertools
 import copy
 import numpy as np
@@ -17,6 +18,8 @@ class Hyper(object):
 class GridHyper(object):
     def __init__(self, *hypers, **kwargs):
         self.hypers = hypers
+    def getFields(self):
+        return [ field for h in self.hypers for field in h.instr ]
     def __iter__(self):
         def merge(*updates):
             merged = {}
@@ -31,28 +34,44 @@ class GridHyper(object):
             split_args, 
             accu_args, 
             target, 
-            target_ref):
-        log << log.mb << "Start hyper loop on stream" << stream.tag << log.endl
+            target_ref,
+            log=None):
         update_cache = []
+        fields = self.getFields()
+        ln_length = 12*(len(fields)+2)+3
+        if log:
+            log << "="*ln_length << log.endl
+            log << "|   iter    |   target    |" + "|".join(
+                map(lambda f: " %8s  " % f if len(f) <= 8 else " %5s...  " % f[0:5], 
+                fields))+"|" << log.endl
+            log << "-"*ln_length << log.endl
+        prev = None
+        invert = -1 if Accumulator.select(**accu_args) == "smallest" else +1
         for hyperidx, updates in enumerate(self):
-            log << "  Hyper #%d" % hyperidx << log.endl
             metric = module.hyperEval(stream, updates, 
                 split_args, accu_args, target, target_ref)
             update_cache.append({
                 "metric": metric,
                 "updates": updates
             })
+            if prev is None:
+                prev = invert*metric
+            if invert*metric >= prev:
+                if log: colour = log.pp
+                prev = invert*metric
+            else:
+                if log: colour = log.ww
+            if log:
+                log << colour << "|   %-5d   |  %+1.2e  |" % (hyperidx+1, metric) + "|".join(map(
+                    lambda f: (" %+1.2e " % float(updates[f])) \
+                        if type(updates[f]) is not list else "  [ ... ]  ", fields))+"|" << log.endl
         update_cache = sorted(update_cache, key=lambda cache: cache["metric"])
         best = update_cache[0] if (Accumulator.select(**accu_args) == "smallest") \
             else update_cache[-1]
-        log << "  Select hyper parameters:" << log.endl
-        log << "    Metrics = [ %+1.4f ... %+1.4e ]" % (
-                update_cache[0]["metric"], update_cache[-1]["metric"]) \
-            << log.endl
         return best["updates"]
 
 class BayesianHyper(object):
-    def __init__(self, *hypers, convert={}, seed=None):
+    def __init__(self, *hypers, convert={}, seed=0):
         self.hypers = hypers
         self.seed = seed
         self.convert = convert
@@ -64,7 +83,8 @@ class BayesianHyper(object):
             split_args, 
             accu_args, 
             target, 
-            target_ref):
+            target_ref,
+            log=None):
         all_updates = [ upd for upd in GridHyper(*self.hypers) ]
         bounds = copy.deepcopy(all_updates[0])
         for key in bounds.keys():

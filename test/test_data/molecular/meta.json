@@ -1,0 +1,20 @@
+{ 
+ "comment": "Curated from CHEMBL",
+ "name": "molecular",
+ "targets": {
+     "pactivity": {
+         "task": "regression",
+         "scaling": "extensive",
+         "metrics": [ "mae", "r2" ],
+         "per_atom": false
+     }
+ },
+ "splits": [ {"method": "random", "n_splits": 2, "train_fraction": 0.7 } ],
+ "elements": [ "C", "N", "O", "S", "H", "F", "Cl", "Br", "I", "P", "B", "Si" ],
+ "has_smiles": true,
+ "datasets": [
+  "set_1.xyz",
+  "set_2.xyz",
+  "set_3.xyz"
+  ]
+}

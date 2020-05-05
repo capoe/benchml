@@ -13,41 +13,6 @@ def compile_null():
 def compile_morgan():
     return [
         Module(
-            tag="morgan_ridge",
-            transforms=[
-                ExtXyzInput(tag="input"),
-                MorganFP(inputs={"configs": "input.configs"}),
-                Ridge(inputs={"X": "MorganFP.X", "y": "input.y"})
-            ],
-            hyper=BayesianHyper(
-                Hyper({"MorganFP.length": [ 1024, 2048 ]}),
-                Hyper({"Ridge.alpha": np.linspace(-2,2,5)}),
-                convert={
-                    "MorganFP.length": int, 
-                    "Ridge.alpha": lambda p: 10**p}),
-            outputs={"y": "Ridge.y"}
-        ),
-        Module(
-            tag="morgan_krr",
-            transforms=[
-                ExtXyzInput(tag="input"),
-                MorganFP(
-                    tag="desc", 
-                    inputs={"configs": "input.configs"}),
-                KernelDot(
-                    tag="kern",
-                    inputs={"X": "desc.X"}),
-                KernelRidge(
-                    args={"alpha": 1e-5, "power": 2},
-                    inputs={"K": "kern.K", "y": "input.y"})
-            ],
-            hyper=GridHyper(
-                Hyper({ "KernelRidge.alpha": np.logspace(-3,+1, 5), }),
-                Hyper({ "KernelRidge.power": [ 2. ] })),
-            broadcast={ "meta": "input.meta" },
-            outputs={ "y": "KernelRidge.y" }
-        ),
-        Module(
             tag="morgan_krrx2",
             transforms=[
                 ExtXyzInput(tag="input"),
@@ -75,6 +40,41 @@ def compile_morgan():
                 })),
             broadcast={ "meta": "input.meta" },
             outputs={ "y": "KernelRidge.y" },
+        ),
+        Module(
+            tag="morgan_krr",
+            transforms=[
+                ExtXyzInput(tag="input"),
+                MorganFP(
+                    tag="desc", 
+                    inputs={"configs": "input.configs"}),
+                KernelDot(
+                    tag="kern",
+                    inputs={"X": "desc.X"}),
+                KernelRidge(
+                    args={"alpha": 1e-5, "power": 2},
+                    inputs={"K": "kern.K", "y": "input.y"})
+            ],
+            hyper=GridHyper(
+                Hyper({ "KernelRidge.alpha": np.logspace(-3,+1, 5), }),
+                Hyper({ "KernelRidge.power": [ 2. ] })),
+            broadcast={ "meta": "input.meta" },
+            outputs={ "y": "KernelRidge.y" }
+        ),
+        Module(
+            tag="morgan_ridge",
+            transforms=[
+                ExtXyzInput(tag="input"),
+                MorganFP(
+                    args={"length": 2048},
+                    inputs={"configs": "input.configs"}),
+                Ridge(inputs={"X": "MorganFP.X", "y": "input.y"})
+            ],
+            hyper=BayesianHyper(
+                Hyper({"Ridge.alpha": np.linspace(-2,2,5)}),
+                convert={
+                    "Ridge.alpha": lambda p: 10**p}),
+            outputs={"y": "Ridge.y"}
         ),
     ]
 

@@ -1,0 +1,110 @@
+{
+ "model=morgan_krr;data=molecular:pactivity:set_1.xyz;perf=test;train:test=294:126": {
+  "mae": 0.4590281470142266,
+  "mae_std": 0.022740721067836773,
+  "r2": 0.60519942803282,
+  "r2_std": 0.05194872928631445
+ },
+ "model=morgan_krr;data=molecular:pactivity:set_1.xyz;perf=train;train:test=294:126": {
+  "mae": 0.04008218988471048,
+  "mae_std": 0.002803035220967592,
+  "r2": 0.993489406365935,
+  "r2_std": 0.0008996922050776389
+ },
+ "model=morgan_krr;data=molecular:pactivity:set_2.xyz;perf=test;train:test=518:222": {
+  "mae": 0.47646963378240925,
+  "mae_std": 0.017820844056674702,
+  "r2": 0.6401776551990238,
+  "r2_std": 0.027584219858115752
+ },
+ "model=morgan_krr;data=molecular:pactivity:set_2.xyz;perf=train;train:test=518:222": {
+  "mae": 0.07791325746561517,
+  "mae_std": 0.0038140279851813573,
+  "r2": 0.9812459268060355,
+  "r2_std": 0.003202103296566834
+ },
+ "model=morgan_krr;data=molecular:pactivity:set_3.xyz;perf=test;train:test=128:55": {
+  "mae": 0.695220852921305,
+  "mae_std": 0.06822443232626703,
+  "r2": 0.32678130893717194,
+  "r2_std": 0.0547901159985132
+ },
+ "model=morgan_krr;data=molecular:pactivity:set_3.xyz;perf=train;train:test=128:55": {
+  "mae": 0.13799768243660065,
+  "mae_std": 0.014556017507510025,
+  "r2": 0.9280108975989176,
+  "r2_std": 0.021937985074229113
+ },
+ "model=morgan_krrx2;data=molecular:pactivity:set_1.xyz;perf=test;train:test=294:126": {
+  "mae": 0.45596427075547624,
+  "mae_std": 0.026695033826701325,
+  "r2": 0.6029358133151959,
+  "r2_std": 0.057870324720592684
+ },
+ "model=morgan_krrx2;data=molecular:pactivity:set_1.xyz;perf=train;train:test=294:126": {
+  "mae": 0.041256099173935586,
+  "mae_std": 0.0028674807223637465,
+  "r2": 0.992907157029037,
+  "r2_std": 0.0010026530312846004
+ },
+ "model=morgan_krrx2;data=molecular:pactivity:set_2.xyz;perf=test;train:test=518:222": {
+  "mae": 0.47572875084506977,
+  "mae_std": 0.022483930377419987,
+  "r2": 0.6508214094388876,
+  "r2_std": 0.02796867369554933
+ },
+ "model=morgan_krrx2;data=molecular:pactivity:set_2.xyz;perf=train;train:test=518:222": {
+  "mae": 0.07961197892085409,
+  "mae_std": 0.003908327361765753,
+  "r2": 0.9802249063514545,
+  "r2_std": 0.0029066040189168023
+ },
+ "model=morgan_krrx2;data=molecular:pactivity:set_3.xyz;perf=test;train:test=128:55": {
+  "mae": 0.6867312829367112,
+  "mae_std": 0.07384624898244631,
+  "r2": 0.34147154432539745,
+  "r2_std": 0.06595411420123239
+ },
+ "model=morgan_krrx2;data=molecular:pactivity:set_3.xyz;perf=train;train:test=128:55": {
+  "mae": 0.13995381302981785,
+  "mae_std": 0.014428976309668247,
+  "r2": 0.9245400164830803,
+  "r2_std": 0.021559701497384738
+ },
+ "model=morgan_ridge;data=molecular:pactivity:set_1.xyz;perf=test;train:test=294:126": {
+  "mae": 0.4572425234230829,
+  "mae_std": 0.028661879110546844,
+  "r2": 0.569913370239964,
+  "r2_std": 0.06821672926332928
+ },
+ "model=morgan_ridge;data=molecular:pactivity:set_1.xyz;perf=train;train:test=294:126": {
+  "mae": 0.11459719216233927,
+  "mae_std": 0.00457400164917641,
+  "r2": 0.9684797827754933,
+  "r2_std": 0.0034961806696485833
+ },
+ "model=morgan_ridge;data=molecular:pactivity:set_2.xyz;perf=test;train:test=518:222": {
+  "mae": 0.48568477789604353,
+  "mae_std": 0.02141651318141351,
+  "r2": 0.6441032304314633,
+  "r2_std": 0.029064159911929555
+ },
+ "model=morgan_ridge;data=molecular:pactivity:set_2.xyz;perf=train;train:test=518:222": {
+  "mae": 0.23700741048836751,
+  "mae_std": 0.006375024027586566,
+  "r2": 0.9160429680971176,
+  "r2_std": 0.005896552605601883
+ },
+ "model=morgan_ridge;data=molecular:pactivity:set_3.xyz;perf=test;train:test=128:55": {
+  "mae": 0.6937202167523283,
+  "mae_std": 0.06612278665506463,
+  "r2": 0.3394062665201546,
+  "r2_std": 0.0644978808897151
+ },
+ "model=morgan_ridge;data=molecular:pactivity:set_3.xyz;perf=train;train:test=128:55": {
+  "mae": 0.2919210289426536,
+  "mae_std": 0.024579747655351127,
+  "r2": 0.8061519230388456,
+  "r2_std": 0.022904161491082632
+ }
+}

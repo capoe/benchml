@@ -436,7 +436,7 @@ class Module(Transform):
             accu_args, 
             target,
             target_ref,
-            verbose=True):
+            verbose=VERBOSE):
         self.hyperUpdate(updates, verbose=verbose)
         if verbose:
             log << "    Hash changed:" << log.flush
@@ -452,10 +452,11 @@ class Module(Transform):
             accu.append("test", out[target], self.get(target_ref))
         metric, metric_std = accu.evaluate("test")
         return metric
-    def hyperfit(self, stream, **kwargs):
+    def hyperfit(self, stream, log=None, **kwargs):
         if self.hyper is None:
             raise ValueError("<Module.hyperfit>: Hyper configuration is missing")
-        updates = self.hyper.optimize(self, stream, **kwargs)
+        if log: log << "Hyperfit on stream" << stream.tag << log.endl
+        updates = self.hyper.optimize(self, stream, log=log, **kwargs)
         self.hyperUpdate(updates)
         return self.fit(stream)
     # Fit, map, precompute

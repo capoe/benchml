@@ -1,54 +1,61 @@
+from ..pipeline import Transform, Macro
+from ..logger import log
 import numpy as np
-import sklearn.linear_model
-import sklearn.kernel_ridge
-import sklearn.ensemble
-import sklearn.svm
+try:
+    import sklearn
+    import sklearn.linear_model
+    import sklearn.kernel_ridge
+except ImportError:
+    sklearn = None
 
-class Ridge(sklearn.linear_model.Ridge):
-    def covers(meta):
-        return meta["task"] == "regress"
-    def __init__(self, X, y, whiten=True, **kwargs):
-        sklearn.linear_model.Ridge.__init__(self, **kwargs)
-        self.whiten = whiten
-        self.y_mean = 0.
-        self.y_std = 1.
-    def fit(self, X, y):
-        y_train = y
-        if self.whiten:
-            self.y_mean = np.mean(y)
-            self.y_std = np.std(y)
-            y_train = (y-self.y_mean)/self.y_std
-        super().fit(X, y_train)
-    def predict(self, X):
-        return super().predict(X)*self.y_std + self.y_mean
+def check_sklearn_available(obj, require=False):
+    if sklearn is None:
+        if require: raise ImportError("%s requires sklearn" % obj.__name__)
+        return False
+    return True
 
-class KernelRidge(sklearn.kernel_ridge.KernelRidge):
-    def covers(meta):
-        return meta["task"] == "regress"
-    def __init__(self, K, y, whiten=True, **kwargs):
-        sklearn.kernel_ridge.KernelRidge.__init__(self, **kwargs)
-        self.whiten = whiten
-        self.y_mean = 0.
-        self.y_std = 1.
-    def fit(self, K, y):
-        y_train = y
-        if self.whiten:
-            self.y_mean = np.mean(y)
-            self.y_std = np.std(y)
-            y_train = (y-self.y_mean)/self.y_std
-        super().fit(K, y_train)
-    def predict(self, K):
-        return super().predict(K)*self.y_std + self.y_mean
+class SklearnTransform(Transform):
+    def check_available():
+        return check_sklearn_available(SklearnTransform)
 
-class RandomForestRegressor(sklearn.ensemble.RandomForestRegressor):
-    def covers(meta):
-        return meta["task"] == "regress"
-    def __init__(self, X, y, **kwargs):
-        sklearn.ensemble.RandomForestRegressor.__init__(self, **kwargs)
+class Ridge(SklearnTransform):
+    default_args = { 'alpha': 1. }
+    req_inputs = ('X', 'y')
+    allow_params = {'model'}
+    allow_stream = {'y'}
+    def _fit(self, inputs):
+        model = sklearn.linear_model.Ridge(**self.args)
+        model.fit(X=inputs["X"], y=inputs["y"])
+        yp = model.predict(inputs["X"])
+        self.params().put("model", model)
+        self.stream().put("y", yp)
+    def _map(self, inputs):
+        y = self.params().get("model").predict(inputs["X"])
+        self.stream().put("y", y)
 
-class SVC(sklearn.svm.SVC):
-    def covers(meta):
-        return meta["task"] == "classify"
-    def __init__(self, K, y, **kwargs):
-        sklearn.svm.SVC(self, **kwargs)
-
+class KernelRidge(SklearnTransform):
+    req_args = ('alpha',)
+    default_args = {'power': 1}
+    req_inputs = ('K', 'y')
+    allow_params = {'model', 'y_mean', 'y_std', 'y'}
+    allow_stream = {'y'}
+    def __init__(self, **kwargs):
+        Transform.__init__(self, **kwargs)
+    def readArgs(self):
+        self.power = self.args["power"]
+    def _fit(self, inputs):
+        y_mean = np.mean(inputs["y"])
+        y_std = np.std(inputs["y"])
+        y_train = (inputs["y"]-y_mean)/y_std
+        model = sklearn.kernel_ridge.KernelRidge(
+            kernel='precomputed', alpha=self.args["alpha"])
+        model.fit(inputs["K"]**self.power, y_train)
+        y_pred = model.predict(inputs["K"]**self.power)*y_std + y_mean
+        self.params().put("model", model)
+        self.params().put("y_mean", y_mean)
+        self.params().put("y_std", y_std)
+        self.stream().put("y", y_pred)
+    def _map(self, inputs):
+        y = self.params().get("model").predict(inputs["K"]**self.power)
+        y = y*self.params().get("y_std") + self.params().get("y_mean")
+        self.stream().put("y", y)
