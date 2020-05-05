@@ -28,18 +28,10 @@ class Add(Transform):
             y = y + coeffs[i]*inputs["X"][i]
         self.stream().put("y", y)
 
-class DescriptorRandom(Transform):
-    req_args = ('dim',)
-    req_inputs = ('configs',)
-    allow_stream = {'X'}
-    stream_samples = ("X",)
-    precompute = True
-    def _map(self, inputs):
-        X = np.random.uniform(0., 1., size=(len(inputs["configs"]), self.args["dim"]))
-        self.stream().put("X", X)
-
-from .kernels import *
 from .plugins import *
+from .descriptors import *
+from .kernels import *
+from .predictors import *
 
 def transform_info(tf, log, verbose=True):
     if verbose:

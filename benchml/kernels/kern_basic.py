@@ -1,5 +1,5 @@
 import numpy as np
-from .pipeline import Transform
+from ..pipeline import Transform
 
 class KernelBase(object):
     def __init__(self, **kwargs):
