@@ -24,7 +24,7 @@ class MorganFP(Transform):
     precompute = True
     def check_available():
         return check_rdkit_available(MorganFP)
-    def readArgs(self):
+    def _setup(self):
         self.radius = self.args["radius"]
         self.length = self.args["length"]
         self.normalize = self.args["normalize"]

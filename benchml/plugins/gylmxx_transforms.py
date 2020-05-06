@@ -27,6 +27,7 @@ class GylmTransform(Transform):
         "wcentre": 0.5,
         "ldamp": 0.5,
         "power": True,
+        "types": None,
         "normalize": True}
     req_inputs = ('configs',)
     allow_params = ("calc",)
@@ -37,8 +38,9 @@ class GylmTransform(Transform):
     def check_available():
         return check_gylmxx_available(GylmAverage)
     def _fit(self, inputs):
+        if self.args["types"] is None:
+            self.args["types"] = inputs["meta"]["elements"]
         calc = gylm.GylmCalculator(
-            types=inputs["meta"]["elements"],
             **self.args)
         self.params().put("calc", calc)
         self._map(inputs)

@@ -41,7 +41,7 @@ class KernelRidge(SklearnTransform):
     allow_stream = {'y'}
     def __init__(self, **kwargs):
         Transform.__init__(self, **kwargs)
-    def readArgs(self):
+    def _setup(self):
         self.power = self.args["power"]
     def _fit(self, inputs):
         y_mean = np.mean(inputs["y"])

@@ -2,6 +2,7 @@
 import numpy as np
 import json
 import os
+import pickle
 from . import ptable
 from .logger import log, Mock
 ase = Mock()
@@ -159,7 +160,7 @@ def write(
         ofs.write('%d\n' % (len(c)))
         for k in sorted(c.info.keys()):
             # int or float?
-            if type(c.info[k]) not in [ unicode, str ]:
+            if type(c.info[k]) not in { str }:
                 ofs.write('%s=%s ' % (k, c.info[k]))
             # String
             else:
@@ -174,3 +175,10 @@ def write(
     ofs.close()
     return
 
+def save(archfile, obj):
+    with open(archfile, 'wb') as f:
+        f.write(pickle.dumps(obj))
+
+def load(archfile):
+    return pickle.load(open(archfile, 'rb'))
+        

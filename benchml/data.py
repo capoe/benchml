@@ -38,39 +38,39 @@ class DatasetIterator(object):
         return
 
 class Dataset(object):
-    def __init__(self, ext_xyz=None, meta=None, structs=None):
-        self.structs = structs
+    def __init__(self, ext_xyz=None, meta=None, configs=None):
+        self.configs = configs
         if ext_xyz is not None:
             if type(ext_xyz) is str:
-                self.structs = read(ext_xyz)
+                self.configs = read(ext_xyz)
             else:
-                self.structs = []
+                self.configs = []
                 for xyz in ext_xyz:
-                    self.structs.extend(read(xyz))
+                    self.configs.extend(read(xyz))
         self.meta = meta
         if meta is not None and "target" in meta:
-            self.y = np.array([ s.info[meta["target"]] for s in self.structs ])
+            self.y = np.array([ s.info[meta["target"]] for s in self.configs ])
         return
     def info(self):
-        return "{name:50s} #structs={size:-5d}  task={task:8s}  metrics={metrics:s}".format(
-            name=self.meta["name"], size=len(self.structs),
+        return "{name:50s} #configs={size:-5d}  task={task:8s}  metrics={metrics:s}".format(
+            name=self.meta["name"], size=len(self.configs),
             task=self.meta["task"], metrics=",".join(self.meta["metrics"]))
     def __getitem__(self, key):
         if np.issubdtype(type(key), np.integer):
-            return self.structs[key]
+            return self.configs[key]
         elif type(key) in {list, np.ndarray}:
             return Dataset(
-                structs=[ self.structs[_] for _ in key ],
+                configs=[ self.configs[_] for _ in key ],
                 meta=self.meta)
         elif type(key) is str:
             return self.meta[key]
         else: raise TypeError("Invalid type in __getitem__: %s" % type(key))
     def __len__(self):
-        return len(self.structs)
+        return len(self.configs)
     def __str__(self):
         return self.info()
     def __iter__(self):
-        return self.structs.__iter__()
+        return self.configs.__iter__()
 
 def compile(root="./data", filter_fct=lambda meta: True):
     return BenchmarkData(root, filter_fct=filter_fct)

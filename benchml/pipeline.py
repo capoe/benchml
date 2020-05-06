@@ -162,9 +162,12 @@ class Transform(object):
     def __init__(self, **kwargs):
         self.tag = kwargs.pop("tag", self.__class__.__name__)
         self.module = None
+        self.is_setup = False
         # Default args, inputs, outputs
         self.args = copy.deepcopy(self.default_args)
         self.args.update(kwargs.pop("args", {}))
+        self.args_links = { key: link for key, link in self.args.items() \
+            if type(link) is str and link.startswith('@') }
         self.inputs = kwargs["inputs"] if "inputs" in kwargs else {}
         self.outputs = kwargs["outputs"] if "outputs" in kwargs else {}
         self.checkRequire()
@@ -184,6 +187,12 @@ class Transform(object):
         self.hash_prev = None
     def attach(self, module):
         self.module = module
+    def resolveArgs(self):
+        # Read "@tf_tag.field_name" -> module["tf_tag"].args["field_name"]
+        for key, val in self.args_links.items():
+            if type(val) is str and val.startswith('@'):
+                tf, field = val[1:].split(".")
+                self.args[key] = self.module[tf].args[field]
     # HASH VERSIONING
     def getHash(self):
         return self.hash_total
@@ -244,8 +253,6 @@ class Transform(object):
         self.deps = deps
         return deps
     # RESOLVE & CHECK ARGS & INPUTS
-    def readArgs(self):
-        return
     def resolveInputs(self):
         res = {}
         for key, addr in self.inputs.items():
@@ -287,7 +294,7 @@ class Transform(object):
             if verbose: log << "[ hash matches, use cache ]" << log.flush
         else:
             self.openParams(stream_tag)
-            self.readArgs()
+            self.setup()
             self._fit(inputs)
             self.params().version(self.getHash())
             self.stream().version(self.getHash())
@@ -298,10 +305,17 @@ class Transform(object):
         if self.precompute and self.stream().get("version") == self.getHash():
             if verbose: log << "[ hash matches, use cache ]" << log.flush
         else:
-            self.readArgs()
+            self.setup()
             self._map(inputs)
             self.stream().version(self.getHash())
     def _map(self, inputs):
+        return
+    def setup(self):
+        if self.is_setup: return
+        self.resolveArgs()
+        self._setup()
+        self.is_setup = True
+    def _setup(self):
         return
     # LOGGING
     def __str__(self):
@@ -387,6 +401,7 @@ class Module(Transform):
     def clearStreams(self):
         for tf in self.transforms:
             tf.clearStreams()
+        super().clearStreams()
     def activateStream(self, stream_tag):
         self.active_stream = self.map_streams[stream_tag]
         for tf in self.transforms:
@@ -415,6 +430,8 @@ class Module(Transform):
             return self[tf].params().get(field[1:])
         else:
             return self[tf].stream().get(field)
+    def resolveArgs(self):
+        for tf in self.transforms: tf.resolveArgs()
     def resolveOutputs(self):
         res = {}
         for key, addr in self.outputs.items():
@@ -460,10 +477,16 @@ class Module(Transform):
         self.hyperUpdate(updates)
         return self.fit(stream)
     # Fit, map, precompute
-    def fit(self, stream, verbose=VERBOSE):
+    def fit(self, stream, endpoint=None, verbose=VERBOSE):
         if verbose: print("Fit '%s'" % stream.tag)
         self.activateStream(stream.tag)
-        for tidx, t in enumerate(self.transforms):
+        if endpoint is None:
+            sweep = self.transforms
+        else: 
+            sweep = list(filter(
+                lambda tf: tf.tag in self[endpoint].deps, self.transforms))
+            sweep.append(self[endpoint])
+        for tidx, t in enumerate(sweep):
             if hasattr(t, "_fit"):
                 if verbose: print(" "*tidx, "Fit", t.tag, "using stream", stream.tag)
                 t.fit(stream.tag, verbose=verbose)
@@ -504,3 +527,13 @@ class Module(Transform):
     def __str__(self):
         return "Module='%s'" % self.tag + \
             "\n  "+"\n  ".join([ str(t) for t in self.transforms ])
+
+class sopen(object):
+    def __init__(self, module, data):
+        self.module = module
+        self.data = data
+    def __enter__(self):
+        return self.module.open(self.data)
+    def __exit__(self, *args):
+        self.module.close()
+
