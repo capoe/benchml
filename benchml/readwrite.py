@@ -32,6 +32,7 @@ class ExtendedXyz(object):
         self.atoms = []
         self.positions = []
         self.symbols = []
+        self.heavy = None
     def __len__(self):
         return len(self.symbols)
     def set_pbc(self, booleans):
@@ -42,6 +43,11 @@ class ExtendedXyz(object):
         return self.symbols
     def get_atomic_numbers(self):
         return np.array([ ptable.lookup[s].z for s in self.get_chemical_symbols() ])
+    def getHeavy(self, recalculate=False):
+        if recalculate or self.heavy is None:
+            self.symbols = np.array(self.symbols)
+            self.heavy = np.where(np.array(self.symbols != 'H'))[0]
+        return self.heavy, self.symbols[self.heavy], self.positions[self.heavy]
     def create(self, n_atoms, fs):
         # Parse header: key1="str1" key2=123 key3="another value" ...
         header = fs.readline().replace("\n", "")
@@ -133,7 +139,7 @@ class ExtendedXyzAtom(object):
 def read(
         config_file,
         index=':'):
-    if ase.io is not None: 
+    if ase.io is not None:
         return ase.io.read(config_file, index)
     configs = []
     ifs = open(config_file, 'r')
@@ -168,17 +174,25 @@ def write(
         ofs.write('\n')
         for i in range(len(c)):
             ofs.write('%s %+1.4f %+1.4f %+1.4f\n' % (
-                c.get_chemical_symbols()[i], 
-                c.positions[i][0], 
-                c.positions[i][1], 
+                c.get_chemical_symbols()[i],
+                c.positions[i][0],
+                c.positions[i][1],
                 c.positions[i][2]))
     ofs.close()
     return
 
-def save(archfile, obj):
-    with open(archfile, 'wb') as f:
-        f.write(pickle.dumps(obj))
+def save(archfile, obj, method=None):
+    if method is None:
+        if type(archfile) is not str:
+            assert type(obj) is str # Invalid function call to benchml.save
+            archfile, obj = obj, archfile
+        with open(archfile, 'wb') as f:
+            f.write(pickle.dumps(obj))
+    else:
+        method.save(archfile, obj)
 
-def load(archfile):
-    return pickle.load(open(archfile, 'rb'))
-        
+def load(archfile, method=None):
+    if method is None:
+        return pickle.load(open(archfile, 'rb'))
+    else:
+        return method.load(archfile)

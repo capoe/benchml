@@ -162,12 +162,12 @@ class Transform(object):
     def __init__(self, **kwargs):
         self.tag = kwargs.pop("tag", self.__class__.__name__)
         self.module = None
-        self.is_setup = False
+        self._is_setup = False
+        self._freeze = False
         # Default args, inputs, outputs
         self.args = copy.deepcopy(self.default_args)
         self.args.update(kwargs.pop("args", {}))
-        self.args_links = { key: link for key, link in self.args.items() \
-            if type(link) is str and link.startswith('@') }
+        self.args_links = self.parseArgsLinks()
         self.inputs = kwargs["inputs"] if "inputs" in kwargs else {}
         self.outputs = kwargs["outputs"] if "outputs" in kwargs else {}
         self.checkRequire()
@@ -187,12 +187,23 @@ class Transform(object):
         self.hash_prev = None
     def attach(self, module):
         self.module = module
+    def parseArgsLinks(self):
+        args_links = { key: link for key, link in self.args.items() \
+            if type(link) is str and link.startswith('@') }
+        for key, val in self.args.items():
+            if type(val) is list and len(val) > 0 \
+                and type(val[0]) is str and val[0].startswith('@'):
+                args_links[key] = val
+        return args_links
     def resolveArgs(self):
         # Read "@tf_tag.field_name" -> module["tf_tag"].args["field_name"]
         for key, val in self.args_links.items():
             if type(val) is str and val.startswith('@'):
                 tf, field = val[1:].split(".")
                 self.args[key] = self.module[tf].args[field]
+            elif type(val) is list:
+                self.args[key] = [ self.module[v[0]].args[v[1]] \
+                    for v in map(lambda v: v[1:].split("."), val) ]
     # HASH VERSIONING
     def getHash(self):
         return self.hash_total
@@ -267,6 +278,8 @@ class Transform(object):
                     lambda tf_k: self.module.map_transforms[tf_k[0]].stream().get(tf_k[1]),
                         map(lambda item: tuple(item.split(".")), addr)
                 ))
+            else:
+                res[key] = addr
         return res
     def checkRequire(self):
         self.requireArgs(*self.__class__.req_args)
@@ -282,11 +295,15 @@ class Transform(object):
                 raise KeyError("Missing input: <%s> requires '%s'" % (
                     self.__class__.__name__, inp))
     # EXECUTION
-    def feed(self, data):
+    def feed(self, data, verbose=VERBOSE):
         self.hashState()
+        self.setup()
         self._feed(data)
         self.stream().version(self.getHash())
     def fit(self, stream_tag, verbose=VERBOSE):
+        if self._freeze:
+            if verbose: log << "[302->Map]" << log.flush
+            return self.map(stream_tag, verbose=verbose)
         self.activateStream(stream_tag)
         self.hashState()
         inputs = self.resolveInputs()
@@ -311,10 +328,10 @@ class Transform(object):
     def _map(self, inputs):
         return
     def setup(self):
-        if self.is_setup: return
+        if self._is_setup: return
         self.resolveArgs()
         self._setup()
-        self.is_setup = True
+        self._is_setup = True
     def _setup(self):
         return
     # LOGGING
@@ -377,12 +394,26 @@ class Module(Transform):
         self.map_transforms[transform.tag] = transform
         transform.attach(self)
         return self
+    def replace(self, tag, tf):
+        tf.attach(self)
+        self.map_transforms[tag] = tf
+        self.transforms = list(map(lambda t: tf if (t.tag == tag) else t, self.transforms))
+        self.updateDependencies()
     # Dependencies
     def clearDependencies(self):
         for tf in self.transforms: tf.clearDependencies()
     def updateDependencies(self):
         self.clearDependencies()
         for tf in self.transforms: tf.updateDependencies()
+    def reconnect(self, inputs):
+        for destination, target in inputs.items():
+            tf, input_field = destination.split(".")
+            self[tf].inputs.update({ input_field: target })
+        self.updateDependencies()
+    def freeze(self, *tfs, freeze=True):
+        for tf in tfs: self[tf]._freeze = freeze
+    def unfreeze(self, *tfs):
+        self.freeze(*tfs, freeze=False)
     # Params
     def clearParams(self, keep_active=True):
         for tf in self.transforms:
@@ -420,7 +451,10 @@ class Module(Transform):
         for t in self.transforms:
             t.openStream(data=data, tag=tag, parent_tag=parent_tag,
                 slice=slice, slice_ax2=slice_ax2, verbose=verbose)
-            if data is not None and hasattr(t, "_feed"): t.feed(data)
+            if data is not None and hasattr(t, "_feed"):
+                if verbose: log << " Feed '%s'" % t.tag << log.flush
+                t.feed(data, verbose=verbose)
+                if verbose: log << log.endl
         return self.inputStream()
     def inputStream(self):
         return self.transforms[0].stream()
@@ -446,11 +480,11 @@ class Module(Transform):
                 print("    Setting {0:15s}.{1:10s} = {2}".format(
                     tf_tag, arg_name, val))
             self[tf_tag].args[arg_name] = val
-    def hyperEval(self, 
-            stream, 
-            updates, 
+    def hyperEval(self,
+            stream,
+            updates,
             split_args,
-            accu_args, 
+            accu_args,
             target,
             target_ref,
             verbose=VERBOSE):
@@ -477,28 +511,32 @@ class Module(Transform):
         self.hyperUpdate(updates)
         return self.fit(stream)
     # Fit, map, precompute
+    def filter(self, endpoint):
+        if endpoint is None: return self.transforms
+        shortlist = list(filter(
+            lambda tf: tf.tag in self[endpoint].deps, self.transforms))
+        shortlist.append(self[endpoint])
+        return shortlist
     def fit(self, stream, endpoint=None, verbose=VERBOSE):
         if verbose: print("Fit '%s'" % stream.tag)
         self.activateStream(stream.tag)
-        if endpoint is None:
-            sweep = self.transforms
-        else: 
-            sweep = list(filter(
-                lambda tf: tf.tag in self[endpoint].deps, self.transforms))
-            sweep.append(self[endpoint])
+        sweep = self.filter(endpoint=endpoint)
         for tidx, t in enumerate(sweep):
             if hasattr(t, "_fit"):
-                if verbose: print(" "*tidx, "Fit", t.tag, "using stream", stream.tag)
+                if verbose: log << " ".join([" "*tidx, "Fit", t.tag,
+                    "using stream", stream.tag]) << log.flush
                 t.fit(stream.tag, verbose=verbose)
+                if verbose: log << log.endl
             else:
                 if verbose: log << " ".join([" "*tidx, "Map", t.tag,
                     "using stream", stream.tag]) << log.flush
                 t.map(stream.tag, verbose=verbose)
                 if verbose: log << log.endl
         return
-    def map(self, stream, verbose=VERBOSE):
+    def map(self, stream, endpoint=None, verbose=VERBOSE):
         if verbose: print("Map '%s'" % stream.tag)
         self.activateStream(stream.tag)
+        sweep = self.filter(endpoint=endpoint)
         for tidx, t in enumerate(self.transforms):
             if verbose: log << " ".join([" "*tidx, "Map", t.tag,
                 "using stream", stream.tag]) << log.flush
@@ -529,11 +567,11 @@ class Module(Transform):
             "\n  "+"\n  ".join([ str(t) for t in self.transforms ])
 
 class sopen(object):
-    def __init__(self, module, data):
+    def __init__(self, module, data, verbose=False):
         self.module = module
         self.data = data
+        self.verbose = verbose
     def __enter__(self):
-        return self.module.open(self.data)
+        return self.module.open(self.data, verbose=self.verbose)
     def __exit__(self, *args):
         self.module.close()
-

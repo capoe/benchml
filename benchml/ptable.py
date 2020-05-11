@@ -1,3 +1,5 @@
+import numpy as np
+# TODO Replace this periodic table with something proper! Extremely unsafe in the present form!
 
 class PeriodicTable(object):
     element_elneg = [ 0.0, 
@@ -57,9 +59,9 @@ class PeriodicTable(object):
         self.elements_by_z = {}
         self.elements_by_name = {}
     def __getitem__(self, key):
-        if type(key) == str:
+        if type(key) in { str, np.str_ }:
             return self.elements_by_name[key]
-        elif type(key) == int:
+        elif type(key) is int:
             return self.elements_by_z[key]
         else:
             raise RuntimeError("Invalid element identifier '%s'" % key)

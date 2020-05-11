@@ -319,6 +319,7 @@ class ShellInterface(object):
         self.os_exe_dev = ''
         self.os_exe_verbose = False
         # LOGGING
+        self.verbose = False
         self.logfile = None
         # DIRECTORY HOPPING
         self.paths_visited = [ os.getcwd() ]
