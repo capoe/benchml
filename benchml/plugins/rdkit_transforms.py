@@ -53,6 +53,6 @@ class MorganKernel(Macro):
           "class": KernelDot,
           "tag": "k",
           "args": {},
-          "inputs": {"X": "x.X"}
+          "inputs": {"X": "{self}x.X"}
         }
     ]

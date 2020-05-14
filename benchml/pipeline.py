@@ -136,14 +136,16 @@ class Macro(object):
             tf = tf_class(**tf_args)
             # Link inputs to parent module
             for key, addr in tf.inputs.items():
+                tf.inputs[key] = tf.inputs[key].format(self=self.tag+"/")
                 tf.inputs[key] = self.inputs.pop(
                     ".".join([tf.tag, key]),
-                    "/".join([self.tag, tf.inputs[key]]))
+                    tf.inputs[key])
             # Update args
             for key in tf.args:
                 tf.args[key] = self.args.pop(
                     ".".join([tf.tag, key]),
                     tf.args[key])
+            tf.parseArgsLinks()
             tf.tag = self.tag+"/"+tf.tag
             yield tf
 
@@ -182,6 +184,7 @@ class Transform(object):
         # Dependency and dependency hash
         self.deps = None
         self.hash_self = None
+        self.hash_self_prev = None
         self.hash_deps = None
         self.hash_total = None
         self.hash_prev = None
@@ -194,6 +197,7 @@ class Transform(object):
             if type(val) is list and len(val) > 0 \
                 and type(val[0]) is str and val[0].startswith('@'):
                 args_links[key] = val
+        self.args_links = args_links
         return args_links
     def resolveArgs(self):
         # Read "@tf_tag.field_name" -> module["tf_tag"].args["field_name"]
@@ -209,12 +213,15 @@ class Transform(object):
         return self.hash_total
     def hashState(self):
         self.hash_prev = self.hash_total
+        self.hash_self_prev = self.hash_self
         self.hash_self = generate_hash_id(self.args)
         self.hash_deps = "".join(
             [ self.module[d].getHash() for d in sorted(list(self.deps)) ])
         self.hash_total = generate_hash_id(self.hash_self+self.hash_deps)
     def hashChanged(self):
         return self.hash_prev != self.hash_total
+    def hashSelfChanged(self):
+        return self.hash_self_prev != self.hash_self
     # STREAM
     def clearStreams(self):
         self.map_streams.clear()
@@ -328,7 +335,7 @@ class Transform(object):
     def _map(self, inputs):
         return
     def setup(self):
-        if self._is_setup: return
+        if not self.hashSelfChanged() and self._is_setup: return
         self.resolveArgs()
         self._setup()
         self._is_setup = True
