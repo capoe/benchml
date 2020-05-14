@@ -133,18 +133,21 @@ class Macro(object):
     def __iter__(self):
         for tf_args in self.transforms:
             tf_class = tf_args.pop("class")
-            tf = tf_class(**tf_args)
+            init = copy.deepcopy(tf_args)
+            init_args = init["args"]
+            init_tag = init["tag"] if "tag" in init else tf_class.__name__
+            # Update args
+            for key in init_args:
+                init_args[key] = self.args.pop(
+                    ".".join([init_tag, key]),
+                    init_args[key])
+            tf = tf_class(**init)
             # Link inputs to parent module
             for key, addr in tf.inputs.items():
                 tf.inputs[key] = tf.inputs[key].format(self=self.tag+"/")
                 tf.inputs[key] = self.inputs.pop(
                     ".".join([tf.tag, key]),
                     tf.inputs[key])
-            # Update args
-            for key in tf.args:
-                tf.args[key] = self.args.pop(
-                    ".".join([tf.tag, key]),
-                    tf.args[key])
             tf.parseArgsLinks()
             tf.tag = self.tag+"/"+tf.tag
             yield tf
@@ -303,6 +306,7 @@ class Transform(object):
                     self.__class__.__name__, inp))
     # EXECUTION
     def feed(self, data, verbose=VERBOSE):
+        self.resolveArgs()
         self.hashState()
         self.setup()
         self._feed(data)
@@ -312,6 +316,7 @@ class Transform(object):
             if verbose: log << "[302->Map]" << log.flush
             return self.map(stream_tag, verbose=verbose)
         self.activateStream(stream_tag)
+        self.resolveArgs()
         self.hashState()
         inputs = self.resolveInputs()
         if self.precompute and self.stream().get("version") == self.getHash():
@@ -324,6 +329,7 @@ class Transform(object):
             self.stream().version(self.getHash())
     def map(self, stream_tag, verbose=VERBOSE):
         self.activateStream(stream_tag)
+        self.resolveArgs()
         self.hashState()
         inputs = self.resolveInputs()
         if self.precompute and self.stream().get("version") == self.getHash():
@@ -336,7 +342,6 @@ class Transform(object):
         return
     def setup(self):
         if not self.hashSelfChanged() and self._is_setup: return
-        self.resolveArgs()
         self._setup()
         self._is_setup = True
     def _setup(self):
