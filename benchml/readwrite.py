@@ -181,7 +181,7 @@ def write(
     ofs.close()
     return
 
-def save(archfile, obj, method=None):
+def save(archfile, obj, method=None, **kwargs):
     if method is None:
         if type(archfile) is not str:
             assert type(obj) is str # Invalid function call to benchml.save
@@ -189,10 +189,10 @@ def save(archfile, obj, method=None):
         with open(archfile, 'wb') as f:
             f.write(pickle.dumps(obj))
     else:
-        method.save(archfile, obj)
+        method.save(archfile, obj, **kwargs)
 
-def load(archfile, method=None):
+def load(archfile, method=None, **kwargs):
     if method is None:
         return pickle.load(open(archfile, 'rb'))
     else:
-        return method.load(archfile)
+        return method.load(archfile, **kwargs)
