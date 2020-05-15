@@ -59,7 +59,7 @@ def transform_info(tf, log, verbose=True):
         log << log.endl
         log << "  Precompute:           " << bool(tf.precompute) << log.endl
     else:
-        log << "%-20s" % ("<"+tf.__name__+">")
+        log << "%-22s" % ("<"+tf.__name__+">")
         argstr = ",".join(tf.req_args)
         inputstr = ",".join(tf.req_inputs)
         streamstr = ",".join(tf.allow_stream)
