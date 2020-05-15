@@ -342,6 +342,7 @@ class Transform(object):
         return
     def setup(self):
         if not self.hashSelfChanged() and self._is_setup: return
+        if self._is_setup and self.hashSelfChanged(): log << "[%s#H]" % self.tag << log.flush
         self._setup()
         self._is_setup = True
     def _setup(self):
