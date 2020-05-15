@@ -19,8 +19,7 @@ class TorchModuleTransform(Transform, nn.Module):
         nn.Module.__init__(self)
     def setDevice(self, devstr):
         if devstr.startswith('@'):
-            tf, val = devstr[1:].split(".")
-            devstr = self.module[tf] = val
+            raise ValueError("setDevice: Device address must be resolved first")
         log << "[Set device[%s] = '%s']" % (self.tag, devstr) << log.flush
         self.device = torch.device(devstr) \
             if devstr != "" else None
