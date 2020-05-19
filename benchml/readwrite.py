@@ -25,13 +25,13 @@ def configure(use_ase):
         disable_ase()
 
 class ExtendedXyz(object):
-    def __init__(self):
+    def __init__(self, pos=[], symbols=[]):
         self.info = {}
         self.cell = None
         self.pbc = np.array([False, False, False])
         self.atoms = []
-        self.positions = []
-        self.symbols = []
+        self.positions = pos
+        self.symbols = symbols
         self.heavy = None
     def __len__(self):
         return len(self.symbols)

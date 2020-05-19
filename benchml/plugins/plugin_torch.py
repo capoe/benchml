@@ -19,7 +19,7 @@ class TorchModuleTransform(Transform, nn.Module):
         "reset_optimizer": False
     }
     def is_available():
-        return check_torch_available() 
+        return check_torch_available()
     def __init__(self, **kwargs):
         Transform.__init__(self, **kwargs)
         nn.Module.__init__(self)
@@ -46,5 +46,7 @@ class TorchModuleTransform(Transform, nn.Module):
             self._optimizer(*args, **kwargs)
 
 class TorchDevice(TorchModuleTransform):
+    allow_stream = ("device",)
     def _feed(self, *args, **kwargs):
+        self.stream().put("device", self.device)
         return # <- This automatically calls _setup

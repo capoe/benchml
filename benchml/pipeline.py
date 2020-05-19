@@ -305,6 +305,10 @@ class Transform(object):
                 raise KeyError("Missing input: <%s> requires '%s'" % (
                     self.__class__.__name__, inp))
     # EXECUTION
+    def frozen(self):
+        return self._freeze
+    def ready(self):
+        return self._is_setup
     def feed(self, data, verbose=VERBOSE):
         self.resolveArgs()
         self.hashState()
@@ -342,7 +346,7 @@ class Transform(object):
         return
     def setup(self):
         if not self.hashSelfChanged() and self._is_setup: return
-        if VERBOSE and self._is_setup and self.hashSelfChanged(): 
+        if VERBOSE and self._is_setup and self.hashSelfChanged():
             log << "[%s#H]" % self.tag << log.flush
         self._setup()
         self._is_setup = True
@@ -350,7 +354,7 @@ class Transform(object):
         return
     # LOGGING
     def __str__(self):
-        info = "%-15s <- %s" % (self.tag, str(self.inputs))
+        info = "%s <- %s" % (self.tag, str(self.inputs))
         info += "\n    State:    " + str(self.getHash())
         info += "\n    Precomp.: " + str(self.precompute)
         info += "\n    Depends:"
@@ -527,9 +531,15 @@ class Module(Transform):
     # Fit, map, precompute
     def filter(self, endpoint):
         if endpoint is None: return self.transforms
+        deps = set()
+        if type(endpoint) is list:
+            deps = deps.union(*([ self[e].deps for e in endpoint ]))
+            deps = deps.union(set(endpoint))
+        else:
+            deps = deps.union(self[endpoint].deps)
+            deps.add(endpoint)
         shortlist = list(filter(
-            lambda tf: tf.tag in self[endpoint].deps, self.transforms))
-        shortlist.append(self[endpoint])
+            lambda tf: tf.tag in deps, self.transforms))
         return shortlist
     def fit(self, stream, endpoint=None, verbose=VERBOSE):
         if verbose: print("Fit '%s'" % stream.tag)
