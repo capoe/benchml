@@ -6,7 +6,7 @@ try:
 except ImportError:
     torch = None
     nn = Mock()
-    nn.Module = None
+    nn.Module = Mock
 
 def check_torch_available():
     return torch is not None

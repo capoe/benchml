@@ -10,6 +10,44 @@ def compile(groups):
 def compile_null():
     return []
 
+
+def compile_dscribe():
+    return [
+        Module(
+            tag=DescriptorClass.__name__+"_ridge",
+            transforms=[
+                ExtXyzInput(tag="input"),
+                DescriptorClass(
+                    tag="descriptor",
+                    inputs={"configs": "input.configs"}),
+                ReduceMatrix(
+                    tag="reduce",
+                    inputs={"X": "descriptor.X"}),
+                Ridge(
+                    tag="predictor",
+                    inputs={"X": "reduce.X", "y": "input.y"}) ],
+            hyper=GridHyper(
+                Hyper({ "predictor.alpha": np.logspace(-5,+5, 7), })),
+            broadcast={"meta": "input.meta"},
+            outputs={ "y": "predictor.y" }) \
+        for DescriptorClass in [ DscribeCM, DscribeACSF ]
+    ]
+
+def compile_asap():
+    return [
+        Module(
+            tag="asap_xyz",
+            transforms=[
+                ExtXyzInput(tag="input"),
+                AsapXyz(
+                    inputs={"configs": "input.configs"}
+                )
+            ],
+            broadcast={
+                "meta": "input.meta"
+            })
+    ]
+
 def compile_morgan():
     return [
         Module(
@@ -32,10 +70,10 @@ def compile_morgan():
                     inputs={"K": "Add.y", "y": "input.y"})
             ],
             hyper=GridHyper(
-                Hyper({ "Add.coeffs": 
+                Hyper({ "Add.coeffs":
                     list(map(lambda f: [ f, 1.-f ], np.linspace(0.25, 0.75, 3)))
                 }),
-                Hyper({ "KernelRidge.alpha": 
+                Hyper({ "KernelRidge.alpha":
                     np.logspace(-3,+1, 5),
                 })),
             broadcast={ "meta": "input.meta" },
@@ -46,7 +84,7 @@ def compile_morgan():
             transforms=[
                 ExtXyzInput(tag="input"),
                 MorganFP(
-                    tag="desc", 
+                    tag="desc",
                     inputs={"configs": "input.configs"}),
                 KernelDot(
                     tag="kern",
@@ -85,7 +123,7 @@ def compile_gylm():
             transforms=[
                 ExtXyzInput(tag="input"),
                 GylmAverage(
-                    tag="desc", 
+                    tag="desc",
                     inputs={"configs": "input.configs"}),
                 KernelDot(
                     inputs={"X": "desc.X"}),
@@ -104,5 +142,7 @@ def compile_gylm():
 collections = {
     "morgan": compile_morgan,
     "gylm": compile_gylm,
-    "null": compile_null
+    "null": compile_null,
+    "asap": compile_asap,
+    "dscribe": compile_dscribe
 }

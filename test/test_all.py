@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 from test_morgan import *
+from test_asap import *
+from test_dscribe import *
+import re
 import benchml
 import sys
 import inspect
@@ -24,13 +27,23 @@ def get_all_mocks(verbose=False):
                 yield obj
 
 if __name__ == "__main__":
-    benchml.readwrite.configure(use_ase=False)
     parser = optparse.OptionParser()
     parser.add_option("-c", "--create", action="store_true", dest="create", 
         default=False, help="Create reference")
+    parser.add_option("-l", "--list", action="store_true", dest="list",
+        default=False, help="List all tests")
+    parser.add_option("-f", "--filter", default=".*", dest="filter", 
+        help="Filter regular expression")
+    parser.add_option("-a", "--ase", action="store_true", dest="ase",
+        default=False, help="Use ASE parser")
     args, _ = parser.parse_args()
+    benchml.readwrite.configure(use_ase=args.ase)
     for mock in get_all_mocks():
-        log << "Test <%s> start" % mock.__name__ << log.endl
+        run = bool(re.match(re.compile(args.filter), mock.__name__))
+        colour = log.mg
+        if not run: colour = log.mb
+        log << colour << "[%s] Test <%s>" % ("Run" if run else "---", mock.__name__) << log.endl
+        if args.list or not run: continue
         mock.run(create=args.create)
         success = mock.validate()
         if not success:

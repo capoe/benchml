@@ -16,13 +16,16 @@ def evaluate_model(dataset, model, accu, log, verbose=False):
     # Evaluate splits
     for stream_train, stream_test in stream.split(**dataset["splits"][0]):
         # Hyper fit
-        model.hyperfit(
-            stream=stream_train, 
-            split_args={"method": "random", "n_splits": 5, "train_fraction": 0.75},
-            accu_args={"metric": dataset["metrics"][0]},
-            target="y",
-            target_ref="input.y",
-            log=log)
+        if model.hyper is not None:
+            model.hyperfit(
+                stream=stream_train, 
+                split_args={"method": "random", "n_splits": 5, "train_fraction": 0.75},
+                accu_args={"metric": dataset["metrics"][0]},
+                target="y",
+                target_ref="input.y",
+                log=log)
+        else:
+            model.fit(stream=stream_train)
         # Evaluate
         output_train = model.map(stream_train)
         output_test = model.map(stream_test)

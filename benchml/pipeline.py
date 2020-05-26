@@ -388,7 +388,7 @@ class Module(Transform):
             tag="module",
             broadcast={},
             transforms=[],
-            hyper=[],
+            hyper=None,
             **kwargs):
         Transform.__init__(self, tag=tag, **kwargs)
         self.broadcast = broadcast

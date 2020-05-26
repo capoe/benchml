@@ -28,6 +28,21 @@ class Add(Transform):
             y = y + coeffs[i]*inputs["X"][i]
         self.stream().put("y", y)
 
+class ReduceMatrix(Transform):
+    req_inputs = ("X",)
+    default_args = {
+        "reduce": "np.sum(x, axis=0)",
+        "norm": True,
+        "epsilon": 1e-10 }
+    allow_stream = ("X",)
+    stream_samples = ("X",)
+    def _map(self, inputs):
+        X = map(lambda x: eval(self.args["reduce"]), inputs["X"])
+        X = map(lambda x: x/(np.dot(x,x)**0.5+self.args["epsilon"]), X)
+        X = map(lambda x: x.reshape((1,-1)), X)
+        X = np.concatenate(list(X), axis=0)
+        self.stream().put("X", X)
+
 from .plugins import *
 from .descriptors import *
 from .kernels import *
