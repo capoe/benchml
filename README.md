@@ -7,7 +7,7 @@ To install from source, clone the repository, create a new conda environment and
 ```bash
 git clone https://github.com/capoe/benchml.git
 cd benchml
-conda env create python=3.6 -n py3benchml -f env.yml
+conda env create python=3.7 -n py3benchml -f env.yml
 conda activate py3benchml
 ./configure.py
 source bin/BENCHMLRC
