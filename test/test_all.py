@@ -2,6 +2,7 @@
 from test_morgan import *
 from test_asap import *
 from test_dscribe import *
+from test_soapgto import *
 import re
 import benchml
 import sys

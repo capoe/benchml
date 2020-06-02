@@ -10,6 +10,65 @@ def compile(groups):
 def compile_null():
     return []
 
+def make_soap_krr(tag):
+    return Module(
+        tag=tag,
+        transforms=[
+            ExtXyzInput(
+                tag="input"),
+            UniversalSoapGto(
+                tag="descriptor",
+                inputs={
+                    "configs": "input.configs"
+                }),
+            ReduceTypedMatrix(
+                tag="reduce",
+                inputs={
+                    "X": "descriptor.X", 
+                    "T": "descriptor.T"
+                }),
+            WhitenMatrix(
+                tag="whiten",
+                inputs={
+                    "X": "reduce.X"
+                }),
+            KernelDot(
+                tag="kernel",
+                inputs={
+                    "X": "whiten.X"
+                }),
+            KernelRidge(
+                tag="predictor",
+                args={
+                    "alpha": None
+                },
+                inputs={
+                    "K": "kernel.K",
+                    "y": "input.y"
+                })
+        ],
+        hyper=GridHyper(
+            Hyper({ "predictor.alpha": np.logspace(-7,+7, 15), })),
+        broadcast={"meta": "input.meta"},
+        outputs={ "y": "predictor.y" })
+
+def compile_soap():
+    hyper = GridHyper(
+        Hyper({"descriptor.normalize": [ True ] }),
+        Hyper({"descriptor.mode": [ "minimal", "smart", "longrange" ] }),
+        Hyper({"descriptor.crossover": [ False, True ] }),
+        Hyper({"reduce.reduce_op": [ "sum", "mean" ]}),
+        Hyper({"reduce.normalize": [ True ]}),
+        Hyper({"reduce.reduce_by_type": [ False, True ]}),
+        Hyper({"whiten.centre": [ False, True ]}),
+        Hyper({"whiten.scale":  [ False, True ]}),
+        Hyper({"predictor.power": [ 2 ] }))
+    models = []
+    for hidx, updates in enumerate(hyper):
+        model = make_soap_krr(tag="soap_krr_%02d" % hidx)
+        model.hyperUpdate(updates)
+        models.append(model)
+    return models
 
 def compile_dscribe():
     return [
@@ -144,5 +203,6 @@ collections = {
     "gylm": compile_gylm,
     "null": compile_null,
     "asap": compile_asap,
-    "dscribe": compile_dscribe
+    "dscribe": compile_dscribe,
+    "soap": compile_soap
 }

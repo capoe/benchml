@@ -43,6 +43,29 @@ class ReduceMatrix(Transform):
         X = np.concatenate(list(X), axis=0)
         self.stream().put("X", X)
 
+class WhitenMatrix(Transform):
+    default_args = {
+        "centre": True,
+        "scale": True,
+        "epsilon": 1e-10 }
+    req_inputs = ("X",)
+    allow_params = ("x_avg", "x_std")
+    allow_stream = ("X",)
+    def _fit(self, inputs):
+        x_avg = np.mean(inputs["X"], axis=0)        
+        x_std = np.std(inputs["X"], axis=0) + self.args["epsilon"]
+        self.params().put("x_avg", x_avg)
+        self.params().put("x_std", x_std)
+        self._map(inputs)
+    def _map(self, inputs):
+        if self.args["centre"]:
+            X_w = inputs["X"]-self.params().get("x_avg")
+        else:
+            X_w = inputs["X"]
+        if self.args["scale"]:
+            X_w = X_w/self.params().get("x_std")
+        self.stream().put("X", X_w)
+
 from .plugins import *
 from .descriptors import *
 from .kernels import *
