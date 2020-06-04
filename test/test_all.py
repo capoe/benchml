@@ -1,9 +1,9 @@
 #! /usr/bin/env python
-from test_morgan import *
 from test_asap import *
 from test_dscribe import *
-from test_soap import *
 from test_gylm import *
+from test_morgan import *
+from test_soap import *
 from benchml.logger import log
 import re
 import benchml
@@ -52,9 +52,10 @@ if __name__ == "__main__":
         log << colour << "[%s] Test <%s>" % ("Run" if run else "---", mock.__name__) << log.endl
         if args.list or not run: continue
         result = mock().run(create=args.create)
-        success = result.validate()
-        if not success:
-            log << log.mr << "Test <%s> failed" % mock.__name__ << log.endl
-        else:
-            log << log.mg << "Test <%s> success" % mock.__name__  << log.endl
+        if not args.create:
+            success = result.validate()
+            if not success:
+                log << log.mr << "Test <%s> failed" % mock.__name__ << log.endl
+            else:
+                log << log.mg << "Test <%s> success" % mock.__name__  << log.endl
 

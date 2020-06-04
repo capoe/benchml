@@ -4,11 +4,16 @@ import benchml
 from ..transforms import *
 from ..logger import log, Mock
 
+def assert_equal(x, y, tol):
+    if np.abs(x-y) < tol: return True
+    return False
+        
 class TestMock(Mock):
     group = None
     seed = 971231
     path = os.path.dirname(__file__)
     data_dir = ("..", "test_data")
+    tol = 1e-6
     def __init__(self):
         pass
     def run(self, create=False):
@@ -29,8 +34,21 @@ class TestMock(Mock):
         json.dump(bench, open(args.output, "w"), indent=1, sort_keys=True)
         return self
     def validate(self):
-        diff = log >> log.catch >> 'diff %s %s' % (
-            os.path.join(self.path, "test.json"), os.path.join(self.path, "test_ref.json"))
-        if diff.strip() != "": return False
+        log << "Validate" << __class__ << log.endl
+        try:
+            ref = json.load(open(os.path.join(self.path, "test_ref.json")))
+        except IOError:
+            log << "Reference output for" << __class__ << "missing" << log.endl
+            return False
+        out = json.load(open(os.path.join(self.path, "test.json")))
+        success = True
+        for key, record_ref in sorted(ref.items()):
+            log << "  %20s...%20s" % (key[0:20], key[-20:]) << log.flush
+            record_out = out[key]
+            for field, val in sorted(record_ref.items()):
+                check = assert_equal(val, record_out[field], self.tol)
+                success = success and check
+                if check: log << "+" << log.flush
+            log << log.endl
         return True
 
