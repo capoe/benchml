@@ -38,7 +38,7 @@ class TestMock(Mock):
         try:
             ref = json.load(open(os.path.join(self.path, "test_ref.json")))
         except IOError:
-            log << log.mr << "Reference output for" << __class__ \
+            log << log.mr << "Reference output for" << self.__class__.__name__ \
                 << "missing. Abort validation." << log.endl
             return False
         out = json.load(open(os.path.join(self.path, "test.json")))
