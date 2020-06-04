@@ -2,13 +2,15 @@
 from test_morgan import *
 from test_asap import *
 from test_dscribe import *
-from test_soapgto import *
+from test_soap import *
 from test_gylm import *
+from benchml.logger import log
 import re
 import benchml
 import sys
 import inspect
 import optparse
+import numpy as np
 # NOTE Independent random seeds used in
 # - Split
 # - BayesianHyper
@@ -25,7 +27,7 @@ def get_bases_recursive(obj):
 def get_all_mocks(verbose=False):
     for name, obj in inspect.getmembers(sys.modules[__name__]):
         if inspect.isclass(obj):
-            if Mock in get_bases_recursive(obj):
+            if TestMock in get_bases_recursive(obj):
                 yield obj
 
 if __name__ == "__main__":
@@ -49,8 +51,8 @@ if __name__ == "__main__":
         if not run: colour = log.mb
         log << colour << "[%s] Test <%s>" % ("Run" if run else "---", mock.__name__) << log.endl
         if args.list or not run: continue
-        mock.run(create=args.create)
-        success = mock.validate()
+        result = mock().run(create=args.create)
+        success = result.validate()
         if not success:
             log << log.mr << "Test <%s> failed" % mock.__name__ << log.endl
         else:
