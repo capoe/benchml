@@ -30,10 +30,10 @@ class GridHyper(object):
                 itertools.product(*tuple(self.hypers))):
             updates = merge(*updates)
             yield updates
-    def optimize(self, module, stream, 
-            split_args, 
-            accu_args, 
-            target, 
+    def optimize(self, module, stream,
+            split_args,
+            accu_args,
+            target,
             target_ref,
             log=None):
         update_cache = []
@@ -42,13 +42,13 @@ class GridHyper(object):
         if log:
             log << "="*ln_length << log.endl
             log << "|   iter    |   target    |" + "|".join(
-                map(lambda f: " %8s  " % f if len(f) <= 8 else " %5s...  " % f[0:5], 
+                map(lambda f: " %8s  " % f if len(f) <= 8 else " %5s...  " % f[0:5],
                 fields))+"|" << log.endl
             log << "-"*ln_length << log.endl
         prev = None
         invert = -1 if Accumulator.select(**accu_args) == "smallest" else +1
         for hyperidx, updates in enumerate(self):
-            metric = module.hyperEval(stream, updates, 
+            metric = module.hyperEval(stream, updates,
                 split_args, accu_args, target, target_ref)
             update_cache.append({
                 "metric": metric,
@@ -71,35 +71,65 @@ class GridHyper(object):
         return best["updates"]
 
 class BayesianHyper(object):
-    def __init__(self, *hypers, convert={}, seed=0):
+    def __init__(self, *hypers, convert={}, seed=0, init_points=5, n_iter=10):
         self.hypers = hypers
-        self.seed = seed
         self.convert = convert
-    def convertUpdates(self, updates):
-        for field in self.convert:
-            updates[field] = self.convert[field](updates[field])
-        return updates
-    def optimize(self, module, stream,
-            split_args, 
-            accu_args, 
-            target, 
-            target_ref,
-            log=None):
+        self.arrays = []
+        self.array_lengths = {}
+        self.seed = seed
+        self.init_points = init_points
+        self.n_iter = n_iter
+    def findBounds(self):
         all_updates = [ upd for upd in GridHyper(*self.hypers) ]
         bounds = copy.deepcopy(all_updates[0])
         for key in bounds.keys():
             bounds[key] = (bounds[key], all_updates[-1][key])
+        return bounds
+    def convertUpdates(self, updates):
+        for field in self.convert:
+            updates[field] = self.convert[field](updates[field])
+        return updates
+    def detectArrays(self, bounds):
+        self.arrays = []
+        self.array_lengths = {}
+        for key, val in bounds.items():
+            if isinstance(val[0], (list, np.ndarray)):
+                self.arrays.append(key)
+                self.array_lengths[key] = len(val[0])
+    def atomizeArrays(self, bounds):
+        self.detectArrays(bounds)
+        for arr in self.arrays:
+            bound = bounds.pop(arr)
+            length = len(bound[0])
+            self.array_lengths[arr] = length
+            for l in range(length):
+                bounds["%s[%d]" % (arr, l)] = [ bound[0][l], bound[1][l] ]
+        return bounds
+    def joinArrays(self, updates):
+        for arr in self.arrays:
+            vals = np.array([ updates.pop('%s[%d]' % (arr, l)) \
+                for l in range(self.array_lengths[arr]) ])
+            updates[arr] = vals
+        return updates
+    def optimize(self, module, stream,
+            split_args,
+            accu_args,
+            target,
+            target_ref,
+            log=None):
+        bounds = self.findBounds()
+        bounds = self.atomizeArrays(bounds)
         def f(**kwargs):
+            self.joinArrays(kwargs)
             self.convertUpdates(kwargs)
             return module.hyperEval(stream, kwargs,
-                split_args, accu_args, target, target_ref, verbose=False)*(-1. if \
+                split_args, accu_args, target, target_ref)*(-1. if \
                     Accumulator.select(accu_args['metric']) == 'smallest' else +1.)
         from bayes_opt import BayesianOptimization
         optimizer = BayesianOptimization(
             f=f, pbounds=bounds, random_state=self.seed)
         optimizer.maximize(
-            init_points=4,
-            n_iter=10,
+            init_points=self.init_points,
+            n_iter=self.n_iter,
         )
-        return self.convertUpdates(optimizer.max["params"])
-
+        return self.convertUpdates(self.joinArrays(optimizer.max["params"]))

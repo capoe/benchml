@@ -3,6 +3,7 @@ from test_morgan import *
 from test_asap import *
 from test_dscribe import *
 from test_soapgto import *
+from test_gylm import *
 import re
 import benchml
 import sys
@@ -35,10 +36,13 @@ if __name__ == "__main__":
         default=False, help="List all tests")
     parser.add_option("-f", "--filter", default=".*", dest="filter", 
         help="Filter regular expression")
-    parser.add_option("-a", "--ase", action="store_true", dest="ase",
-        default=False, help="Use ASE parser")
+    parser.add_option("-n", "--noase", action="store_true", dest="noase",
+        default=False, help="Bypass ASE parser")
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
+        default=False, help="Toggle verbose output")
     args, _ = parser.parse_args()
-    benchml.readwrite.configure(use_ase=args.ase)
+    if args.verbose: benchml.pipeline.VERBOSE = True
+    benchml.readwrite.configure(use_ase=not args.noase)
     for mock in get_all_mocks():
         run = bool(re.match(re.compile(args.filter), mock.__name__))
         colour = log.mg

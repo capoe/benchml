@@ -5,11 +5,18 @@ import copy
 import hashlib
 import json
 import itertools
+import numpy as np
 VERBOSE = False
+
+def force_json(data):
+    if isinstance(data, np.ndarray):
+        return str(data)
+    else:
+        return data
 
 def generate_hash_id(data):
     data_md5 = hashlib.md5(
-        json.dumps(data, sort_keys=True).encode('utf-8'))
+        json.dumps(data, sort_keys=True, default=force_json).encode('utf-8'))
     return data_md5.hexdigest()
 
 def deps_from_inputs(inps):
@@ -329,6 +336,7 @@ class Transform(object):
             self.openParams(stream_tag)
             self.setup()
             self._fit(inputs)
+            self.hashState()
             self.params().version(self.getHash())
             self.stream().version(self.getHash())
     def map(self, stream_tag, verbose=VERBOSE):
@@ -341,6 +349,7 @@ class Transform(object):
         else:
             self.setup()
             self._map(inputs)
+            self.hashState()
             self.stream().version(self.getHash())
     def _map(self, inputs):
         return
@@ -418,6 +427,8 @@ class Module(Transform):
         self.transforms = list(map(lambda t: tf if (t.tag == tag) else t, self.transforms))
         self.updateDependencies()
     # Dependencies
+    def hashState(self):
+        for tf in self.transforms: tf.hashState()
     def clearDependencies(self):
         for tf in self.transforms: tf.clearDependencies()
     def updateDependencies(self):
@@ -498,6 +509,7 @@ class Module(Transform):
                 print("    Setting {0:15s}.{1:10s} = {2}".format(
                     tf_tag, arg_name, val))
             self[tf_tag].args[arg_name] = val
+        self.hashState()
     def hyperEval(self,
             stream,
             updates,
@@ -505,7 +517,8 @@ class Module(Transform):
             accu_args,
             target,
             target_ref,
-            verbose=VERBOSE):
+            verbose=None):
+        if verbose is None: verbose = VERBOSE
         self.hyperUpdate(updates, verbose=verbose)
         if verbose:
             log << "    Hash changed:" << log.flush
@@ -513,10 +526,10 @@ class Module(Transform):
                 if tf.hashChanged():
                     log << tf.tag << log.flush
             log << log.endl
-        self.precompute(stream)
+        self.precompute(stream, verbose=verbose)
         accu = Accumulator(**accu_args)
         for substream_train, substream_test in stream.split(**split_args):
-            self.fit(substream_train)
+            self.fit(substream_train, verbose=verbose)
             out = self.map(substream_test)
             accu.append("test", out[target], self.get(target_ref))
         metric, metric_std = accu.evaluate("test")
@@ -580,6 +593,7 @@ class Module(Transform):
                 if verbose: log << " ".join([" "*tidx, "Fit (precompute)",
                     tf.tag, "using stream", stream.tag]) << log.flush
                 tf.fit(stream.tag, verbose=verbose)
+                if verbose: log << log.endl
             else:
                 if verbose: log << " ".join([" "*tidx, "Map (precompute)",
                     tf.tag, "using stream", stream.tag]) << log.flush

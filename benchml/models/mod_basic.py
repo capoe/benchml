@@ -16,7 +16,7 @@ def make_soap_krr(tag):
         transforms=[
             ExtXyzInput(
                 tag="input"),
-            UniversalSoapGto(
+            UniversalSoapGylmxx(
                 tag="descriptor",
                 inputs={
                     "configs": "input.configs"
@@ -24,7 +24,7 @@ def make_soap_krr(tag):
             ReduceTypedMatrix(
                 tag="reduce",
                 inputs={
-                    "X": "descriptor.X", 
+                    "X": "descriptor.X",
                     "T": "descriptor.T"
                 }),
             WhitenMatrix(
@@ -48,7 +48,7 @@ def make_soap_krr(tag):
                 })
         ],
         hyper=GridHyper(
-            Hyper({ "predictor.alpha": np.logspace(-7,+7, 15), })),
+            Hyper({ "predictor.alpha": np.logspace(-7, +7, 15), })),
         broadcast={"meta": "input.meta"},
         outputs={ "y": "predictor.y" })
 
@@ -62,6 +62,16 @@ def compile_soap():
         Hyper({"reduce.reduce_by_type": [ False, True ]}),
         Hyper({"whiten.centre": [ False, True ]}),
         Hyper({"whiten.scale":  [ False, True ]}),
+        Hyper({"predictor.power": [ 2 ] }))
+    hyper = GridHyper(
+        Hyper({"descriptor.normalize": [ False ] }),
+        Hyper({"descriptor.mode": [ "minimal" ] }),
+        Hyper({"descriptor.crossover": [ True ] }),
+        Hyper({"reduce.reduce_op": [ "sum" ]}),
+        Hyper({"reduce.normalize": [ True ]}),
+        Hyper({"reduce.reduce_by_type": [ False ]}),
+        Hyper({"whiten.centre": [ False ]}),
+        Hyper({"whiten.scale":  [ False ]}),
         Hyper({"predictor.power": [ 2 ] }))
     models = []
     for hidx, updates in enumerate(hyper):
@@ -89,7 +99,7 @@ def compile_dscribe():
                 Hyper({ "predictor.alpha": np.logspace(-5,+5, 7), })),
             broadcast={"meta": "input.meta"},
             outputs={ "y": "predictor.y" }) \
-        for DescriptorClass in [ DscribeCM, DscribeACSF ]
+        for DescriptorClass in [ DscribeSineMatrix ] #[ DscribeCM, DscribeSineMatrix, DscribeACSF, DscribeMBTR, DscribeLMBTR ]
     ]
 
 def compile_asap():
@@ -128,13 +138,17 @@ def compile_morgan():
                     args={"alpha": 0.1, "power": 2},
                     inputs={"K": "Add.y", "y": "input.y"})
             ],
-            hyper=GridHyper(
+            hyper=BayesianHyper(
                 Hyper({ "Add.coeffs":
                     list(map(lambda f: [ f, 1.-f ], np.linspace(0.25, 0.75, 3)))
                 }),
                 Hyper({ "KernelRidge.alpha":
-                    np.logspace(-3,+1, 5),
-                })),
+                    np.linspace(-3,+1, 5),
+                }),
+                n_iter=40,
+                init_points=10,
+                convert={
+                    "KernelRidge.alpha": lambda p: 10**p}),
             broadcast={ "meta": "input.meta" },
             outputs={ "y": "KernelRidge.y" },
         ),
@@ -178,6 +192,25 @@ def compile_morgan():
 def compile_gylm():
     return [
         Module(
+            tag="gylm_smooth_match",
+            transforms=[
+                ExtXyzInput(tag="input"),
+                GylmAtomic(
+                    tag="desc",
+                    inputs={"configs": "input.configs"}),
+                KernelSmoothMatch(
+                    inputs={"X": "desc.X"}),
+                KernelRidge(
+                    args={"alpha": 1e-5, "power": 2},
+                    inputs={"K": "KernelSmoothMatch.K", "y": "input.y"})
+            ],
+            hyper=GridHyper(
+                Hyper({ "KernelRidge.alpha": np.logspace(-5,+1, 7), }),
+                Hyper({ "KernelRidge.power": [ 2. ] })),
+            broadcast={ "meta": "input.meta" },
+            outputs={ "y": "KernelRidge.y" }
+        ),
+        Module(
             tag="gylm",
             transforms=[
                 ExtXyzInput(tag="input"),
@@ -192,7 +225,7 @@ def compile_gylm():
             ],
             hyper=GridHyper(
                 Hyper({ "KernelRidge.alpha": np.logspace(-5,+1, 7), }),
-                Hyper({ "KernelRidge.power": [ 1., 2., 3., 6. ] })),
+                Hyper({ "KernelRidge.power": [ 2. ] })),
             broadcast={ "meta": "input.meta" },
             outputs={ "y": "KernelRidge.y" }
         ),

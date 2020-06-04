@@ -1,16 +1,6 @@
 from ..logger import log, Mock
 from ..pipeline import Transform
-try:
-    import torch
-    import torch.nn as nn
-except ImportError:
-    torch = None
-    nn = Mock()
-    nn.Module = Mock
-
-def check_torch_available():
-    return torch is not None
-
+from .plugin_check import *
 
 class TorchModuleTransform(Transform, nn.Module):
     default_args = {
@@ -18,8 +8,8 @@ class TorchModuleTransform(Transform, nn.Module):
         "reset_parameters": False,
         "reset_optimizer": False
     }
-    def is_available():
-        return check_torch_available()
+    def check_available():
+        return check_torch_available(__class__)
     def __init__(self, **kwargs):
         Transform.__init__(self, **kwargs)
         nn.Module.__init__(self)
@@ -50,3 +40,4 @@ class TorchDevice(TorchModuleTransform):
     def _feed(self, *args, **kwargs):
         self.stream().put("device", self.device)
         return # <- This automatically calls _setup
+

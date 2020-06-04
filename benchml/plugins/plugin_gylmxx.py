@@ -4,16 +4,51 @@ from ..logger import log
 import numpy as np
 import multiprocessing as mp
 import time
-try:
-    import gylm
-except ImportError:
-    gylm = None
+from .plugin_check import *
 
-def check_gylmxx_available(obj, require=False):
-    if gylm is None:
-        if require: raise ImportError("%s requires gylmxx" % obj.__name__)
-        return False
-    return True
+class KernelSmoothMatch(Transform):
+    default_args = {
+        "base_kernel": "xi.dot(xj.T)",
+        "base_power": 3,
+        "gamma": 1e-2,
+        "epsilon": 1e-6
+    }
+    req_inputs = ("X",)
+    allow_stream = ("K",)
+    allow_params = ("X",)
+    stream_kernel = ("K",)
+    precompute = True
+    verbose = True
+    log = log
+    def check_available():
+        return check_gylmxx_available(__class__)
+    def evaluate(self, X1, X2, symmetric):
+        K = np.zeros((X1.shape[0], X2.shape[0]))
+        for i in range(X1.shape[0]):
+            xi = X1[i]
+            for j in range(i if symmetric else 0, X2.shape[0]):
+                xj = X2[j]
+                if self.verbose: log << log.back << " Match %4d/%-4d   " % (i, j) << log.flush
+                #kij = np.zeros((xi.shape[0], xj.shape[0]))
+                #kij = xi.dot(xj.T)**self.args["base_power"]
+                kij = eval(self.args["base_kernel"])**self.args["base_power"]
+                pij = np.zeros_like(kij)
+                gylm.smooth_match(pij, kij, kij.shape[0], kij.shape[1],
+                    self.args["gamma"], self.args["epsilon"], self.verbose)
+                K[i,j] = np.sum(kij*pij)
+                if symmetric: K[j,i] = K[i,j]
+        if self.verbose: log << log.endl
+        return K
+    def _fit(self, inputs):
+        X = inputs["X"]
+        K = self.evaluate(X, X, True)
+        self.stream().put("K", K)
+        self.params().put("X", np.copy(inputs["X"]))
+    def _map(self, inputs):
+        X1 = inputs["X"]
+        X2 = self.params().get("X")
+        K = self.evaluate(X1, X2, False)
+        self.stream().put("K", K)
 
 class GylmTransform(Transform):
     default_args = {

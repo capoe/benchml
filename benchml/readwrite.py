@@ -3,6 +3,7 @@ import numpy as np
 import json
 import os
 import pickle
+import types
 from . import ptable
 from .logger import log, Mock
 ase = Mock()
@@ -49,71 +50,7 @@ class ExtendedXyz(object):
             self.heavy = np.where(np.array(self.symbols != 'H'))[0]
         return self.heavy, self.symbols[self.heavy], self.positions[self.heavy]
     def create(self, n_atoms, fs):
-        # Parse header: key1="str1" key2=123 key3="another value" ...
-        header = fs.readline().replace("\n", "")
-        tokens = []
-        pos0 = 0
-        pos1 = 0
-        status = "<"
-        quotcount = 0
-        while pos1 < len(header):
-            status_out = status
-            # On the lhs of the key-value pair?
-            if status == "<":
-                if header[pos1] == "=":
-                    tokens.append(header[pos0:pos1])
-                    pos0 = pos1+1
-                    pos1 = pos1+1
-                    status_out = ">"
-                    quotcount = 0
-                else:
-                    pos1 += 1
-            # On the rhs of the key-value pair?
-            elif status == ">":
-                if header[pos1-1:pos1] == '"':
-                    quotcount += 1
-                if quotcount == 0 and header[pos1] == ' ':
-                    quotcount = 2
-                if quotcount <= 1:
-                    pos1 += 1
-                elif quotcount == 2:
-                    tokens.append(header[pos0:pos1])
-                    pos0 = pos1+1
-                    pos1 = pos1+1
-                    status_out = ""
-                    quotcount = 0
-                else:
-                    assert False
-            # In between key-value pairs?
-            elif status == "":
-                if header[pos1] == ' ':
-                    pos0 += 1
-                    pos1 += 1
-                else:
-                    status_out = "<"
-            else:
-                assert False
-            status = status_out
-        kvs = []
-        for i in range(len(tokens)//2):
-            kvs.append([tokens[2*i], tokens[2*i+1]])
-        # Process key-value pairs
-        for kv in kvs:
-            key = kv[0]
-            value = '='.join(kv[1:])
-            value = value.replace('"','').replace('\'','')
-            # Float?
-            if '.' in value:
-                try:
-                    value = float(value)
-                except: pass
-            else:
-                # Int?
-                try:
-                    value = int(value)
-                except: pass
-            self.info[kv[0]] = value
-        # Read atoms
+        self.info = tokenize_extxyz_meta(fs)
         self.positions = []
         self.symbols = []
         for i in range(n_atoms):
@@ -136,11 +73,108 @@ class ExtendedXyzAtom(object):
         self.name = name
         self.pos = pos
 
+def tokenize_extxyz_meta(fs):
+    # Parse header: key1="str1" key2=123 key3="another value" ...
+    header = fs.readline().replace("\n", "")
+    tokens = []
+    pos0 = 0
+    pos1 = 0
+    status = "<"
+    quotcount = 0
+    while pos1 < len(header):
+        status_out = status
+        # On the lhs of the key-value pair?
+        if status == "<":
+            if header[pos1] == "=":
+                tokens.append(header[pos0:pos1])
+                pos0 = pos1+1
+                pos1 = pos1+1
+                status_out = ">"
+                quotcount = 0
+            else:
+                pos1 += 1
+        # On the rhs of the key-value pair?
+        elif status == ">":
+            if header[pos1-1:pos1] == '"':
+                quotcount += 1
+            if quotcount == 0 and header[pos1] == ' ':
+                quotcount = 2
+            if quotcount <= 1:
+                pos1 += 1
+            elif quotcount == 2:
+                tokens.append(header[pos0:pos1])
+                pos0 = pos1+1
+                pos1 = pos1+1
+                status_out = ""
+                quotcount = 0
+            else:
+                assert False
+        # In between key-value pairs?
+        elif status == "":
+            if header[pos1] == ' ':
+                pos0 += 1
+                pos1 += 1
+            else:
+                status_out = "<"
+        else:
+            assert False
+        status = status_out
+    kvs = []
+    for i in range(len(tokens)//2):
+        kvs.append([tokens[2*i], tokens[2*i+1]])
+    # Process key-value pairs
+    info = {}
+    for kv in kvs:
+        key = kv[0]
+        value = '='.join(kv[1:])
+        value = value.replace('"','').replace('\'','')
+        # Float?
+        if '.' in value:
+            try:
+                value = float(value)
+            except: pass
+        else:
+            # Int?
+            try:
+                value = int(value)
+            except: pass
+        info[kv[0]] = value
+    return info
+
+def read_extxyz_meta_only(config_file):
+    ifs = open(config_file, 'r')
+    while True:
+        header = ifs.readline().split()
+        if header != []:
+            assert len(header) == 1
+            n_atoms = int(header[0])
+            info = tokenize_extxyz_meta(ifs)
+            for _ in range(n_atoms): ifs.readline()
+            yield info
+        else: break
+
+def patch_ase_config(config):
+    def getHeavy(config):
+        symbols = np.array(config.symbols)
+        heavy = np.where(np.array(symbols != 'H'))[0]
+        return heavy, symbols[heavy], config.positions[heavy]
+    config.getHeavy = types.MethodType(getHeavy, config)
+
+def read_ase(config_file, index):
+    if index != ':': raise NotImplementedError()
+    configs = ase.io.read(config_file, index)
+    metas = list(read_extxyz_meta_only(config_file))
+    assert len(configs) == len(metas) # File format error?
+    for midx, meta in enumerate(metas):
+        configs[midx].info = meta
+        patch_ase_config(configs[midx])
+    return configs
+
 def read(
         config_file,
         index=':'):
     if ase.io is not None:
-        return ase.io.read(config_file, index)
+        return read_ase(config_file, index)
     configs = []
     ifs = open(config_file, 'r')
     while True:

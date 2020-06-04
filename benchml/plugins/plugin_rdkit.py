@@ -1,18 +1,7 @@
 from ..kernels import KernelDot
 from ..pipeline import Transform, Macro
 import numpy as np
-try:
-    import rdkit.Chem as rchem
-    from rdkit.Chem import AllChem as achem
-except ImportError:
-    rchem = None
-    achem = None
-
-def check_rdkit_available(obj, require=False):
-    if rchem is None or achem is None:
-        if require: raise ImportError("'%s' requires rdkit" % obj.__class__.__name__)
-        return False
-    return True
+from .plugin_check import *
 
 class MorganFP(Transform):
     default_args = {
