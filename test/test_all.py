@@ -51,7 +51,8 @@ if __name__ == "__main__":
         if not run: colour = log.mb
         log << colour << "[%s] Test <%s>" % ("Run" if run else "---", mock.__name__) << log.endl
         if args.list or not run: continue
-        result = mock().run(create=args.create)
+        #result = mock().run(create=args.create)
+        result = mock()
         if not args.create:
             success = result.validate()
             if not success:

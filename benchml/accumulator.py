@@ -44,6 +44,8 @@ class Accumulator(object):
     }
     def select(metric, **kwargs):
         return Accumulator.select_best[metric]
+    def score(metric, *args, **kwargs):
+        return __class__.eval_map[metric](*args, **kwargs)
     def __init__(self, jsonfile=None, metric=None, metrics=None):
         self.yp_map = {}
         self.yt_map = {}
@@ -100,8 +102,8 @@ class Accumulator(object):
                 dvs.append(dv)
             if log:
                 log << "%-50s : " % (
-                    channel[0:24]+".."+channel[-24:] if \
-                        len(channel) > 50 else channel) << log.flush
+                    str(channel)[0:24]+".."+str(channel)[-24:] if \
+                        len(str(channel)) > 50 else str(channel)) << log.flush
                 for v, metric in zip(vs, metrics):
                     log << "%s=%+1.4e +- %+1.4e" % (
                         metric, v, dv) << log.flush

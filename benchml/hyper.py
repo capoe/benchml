@@ -64,7 +64,8 @@ class GridHyper(object):
             if log:
                 log << colour << "|   %-5d   |  %+1.2e  |" % (hyperidx+1, metric) + "|".join(map(
                     lambda f: (" %+1.2e " % float(updates[f])) \
-                        if type(updates[f]) is not list else "  [ ... ]  ", fields))+"|" << log.endl
+                        if (updates[f] is not None and type(updates[f]) is not list) \
+                            else "  [ ... ]  ", fields))+"|" << log.endl
         update_cache = sorted(update_cache, key=lambda cache: cache["metric"])
         best = update_cache[0] if (Accumulator.select(**accu_args) == "smallest") \
             else update_cache[-1]
@@ -87,7 +88,11 @@ class BayesianHyper(object):
         return bounds
     def convertUpdates(self, updates):
         for field in self.convert:
-            updates[field] = self.convert[field](updates[field])
+            fct = self.convert[field] 
+            # Lambda fcts may be written as str to support pickling:
+            # E.g., fct = "lambda x: 10**x"
+            if isinstance(fct, str): fct = eval(fct)
+            updates[field] = fct(updates[field])
         return updates
     def detectArrays(self, bounds):
         self.arrays = []

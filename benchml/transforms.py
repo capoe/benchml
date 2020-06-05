@@ -18,8 +18,7 @@ class Add(Transform):
     req_args = ('coeffs',)
     req_inputs = ('X',)
     allow_stream = {'y'}
-    def __init__(self, **kwargs):
-        Transform.__init__(self, **kwargs)
+    precompute = True
     def _map(self, inputs):
         coeffs = self.args["coeffs"]
         assert len(coeffs) == len(inputs["X"])
@@ -27,6 +26,18 @@ class Add(Transform):
         for i in range(len(inputs["X"])):
             y = y + coeffs[i]*inputs["X"][i]
         self.stream().put("y", y)
+
+class Concatenate(Transform):
+    req_inputs = ('X',)
+    allow_stream = {'X',}
+    stream_samples = ('X',)
+    precompute = True
+    default_args = {
+        "axis": 1
+    }
+    def _map(self, inputs):
+        X_out = np.concatenate(inputs["X"], axis=self.args["axis"])
+        self.stream().put("X", X_out)
 
 class ReduceMatrix(Transform):
     req_inputs = ("X",)

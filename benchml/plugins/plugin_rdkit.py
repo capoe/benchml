@@ -3,6 +3,9 @@ from ..pipeline import Transform, Macro
 import numpy as np
 from .plugin_check import *
 
+def get_smiles(c):
+    return c.info["smiles"] if "smiles" in c.info else c.info["SMILES"]
+
 class MorganFP(Transform):
     default_args = {
         "radius": 3,
@@ -19,7 +22,7 @@ class MorganFP(Transform):
         self.normalize = self.args["normalize"]
     def _map(self, inputs):
         configs = inputs["configs"]
-        smiles = [ c.info["smiles"] for c in configs ]
+        smiles = [ get_smiles(c) for c in configs ]
         mols = [ rchem.MolFromSmiles(s) for s in smiles ]
         fps = [ achem.GetMorganFingerprintAsBitVect(
             mol, radius=self.radius, nBits=self.length) for mol in mols ]

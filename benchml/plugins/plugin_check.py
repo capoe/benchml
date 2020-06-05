@@ -32,7 +32,12 @@ except ImportError:
     dscribe = None
     dd = Mock()
     dd.CoulombMatrix = None
+    dd.SineMatrix = None
+    dd.EwaldSumMatrix = None
     dd.ACSF = None
+    dd.SOAP = None
+    dd.MBTR = None
+    dd.LMBTR = None
 
 def check_dscribe_available(obj, require=False):
     if dscribe is None:
@@ -43,9 +48,11 @@ def check_dscribe_available(obj, require=False):
 try:
     import rdkit.Chem as rchem
     from rdkit.Chem import AllChem as achem
+    from rdkit.Chem import Descriptors as rdesc
 except ImportError:
     rchem = None
     achem = None
+    rdesc = None
 
 def check_rdkit_available(obj, require=False):
     if rchem is None or achem is None:

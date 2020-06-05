@@ -73,9 +73,11 @@ class ExtendedXyzAtom(object):
         self.name = name
         self.pos = pos
 
-def tokenize_extxyz_meta(fs):
+def tokenize_extxyz_meta(fs, allow_json=True):
     # Parse header: key1="str1" key2=123 key3="another value" ...
     header = fs.readline().replace("\n", "")
+    if allow_json and header.startswith('{'):
+        return json.loads(header)
     tokens = []
     pos0 = 0
     pos1 = 0
@@ -190,7 +192,8 @@ def read(
 
 def write(
         config_file,
-        configs):
+        configs,
+        allow_json=True):
     if type(configs) != list:
         configs = [ configs ]
     if ase.io is not None:
@@ -198,13 +201,16 @@ def write(
     ofs = open(config_file, 'w')
     for c in configs:
         ofs.write('%d\n' % (len(c)))
-        for k in sorted(c.info.keys()):
-            # int or float?
-            if type(c.info[k]) not in { str }:
-                ofs.write('%s=%s ' % (k, c.info[k]))
-            # String
-            else:
-                ofs.write('%s="%s" ' % (k, c.info[k]))
+        if allow_json:
+            ofs.write('%s' % json.dumps(c.info, sort_keys=True))
+        else:
+            for k in sorted(c.info.keys()):
+                # int or float?
+                if type(c.info[k]) not in { str }:
+                    ofs.write('%s=%s ' % (k, c.info[k]))
+                # String
+                else:
+                    ofs.write('%s="%s" ' % (k, c.info[k]))
         ofs.write('\n')
         for i in range(len(c)):
             ofs.write('%s %+1.4f %+1.4f %+1.4f\n' % (

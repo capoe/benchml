@@ -5,6 +5,7 @@ try:
     import sklearn
     import sklearn.linear_model
     import sklearn.kernel_ridge
+    import sklearn.ensemble
 except ImportError:
     sklearn = None
 
@@ -32,6 +33,40 @@ class Ridge(SklearnTransform):
     def _map(self, inputs):
         y = self.params().get("model").predict(inputs["X"])
         self.stream().put("y", y)
+
+class RandomForestRegressor(SklearnTransform):
+    default_args = dict(
+        n_estimators=100, 
+        criterion='mse', 
+        max_depth=None, 
+        min_samples_split=2, 
+        min_samples_leaf=1, 
+        min_weight_fraction_leaf=0.0, 
+        max_features='auto', 
+        max_leaf_nodes=None, 
+        min_impurity_decrease=0.0, 
+        min_impurity_split=None, 
+        bootstrap=True, 
+        oob_score=False, 
+        n_jobs=None, 
+        random_state=None, 
+        verbose=0, 
+        warm_start=False, 
+        ccp_alpha=0.0, 
+        max_samples=None)
+    allow_stream = {"y"}
+    allow_params = {"model"}
+    req_inputs = {"X", "y"}
+    def _fit(self, inputs):
+        model = sklearn.ensemble.RandomForestRegressor(**self.args)
+        model.fit(inputs["X"], inputs["y"])
+        y_pred = model.predict(inputs["X"])
+        self.params().put("model", model)
+        self.stream().put("y", y_pred)
+    def _map(self, inputs):
+        y_pred = self.params().get("model").predict(inputs["X"])
+        self.stream().put("y", y_pred)
+
 
 class KernelRidge(SklearnTransform):
     req_args = ('alpha',)

@@ -38,6 +38,12 @@ class DatasetIterator(object):
         return
 
 class Dataset(object):
+    target_converter = {
+        "": (lambda y: y),
+        "log": (lambda y: np.log(y)),
+        "log10": (lambda y: np.log10(y)),
+        "plog": (lambda y: -np.log10(y)),
+    }
     def __init__(self, ext_xyz=None, meta=None, configs=None):
         self.configs = configs
         if ext_xyz is not None:
@@ -48,13 +54,17 @@ class Dataset(object):
                 for xyz in ext_xyz:
                     self.configs.extend(read(xyz))
         self.meta = meta
+        self.convert = self.target_converter[self.meta.pop("convert", "")]
         if meta is not None and "target" in meta:
-            self.y = np.array([ s.info[meta["target"]] for s in self.configs ])
+            self.y = self.convert(
+                np.array([ float(s.info[meta["target"]]) \
+                    for s in self.configs ]))
         return
     def info(self):
-        return "{name:50s} #configs={size:-5d}  task={task:8s}  metrics={metrics:s}".format(
+        return "{name:50s}  #configs={size:<5d}  task={task:8s}  metrics={metrics:s}   std={std:1.2e}".format(
             name=self.meta["name"], size=len(self.configs),
-            task=self.meta["task"], metrics=",".join(self.meta["metrics"]))
+            task=self.meta["task"], metrics=",".join(self.meta["metrics"]),
+            std=np.std(self.y))
     def __getitem__(self, key):
         if np.issubdtype(type(key), np.integer):
             return self.configs[key]

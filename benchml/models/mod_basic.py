@@ -119,39 +119,39 @@ def compile_asap():
 
 def compile_morgan():
     return [
-        Module(
-            tag="morgan_krrx2",
-            transforms=[
-                ExtXyzInput(tag="input"),
-                MorganKernel(
-                    tag="A",
-                    args={"x.fp_length": 1024, "x.fp_radius": 2},
-                    inputs={"x.configs": "input.configs"}),
-                MorganKernel(
-                    tag="B",
-                    args={"x.fp_length": 2048, "x.fp_radius": 4},
-                    inputs={"x.configs": "input.configs"}),
-                Add(
-                    args={"coeffs": [ 0.5, 0.5 ]},
-                    inputs={"X": ["A/k.K", "B/k.K"]}),
-                KernelRidge(
-                    args={"alpha": 0.1, "power": 2},
-                    inputs={"K": "Add.y", "y": "input.y"})
-            ],
-            hyper=BayesianHyper(
-                Hyper({ "Add.coeffs":
-                    list(map(lambda f: [ f, 1.-f ], np.linspace(0.25, 0.75, 3)))
-                }),
-                Hyper({ "KernelRidge.alpha":
-                    np.linspace(-3,+1, 5),
-                }),
-                n_iter=40,
-                init_points=10,
-                convert={
-                    "KernelRidge.alpha": lambda p: 10**p}),
-            broadcast={ "meta": "input.meta" },
-            outputs={ "y": "KernelRidge.y" },
-        ),
+        #Module(
+        #    tag="morgan_krrx2",
+        #    transforms=[
+        #        ExtXyzInput(tag="input"),
+        #        MorganKernel(
+        #            tag="A",
+        #            args={"x.fp_length": 1024, "x.fp_radius": 2},
+        #            inputs={"x.configs": "input.configs"}),
+        #        MorganKernel(
+        #            tag="B",
+        #            args={"x.fp_length": 2048, "x.fp_radius": 4},
+        #            inputs={"x.configs": "input.configs"}),
+        #        Add(
+        #            args={"coeffs": [ 0.5, 0.5 ]},
+        #            inputs={"X": ["A/k.K", "B/k.K"]}),
+        #        KernelRidge(
+        #            args={"alpha": 0.1, "power": 2},
+        #            inputs={"K": "Add.y", "y": "input.y"})
+        #    ],
+        #    hyper=BayesianHyper(
+        #        Hyper({ "Add.coeffs":
+        #            list(map(lambda f: [ f, 1.-f ], np.linspace(0.25, 0.75, 3)))
+        #        }),
+        #        Hyper({ "KernelRidge.alpha":
+        #            np.linspace(-3,+1, 5),
+        #        }),
+        #        n_iter=40,
+        #        init_points=10,
+        #        convert={
+        #            "KernelRidge.alpha": lambda p: 10**p}),
+        #    broadcast={ "meta": "input.meta" },
+        #    outputs={ "y": "KernelRidge.y" },
+        #),
         Module(
             tag="morgan_krr",
             transforms=[
@@ -189,7 +189,7 @@ def compile_morgan():
         ),
     ]
 
-def compile_gylm():
+def compile_gylm_match():
     return [
         Module(
             tag="gylm_smooth_match",
@@ -210,6 +210,10 @@ def compile_gylm():
             broadcast={ "meta": "input.meta" },
             outputs={ "y": "KernelRidge.y" }
         ),
+    ]
+
+def compile_gylm():
+    return [
         Module(
             tag="gylm",
             transforms=[
@@ -223,9 +227,16 @@ def compile_gylm():
                     args={"alpha": 1e-5, "power": 2},
                     inputs={"K": "KernelDot.K", "y": "input.y"})
             ],
-            hyper=GridHyper(
-                Hyper({ "KernelRidge.alpha": np.logspace(-5,+1, 7), }),
-                Hyper({ "KernelRidge.power": [ 2. ] })),
+            #hyper=GridHyper(
+            #    Hyper({ "KernelRidge.alpha": np.logspace(-5,+1, 7), }),
+            #    Hyper({ "KernelRidge.power": [ 2. ] })),
+            hyper=BayesianHyper(
+                Hyper({ "KernelRidge.alpha": np.linspace(-5,+1, 7), }),
+                Hyper({ "KernelRidge.power": [ 1., 4. ] }),
+                init_points=10,
+                n_iter=30,
+                convert={
+                    "KernelRidge.alpha": "lambda p: 10**p"}),
             broadcast={ "meta": "input.meta" },
             outputs={ "y": "KernelRidge.y" }
         ),
@@ -234,6 +245,7 @@ def compile_gylm():
 collections = {
     "morgan": compile_morgan,
     "gylm": compile_gylm,
+    "gylm_match": compile_gylm_match,
     "null": compile_null,
     "asap": compile_asap,
     "dscribe": compile_dscribe,

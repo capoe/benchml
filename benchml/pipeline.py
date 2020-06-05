@@ -493,6 +493,12 @@ class Module(Transform):
             return self[tf].params().get(field[1:])
         else:
             return self[tf].stream().get(field)
+    def compileArgs(self):
+        args = {}
+        for tf in self.transforms:
+            for key, v in tf.args.items():
+                args["%s.%s" % (tf.tag, key)] = v
+        return args
     def resolveArgs(self):
         for tf in self.transforms: tf.resolveArgs()
     def resolveOutputs(self):
