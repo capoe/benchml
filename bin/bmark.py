@@ -13,29 +13,23 @@ def main(args):
         root=args.data_folder,
         filter_fct=benchml.filters[args.filter])
     # Compile models
-    models = benchml.models.compile(args.groups.split())
+    models = benchml.models.compile(args.groups)
     # Evaluate
     bench = benchml.benchmark.evaluate(
         data, models, log, verbose=args.verbose)
     json.dump(bench, open(args.output, "w"), indent=1, sort_keys=True)
 
 if __name__ == "__main__":
-    parser = optparse.OptionParser()
-    parser.add_option("-d", "--data_folder", dest="data_folder", default="./data",
-        help="Dataset folder", metavar="D")
-    parser.add_option("-g", "--groups", dest="groups", default="null",
-        help="Model groups", metavar="G")
-    parser.add_option("-f", "--filter", dest="filter", default="none", 
-        help="Dataset filter", metavar="F")
-    parser.add_option("-o", "--output", dest="output", default="bench.json", 
-        help="Output benchmark json file", metavar="J")
-    parser.add_option("-s", "--seed", dest="seed", default=0, 
-        help="Global random seed", metavar="S")
-    parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
-        help="Set verbose output")
-    parser.add_option("-l", "--list_transforms", action="store_true", dest="list_transforms", 
-        default=False, help="List available transforms and quit")
-    args, _ = parser.parse_args()
+    log.Connect()
+    log.AddArg("data_folder", typ=str, default="", help="Dataset folder")
+    log.AddArg("groups", typ=(list,str), default=[], help="Model groups")
+    log.AddArg("filter", typ=str, default="none", help="Dataset filter regex")
+    log.AddArg("output", typ=str, default="bench.json", help="Output json")
+    log.AddArg("seed", typ=int, default=0, help="Global random seed")
+    log.AddArg("verbose", typ=bool, default=False, help="Toggle verbose output")
+    log.AddArg("list_transforms", typ=bool, default=False, help="List available transforms and quit")
+    args = log.Parse()
+    print(args.groups)
     if args.list_transforms:
         benchml.transforms.list_all(verbose=args.verbose)
         log.okquit()
