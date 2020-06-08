@@ -1,16 +1,16 @@
 import numpy as np
 from ..transforms import *
 
-def compile(groups):
+def compile(groups, **kwargs):
     selected = [ model \
         for group in groups \
-            for model in collections[group]() ]
+            for model in collections[group](**kwargs) ]
     return selected
 
-def compile_null():
+def compile_null(**kwargs):
     return []
 
-def compile_physchem(custom_fields=[], with_hyper=False):
+def compile_physchem(custom_fields=[], with_hyper=False, **kwargs):
     hyper = None
     if with_hyper:
         hyper=BayesianHyper(
@@ -24,20 +24,23 @@ def compile_physchem(custom_fields=[], with_hyper=False):
             },
             init_points=10,
             n_iter=30)
+    else:
+        hyper=GridHyper(
+            Hyper({"pred.max_depth": [None]}))
     return [
         Module(
             tag="physchem",
             transforms=[
                 ExtXyzInput(tag="input"),
-                Physchem2D(tag="desc1",
+                Physchem2D(tag="Physchem2D",
                     inputs={"configs": "input.configs"}),
-                PhyschemUser(tag="desc2",
+                PhyschemUser(tag="PhyschemUser",
                     args={
                         "fields": custom_fields
                     },
                     inputs={"configs": "input.configs"}),
                 Concatenate(tag="desc",
-                    inputs={"X": [ "desc1.X", "desc2.X" ]}),
+                    inputs={"X": [ "Physchem2D.X", "PhyschemUser.X" ]}),
                 RandomForestRegressor(tag="pred",
                     inputs={"X": "desc.X", "y": "input.y"})
             ],
@@ -88,7 +91,7 @@ def make_soap_krr(tag):
         broadcast={"meta": "input.meta"},
         outputs={ "y": "predictor.y" })
 
-def compile_soap():
+def compile_soap(**kwargs):
     hyper = GridHyper(
         Hyper({"descriptor.normalize": [ True ] }),
         Hyper({"descriptor.mode": [ "minimal", "smart", "longrange" ] }),
@@ -116,7 +119,7 @@ def compile_soap():
         models.append(model)
     return models
 
-def compile_dscribe():
+def compile_dscribe(**kwargs):
     return [
         Module(
             tag=DescriptorClass.__name__+"_ridge",
@@ -138,7 +141,7 @@ def compile_dscribe():
         for DescriptorClass in [ DscribeSineMatrix, DscribeCM, DscribeSineMatrix, DscribeACSF, DscribeMBTR, DscribeLMBTR ]
     ]
 
-def compile_asap():
+def compile_asap(**kwargs):
     return [
         Module(
             tag="asap_xyz",
@@ -153,7 +156,7 @@ def compile_asap():
             })
     ]
 
-def compile_morgan():
+def compile_morgan(**kwargs):
     return [
         # Macro example
         # >>> Module(
@@ -221,12 +224,12 @@ def compile_morgan():
             hyper=BayesianHyper(
                 Hyper({"Ridge.alpha": np.linspace(-2,2,5)}),
                 convert={
-                    "Ridge.alpha": lambda p: 10**p}),
+                    "Ridge.alpha": "lambda p: 10**p"}),
             outputs={"y": "Ridge.y"}
         ),
     ]
 
-def compile_gylm_match():
+def compile_gylm_match(**kwargs):
     return [
         Module(
             tag="gylm_smooth_match",
@@ -249,7 +252,7 @@ def compile_gylm_match():
         ),
     ]
 
-def compile_gylm():
+def compile_gylm(**kwargs):
     return [
         Module(
             tag="gylm",
@@ -276,13 +279,15 @@ def compile_gylm():
         ),
     ]
 
-collections = {
-    "asap": compile_asap,
-    "dscribe": compile_dscribe,
-    "gylm": compile_gylm,
-    "gylm_match": compile_gylm_match,
-    "morgan": compile_morgan,
-    "null": compile_null,
-    "physchem": compile_physchem,
-    "soap": compile_soap
-}
+def register_all():
+    return {
+        "asap": compile_asap,
+        "dscribe": compile_dscribe,
+        "ecfp": compile_morgan,
+        "gylm": compile_gylm,
+        "gylm_match": compile_gylm_match,
+        "morgan": compile_morgan,
+        "null": compile_null,
+        "physchem": compile_physchem,
+        "soap": compile_soap
+    }

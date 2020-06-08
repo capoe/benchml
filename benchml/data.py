@@ -19,9 +19,13 @@ class BenchmarkData(object):
         return
 
 class DatasetIterator(object):
-    def __init__(self, path, filter_fct=lambda meta: True):
-        self.path = path
-        self.meta = json.load(open(os.path.join(path, "meta.json")))
+    def __init__(self, path=None, filter_fct=lambda meta: True, meta_json=None):
+        if meta_json is None:
+            self.path = path
+            self.meta = json.load(open(os.path.join(path, "meta.json")))
+        else:
+            self.path = os.path.dirname(meta_json)
+            self.meta = json.load(open(meta_json))
         self.filter = filter_fct
         return
     def __iter__(self):

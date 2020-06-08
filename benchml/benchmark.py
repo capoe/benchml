@@ -42,7 +42,8 @@ def evaluate_model(dataset, model,
             if model.hyper is not None:
                 model.hyperfit(
                     stream=stream_train, 
-                    split_args={"method": "random", "n_splits": 5, "train_fraction": 0.75},
+                    split_args=dataset["hypersplit"] if "hypersplit" in dataset \
+                        else {"method": "random", "n_splits": 5, "train_fraction": 0.75},
                     accu_args={"metric": dataset["metrics"][0]},
                     target="y",
                     target_ref="input.y",
@@ -87,7 +88,8 @@ def evaluate_ensemble(dataset, models, log, verbose=False, detailed=False):
     benchdata = []
     for model in models:
         log << log.my << "Model:" << model.tag << log.endl
-        record = evaluate_model(dataset, model, log=log, verbose=verbose)
+        record = evaluate_model(dataset, model, 
+            log=log, verbose=verbose, detailed=detailed)
         benchdata.append(record)
     return benchdata
 

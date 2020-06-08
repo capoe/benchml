@@ -11,8 +11,14 @@ class ExtXyzInput(Transform):
     stream_samples = ("configs", "y")
     def _feed(self, data):
         self.stream().put("configs", data)
-        self.stream().put("y", data.y)
-        self.stream().put("meta", data.meta)
+        if hasattr(data, "y"):
+            self.stream().put("y", data.y)
+        else:
+            self.stream().put("y", [])
+        if hasattr(data, "meta"):
+            self.stream().put("meta", data.meta)
+        else:
+            self.stream().put("meta", {})
 
 class Add(Transform):
     req_args = ('coeffs',)

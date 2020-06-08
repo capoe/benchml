@@ -3,6 +3,7 @@ set is_csh = 101
 test "$is_csh" = 101 && goto CSH
 
 # BASH
+export PATH="${PATH}:@CMAKE_INSTALL_PREFIX@/bin"
 export PYTHONPATH="${PYTHONPATH}:@CMAKE_INSTALL_PREFIX@"
 export LIBRMT_ROOT="@CMAKE_INSTALL_PREFIX@"
 return
