@@ -7,16 +7,21 @@ from .readwrite import read
 
 class BenchmarkData(object):
     def __init__(self, root, filter_fct=lambda meta: True):
-        paths = map(lambda sdf: sdf[0], filter(
+        self.paths = map(lambda sdf: sdf[0], filter(
             lambda subdir_dirs_files: "meta.json" in subdir_dirs_files[2],
                 os.walk(root)))
         self.dataits = map(lambda path: DatasetIterator(
-            path, filter_fct=filter_fct), paths)
+            path, filter_fct=filter_fct), self.paths)
+        self.data = []
     def __iter__(self):
+        self.data = []
         for datait in self.dataits:
             for dataset in datait:
+                self.data.append(dataset)
                 yield dataset
         return
+    def __len__(self):
+        return len(self.data)
 
 class DatasetIterator(object):
     def __init__(self, path=None, filter_fct=lambda meta: True, meta_json=None):

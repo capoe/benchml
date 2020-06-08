@@ -3,10 +3,12 @@ from ..logger import Mock
 try:
     import gylm
 except ImportError:
-    gylm = None
+    gylm = Mock()
+    gylm.SoapGtoCalculator = None
+    gylm.GylmCalculator = None
 
 def check_gylmxx_available(obj, require=False):
-    if gylm is None:
+    if gylm.GylmCalculator is None:
         if require: raise ImportError("%s requires gylmxx" % obj.__name__)
         return False
     return True
