@@ -165,7 +165,7 @@ def transform_info(tf, log, verbose=True):
         log << log.endl
         log << "  Precompute:           " << bool(tf.precompute) << log.endl
     else:
-        log << "%-22s" % ("<"+tf.__name__+">")
+        log << "%-25s" % ("<"+tf.__name__+">")
         argstr = ",".join(tf.req_args)
         inputstr = ",".join(tf.req_inputs)
         streamstr = ",".join(tf.allow_stream)
@@ -188,4 +188,5 @@ def list_all(verbose=False):
     for name, obj in inspect.getmembers(sys.modules[__name__]):
         if inspect.isclass(obj):
             if Transform in get_bases_recursive(obj):
+                if obj is Module: continue
                 transform_info(obj, log=log, verbose=verbose)

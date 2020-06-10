@@ -191,7 +191,7 @@ class OptionsInterface(object):
     def InterpretAsList(self, expr):
         array = [ self.subtype(e) for e in expr ]
         return array
-    def AddArg(self, name, typ=str, nickname=None, 
+    def AddArg(self, name, type=str, nickname=None, 
             default=None, destination=None, help=None):
         # Sort out <name> (e.g. --time) vs <destination> (e.g., time)
         if '--' != name[0:2]:
@@ -203,7 +203,9 @@ class OptionsInterface(object):
         if default == None: required = True
         else: required = False
         # Construct default <help> it not given
-        if help == None: help = "%s <default: %s>" % (repr(type), repr(default))
+        if help == None: help = "[type=%s default=%s]" % (repr(type), repr(default))
+        else:
+            help = "%s [type=%s, default=%s]" % (help, repr(type.__name__ if hasattr(type, "__name__") else str(type)), repr(default))
         # Construct <nickname> if not given
         if nickname == None:
             nickname = '-'
@@ -216,30 +218,42 @@ class OptionsInterface(object):
                     % name)
             self.cmd_ln_nicknames.append(nickname)
         # Process type
-        if typ in [int, float, str]:
+        action = 'store'
+        if type in {int, float, str}:
             nargs = None
-        elif typ == bool:
-            typ = self.InterpretAsBoolean
+        elif type is bool:
+            type = self.InterpretAsBoolean
             nargs = None
-        elif typ == np.array:
+        elif type is np.array:
             raise NotImplementedError
-            typ = float # self.InterpretAsNumpyArray
+            type = float # self.InterpretAsNumpyArray
             nargs = 3
-        elif typ == list:
-            typ = str
+        elif type is list:
+            type = str
             nargs = '*'
-        elif len(typ) == 2 and typ[0] == list:
-            typ = typ[1]
+        elif type == "toggle":
+            if not default:
+                action = 'store_true'
+            else:
+                action = 'store_false'
+            self.cmd_ln_args.add_argument(nickname, name,
+                dest=dest,
+                action=action,
+                default=default,
+                help=help)
+            return
+        elif len(type) == 2 and type[0] == list:
+            type = type[1]
             nargs = '*'
         else:
             raise NotImplementedError("CLIO does not know how to generate type '%s'"\
-                 % typ)
+                 % type)
         self.cmd_ln_args.add_argument(nickname, name, 
                 dest=dest,
-                action='store',
+                action=action,
                 nargs=nargs,
                 required=required,
-                type=typ,
+                type=type,
                 metavar=dest[0:1].upper(),
                 default=default,
                 help=help)

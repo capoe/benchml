@@ -34,6 +34,20 @@ class Ridge(SklearnTransform):
         y = self.params().get("model").predict(inputs["X"])
         self.stream().put("y", y)
 
+class GradientBoosting(SklearnTransform):
+    allow_stream = {"y"}
+    allow_params = {"model"}
+    req_inputs = {"X", "y"}
+    def _fit(self, inputs):
+        model = sklearn.ensemble.GradientBoostingRegressor()
+        model.fit(inputs["X"], inputs["y"])
+        y_pred = model.predict(inputs["X"])
+        self.params().put("model", model)
+        self.stream().put("y", y_pred)
+    def _map(self, inputs):
+        y_pred = self.params().get("model").predict(inputs["X"])
+        self.stream().put("y", y_pred)
+
 class RandomForestRegressor(SklearnTransform):
     default_args = dict(
         n_estimators=100, 
@@ -66,7 +80,6 @@ class RandomForestRegressor(SklearnTransform):
     def _map(self, inputs):
         y_pred = self.params().get("model").predict(inputs["X"])
         self.stream().put("y", y_pred)
-
 
 class KernelRidge(SklearnTransform):
     req_args = ('alpha',)

@@ -5,6 +5,21 @@ import benchml
 from benchml.transforms import *
 log = benchml.log
 
+def load_models_and_dataset(args):
+    log >> 'mkdir -p %s' % args.output_folder
+    log << "Load dataset" << log.flush
+    dataset = list(benchml.data.DatasetIterator(meta_json=args.meta))
+    log << "... done" << log.endl
+    log << "Compile models" << log.endl
+    models = benchml.models.compile(args.models)
+    for model in models:
+        if not model.check_available():
+            raise RuntimeError("Model '%s' requested but not available" % model.tag)
+    for m in models:
+        log << "-" << m.tag << log.endl
+    if args.configure != "": configure_models(models, args.configure)
+    return models, dataset
+
 def train_models(models, dataset, args):
     for model in models:
         with benchml.sopen(model, dataset) as stream:
@@ -37,60 +52,10 @@ def configure_models(models, configure_json_str):
                 log << "-" << "Setting %s.%s = %s" % (tf, field, val) << log.endl
                 m[tf].args[field] = val
 
-def rank(benchmark):
-    def read_splits(splits):
-        for split in splits:
-            props = { k: v for kv in split.split(";") for k, v in [ kv.split("=") ] }
-            props["id"] = split
-            yield props
-    models = []
-    P = []
-    P_std = []
-    S = []
-    metrics = None
-    for record in benchmark:
-        splits = filter(lambda s: s["perf"] == "test", read_splits(record["splits"]))
-        for split in splits:
-            models.append(record["model"])
-            perf = record["performance"][split["id"]]
-            keys = sorted(perf.keys())
-            metrics = list(filter(lambda k: not k.endswith('_std'), keys))
-            std = list(filter(lambda k: k.endswith('_std'), keys))
-            p = [ perf[key] for key in metrics ]
-            p_std = [ perf[key] for key in std ]
-            s = [ (+1 if benchml.Accumulator.select_best[key] == "smallest" else -1) for key in metrics ]
-            P.append(p)
-            P_std.append(p_std)
-            S.append(s)
-    P = np.array(P)
-    P_std = np.array(P_std)
-    S = np.array(S)
-    P = P*S
-    R = np.zeros_like(P)
-    for i in range(P.shape[0]):
-        for j in range(P.shape[1]):
-            rank = np.searchsorted(np.sort(P[:,j]), P[i,j])
-            R[i,j] = rank
-    R = R + 1.
-    rank = np.mean(R, axis=1)
-    order = np.argsort(rank)
-    P = P*S
-    log << "%-20s" % "Model" << log.flush
-    log << "Rank" << log.flush
-    for i in range(len(metrics)):
-        log << "| %-18s" % metrics[i] << log.flush
-    log << log.endl
-    log << "-"*(20+4+20*len(metrics)) << log.endl
-    for o in order:
-        log << "%-20s %1.2f" % (models[o], rank[o]) << log.flush
-        for i in range(len(metrics)):
-            log << "| %+1.4f +- %+1.4f" % (P[o, i], P_std[o,i]) << log.flush
-        log << log.endl
-
 def run(args):
-    if args.mode == "rank_only":
+    if args.mode == "analyse":
         bench = json.load(open(args.benchmark_json))
-        rank(bench)
+        benchml.analysis.analyse(bench)
         return
     if args.mode == "map":
         assert args.extxyz != ""
@@ -108,19 +73,9 @@ def run(args):
                 out[key] = out[key].tolist()
             log << json.dumps(out) << log.endl
         return
-
-    log >> 'mkdir -p %s' % args.output_folder
-    log << "Load dataset" << log.flush
-    dataset = list(benchml.data.DatasetIterator(meta_json=args.meta))
-    log << "... done" << log.endl
-    log << "Compile models" << log.endl
-    models = benchml.models.compile(args.models)
-    for m in models:
-        log << "-" << m.tag << log.endl
-    if args.configure != "": configure_models(models, args.configure)
-
     benchml.splits.synchronize(args.seed)
     if args.mode == "benchmark":
+        models, dataset = load_models_and_dataset(args)
         bench = benchml.benchmark.evaluate(
             data=dataset,
             models=models, 
@@ -129,13 +84,14 @@ def run(args):
             detailed=False)
         json.dump(bench, open(args.benchmark_json, "w"), indent=1, sort_keys=True)
     elif args.mode == "train":
+        models, dataset = load_models_and_dataset(args)
         for data in dataset:
             train_models(models, dataset[0], args)
             break
 
 if __name__ == "__main__":
     log.Connect()
-    log.AddArg("mode", str, help="Select from benchmark|fit|map|rank_only")
+    log.AddArg("mode", str, help="Select from benchmark|fit|map|analyse")
     log.AddArg("meta", str, default="meta.json", help="Input metadata file")
     log.AddArg("extxyz", str, default="", help="Input structure-file in ext-xyz format")
     log.AddArg("models", (list,str), default=[], help="List of predefined models for mode=benchmark,train")
@@ -145,5 +101,10 @@ if __name__ == "__main__":
     log.AddArg("benchmark_json", str, default="models/benchmark.json", help="Output json-file storing benchmark results")
     log.AddArg("configure", str, default="", help="Json string with name-value pairs for parameter overrides")
     log.AddArg("seed", int, default=971, help="RNG seed")
+    log.AddArg("use_ase", "toggle", default=False, help="Use ASE parse")
     args = log.Parse()
+    if args.use_ase:
+        benchml.readwrite.configure(use_ase=args.use_ase)    
+    if not args.mode in {"benchmark", "fit", "map", "analyse"}:
+        raise ValueError("Unknown mode '%s'" % args.mode)
     run(args)

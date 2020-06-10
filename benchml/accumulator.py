@@ -24,13 +24,13 @@ def metric_auc(yp, yt):
 def metric_r2(yp, yt):
     return sklearn.metrics.r2_score(yt, yp)
 
-
 class Accumulator(object):
     eval_map = {
         "mae": metric_mae,
         "mse": metric_mse,
         "rmse": metric_rmse,
         "rhop": metric_rhop,
+        "rhor": metric_rhor,
         "auc":  metric_auc,
         "r2": metric_r2
     }
@@ -39,6 +39,7 @@ class Accumulator(object):
         "mse": 'smallest',
         "rmse": 'smallest',
         "rhop": 'largest',
+        "rhor": 'largest',
         "auc":  'largest',
         "r2": 'largest'
     }

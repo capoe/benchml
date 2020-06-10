@@ -138,7 +138,29 @@ def compile_dscribe(**kwargs):
                 Hyper({ "predictor.alpha": np.logspace(-5,+5, 7), })),
             broadcast={"meta": "input.meta"},
             outputs={ "y": "predictor.y" }) \
-        for DescriptorClass in [ DscribeSineMatrix, DscribeCM, DscribeSineMatrix, DscribeACSF, DscribeMBTR, DscribeLMBTR ]
+        for DescriptorClass in [ DscribeCM, DscribeACSF, DscribeMBTR, DscribeLMBTR ]
+    ]
+
+def compile_dscribe_periodic(**kwargs):
+    return [
+        Module(
+            tag=DescriptorClass.__name__+"_ridge",
+            transforms=[
+                ExtXyzInput(tag="input"),
+                DescriptorClass(
+                    tag="descriptor",
+                    inputs={"configs": "input.configs"}),
+                ReduceMatrix(
+                    tag="reduce",
+                    inputs={"X": "descriptor.X"}),
+                Ridge(
+                    tag="predictor",
+                    inputs={"X": "reduce.X", "y": "input.y"}) ],
+            hyper=GridHyper(
+                Hyper({ "predictor.alpha": np.logspace(-5,+5, 7), })),
+            broadcast={"meta": "input.meta"},
+            outputs={ "y": "predictor.y" }) \
+        for DescriptorClass in [ DscribeSineMatrix ]
     ]
 
 def compile_asap(**kwargs):
@@ -198,6 +220,7 @@ def compile_morgan(**kwargs):
                 ExtXyzInput(tag="input"),
                 MorganFP(
                     tag="desc",
+                    args={"length": 4096, "radius": 2},
                     inputs={"configs": "input.configs"}),
                 KernelDot(
                     tag="kern",
@@ -207,8 +230,17 @@ def compile_morgan(**kwargs):
                     inputs={"K": "kern.K", "y": "input.y"})
             ],
             hyper=GridHyper(
-                Hyper({ "KernelRidge.alpha": np.logspace(-3,+1, 5), }),
+                Hyper({ "desc.radius": [ 1, 2, 3, 4] }),
+                Hyper({ "KernelRidge.alpha": np.logspace(-5,+1, 7), }),
                 Hyper({ "KernelRidge.power": [ 2. ] })),
+            # >>> hyper=BayesianHyper(
+            # >>>     Hyper({ "KernelRidge.alpha": np.linspace(-3,+1, 5), }),
+            # >>>     Hyper({ "KernelRidge.power": [ 1., 4. ] }),
+            # >>>     n_iter=40,
+            # >>>     init_points=10,
+            # >>>     convert={
+            # >>>         "KernelRidge.alpha": "lambda p: 10**p"
+            # >>>     }),
             broadcast={ "meta": "input.meta" },
             outputs={ "y": "KernelRidge.y" }
         ),
@@ -226,6 +258,20 @@ def compile_morgan(**kwargs):
                 convert={
                     "Ridge.alpha": "lambda p: 10**p"}),
             outputs={"y": "Ridge.y"}
+        ),
+        Module(
+            tag="morgan_gb",
+            transforms=[
+                ExtXyzInput(tag="input"),
+                MorganFP(
+                    args={"length": 2048},
+                    inputs={"configs": "input.configs"}),
+                GradientBoosting(inputs={"X": "MorganFP.X", "y": "input.y"})
+            ],
+            hyper=GridHyper(
+                Hyper({"GradientBoosting.max_depth": [1,3,5]})
+            ),
+            outputs={"y": "GradientBoosting.y"}
         ),
     ]
 
@@ -283,6 +329,7 @@ def register_all():
     return {
         "asap": compile_asap,
         "dscribe": compile_dscribe,
+        "dscribe_periodic": compile_dscribe_periodic,
         "ecfp": compile_morgan,
         "gylm": compile_gylm,
         "gylm_match": compile_gylm_match,

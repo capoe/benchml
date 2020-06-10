@@ -5,7 +5,7 @@
      "pactivity": {
          "task": "regression",
          "scaling": "extensive",
-         "metrics": [ "mae", "r2" ],
+         "metrics": [ "mae", "r2", "rhop", "rmse", "rhor" ],
          "per_atom": false
      }
  },

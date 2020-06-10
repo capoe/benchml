@@ -409,6 +409,8 @@ class Module(Transform):
                 for sub in t: self.append(sub)
             else: self.append(t)
         self.updateDependencies()
+    def check_available(self):
+        return np.array([ tf.__class__.check_available() for tf in self.transforms ]).all()
     # Transforms
     def __getitem__(self, tag):
         return self.map_transforms[tag]
