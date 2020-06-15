@@ -7,30 +7,6 @@ import csv
 log = benchml.log
 log >> 'mkdir -p tmp'
 
-def csv_to_xyz(csv_file, xyz_file, args):
-    log << log.mg << "Converting csv to extxyz format" << log.endl
-    reader = csv.DictReader(open(csv_file))
-    data = [ row for row in reader ]
-    smiles = [ row[args.smiles] for row in data ]
-    configs = smiles_to_xyz(smiles, args.corina, args.babel)
-    assert len(configs) == len(data)
-    for config, meta in zip(configs, data):
-        config.info = meta
-    log << "Writing structures to" << xyz_file << log.endl
-    benchml.write(xyz_file, configs)
-    return configs
-
-def smiles_to_xyz(smiles, corina, babel):
-    log >> 'rm -f tmp/tmp.smi tmp/tmp.xyz tmp/tmp.sdf'
-    with open('tmp/tmp.smi', 'w') as ofs:
-        for s in smiles: ofs.write('%s\n' % s)
-    log >> '%s -d wh -i t=smiles tmp/tmp.smi tmp/tmp.sdf' % corina
-    log >> '%s -isdf tmp/tmp.sdf -oxyz tmp/tmp.xyz' % babel
-    configs = benchml.read('tmp/tmp.xyz')
-    assert len(configs) == len(smiles)
-    log >> 'rm -f tmp/tmp.smi tmp/tmp.xyz tmp/tmp.sdf'
-    return configs
-
 def prompt(mssg, options=[], default=None, convert=str):
     prompt_str = "%-20s" % (mssg+":")
     if default is not None:
@@ -93,6 +69,9 @@ def write_meta(configs, extxyz, meta_json):
     for config in configs:
         elements = elements.union(set(list(config.symbols)))
     elements = sorted(list(elements))
+    elements_add = prompt("Add chemical elements",
+        default=elements, convert=lambda s: s.split())
+    elements = sorted(list(set(elements).union(set(elements_add))))
     has_smiles = True if ("smiles" in fields or "SMILES" in fields) else False
     periodic = True if ("cell" in fields or "lattice" in fields) else False
     datasets = [ extxyz ]
@@ -126,16 +105,9 @@ def write_meta(configs, extxyz, meta_json):
 if __name__ == "__main__":
     log.Connect()
     log.AddArg("extxyz", str)
-    log.AddArg("meta_json", str, default="")
-    log.AddArg("from_csv", str, default="")
-    log.AddArg("smiles", str, default="SMILES")
-    log.AddArg("corina", str, default='/software/corina/bin/corina')
-    log.AddArg("babel", str, default='/software/babel/bin/babel')
+    log.AddArg("meta", str)
     args = log.Parse()
 
-    if args.from_csv != "":
-        csv_to_xyz(args.from_csv, args.extxyz, args)
-    if args.meta_json != "":
-        configs = benchml.read(args.extxyz)
-        write_meta(configs, args.extxyz, args.meta_json)
+    configs = benchml.read(args.extxyz)
+    write_meta(configs, args.extxyz, args.meta)
     

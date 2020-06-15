@@ -6,7 +6,6 @@ from benchml.transforms import *
 log = benchml.log
 
 def load_models_and_dataset(args):
-    log >> 'mkdir -p %s' % args.output_folder
     log << "Load dataset" << log.flush
     dataset = list(benchml.data.DatasetIterator(meta_json=args.meta))
     log << "... done" << log.endl
@@ -35,7 +34,9 @@ def train_models(models, dataset, args):
                     log=benchml.log)
             else:
                 model.fit(stream)
-        benchml.save(os.path.join(args.output_folder, model.tag+".arch"), model)
+        archfile = args.archfile.format(model=model.tag)
+        log >> 'mkdir -p %s' % os.path.dirname(archfile)
+        benchml.save(archfile, model)
     return model
 
 def configure_models(models, configure_json_str):
@@ -58,8 +59,8 @@ def run(args):
         benchml.analysis.analyse(bench)
         return
     if args.mode == "map":
-        assert args.extxyz != ""
-        assert args.archfile != ""
+        assert args.extxyz != "" # Require --extxyz input for mode=map
+        assert args.archfile != "{model}.arch" # Require --archfile input for mode=map
         configs = benchml.read(args.extxyz)
         model = benchml.load(args.archfile)
         with benchml.sopen(model, configs) as stream:
@@ -67,7 +68,7 @@ def run(args):
         if args.store_as != "":
             for idx, y in enumerate(out["y"]):
                 configs[idx].info[args.store_as] = y
-            benchml.write(args.extxyz[:-4]+"_mapped.xyz", configs)
+            benchml.write(args.extxyz, configs)
         else:
             for key in out.keys():
                 out[key] = out[key].tolist()
@@ -75,6 +76,8 @@ def run(args):
         return
     benchml.splits.synchronize(args.seed)
     if args.mode == "benchmark":
+        assert args.benchmark_json != "" # Require --benchmark_json for mode=benchmark
+        log >> 'mkdir -p %s' % os.path.dirname(args.benchmark_json)
         models, dataset = load_models_and_dataset(args)
         bench = benchml.benchmark.evaluate(
             data=dataset,
@@ -95,16 +98,15 @@ if __name__ == "__main__":
     log.AddArg("meta", str, default="meta.json", help="Input metadata file")
     log.AddArg("extxyz", str, default="", help="Input structure-file in ext-xyz format")
     log.AddArg("models", (list,str), default=[], help="List of predefined models for mode=benchmark,train")
-    log.AddArg("archfile", str, default="", help="Input model file used when mode=map")
-    log.AddArg("store_as", str, default="y", help="Key under which predictions are stored in ext-xyz file when mode=map")
-    log.AddArg("output_folder", str, default="models", help="Output folder for model arch-files")
-    log.AddArg("benchmark_json", str, default="models/benchmark.json", help="Output json-file storing benchmark results")
+    log.AddArg("archfile", str, default="{model}.arch", help="Input model file used when mode=map")
+    log.AddArg("store_as", str, default="", help="Key under which predictions are stored in ext-xyz file when mode=map")
+    log.AddArg("benchmark_json", str, default="", help="Output json-file storing benchmark results")
     log.AddArg("configure", str, default="", help="Json string with name-value pairs for parameter overrides")
     log.AddArg("seed", int, default=971, help="RNG seed")
     log.AddArg("use_ase", "toggle", default=False, help="Use ASE parse")
     args = log.Parse()
     if args.use_ase:
         benchml.readwrite.configure(use_ase=args.use_ase)    
-    if not args.mode in {"benchmark", "fit", "map", "analyse"}:
+    if not args.mode in {"benchmark", "train", "map", "analyse"}:
         raise ValueError("Unknown mode '%s'" % args.mode)
     run(args)
