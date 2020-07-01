@@ -35,7 +35,8 @@ def train_models(models, dataset, args):
             else:
                 model.fit(stream)
         archfile = args.archfile.format(model=model.tag)
-        log >> 'mkdir -p %s' % os.path.dirname(archfile)
+        if os.path.dirname(archfile) != '':
+            log >> 'mkdir -p %s' % os.path.dirname(archfile)
         benchml.save(archfile, model)
     return model
 
@@ -55,6 +56,7 @@ def configure_models(models, configure_json_str):
 
 def run(args):
     if args.mode == "analyse":
+        assert args.benchmark_json != "" # Require --benchmark_json for mode=analyse
         bench = json.load(open(args.benchmark_json))
         benchml.analysis.analyse(bench)
         return
@@ -77,7 +79,8 @@ def run(args):
     benchml.splits.synchronize(args.seed)
     if args.mode == "benchmark":
         assert args.benchmark_json != "" # Require --benchmark_json for mode=benchmark
-        log >> 'mkdir -p %s' % os.path.dirname(args.benchmark_json)
+        if os.path.dirname(args.benchmark_json):
+            log >> 'mkdir -p %s' % os.path.dirname(args.benchmark_json)
         models, dataset = load_models_and_dataset(args)
         bench = benchml.benchmark.evaluate(
             data=dataset,

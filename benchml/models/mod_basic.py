@@ -178,6 +178,32 @@ def compile_asap(**kwargs):
             })
     ]
 
+def compile_morgan_krr(**kwargs):
+    return [
+        Module(
+            tag="morgan_krr",
+            transforms=[
+                ExtXyzInput(tag="input"),
+                MorganFP(
+                    tag="desc",
+                    args={"length": 4096, "radius": 2, "normalize": True},
+                    inputs={"configs": "input.configs"}),
+                KernelDot(
+                    tag="kern",
+                    inputs={"X": "desc.X"}),
+                KernelRidge(
+                    args={"alpha": 1e-5, "power": 2},
+                    inputs={"K": "kern.K", "y": "input.y"})
+            ],
+            hyper=GridHyper(
+                Hyper({ "desc.radius": [ 2 ] }),
+                Hyper({ "KernelRidge.alpha": np.logspace(-6,+1, 8), }),
+                Hyper({ "KernelRidge.power": [ 2. ] })),
+            broadcast={ "meta": "input.meta" },
+            outputs={ "y": "KernelRidge.y" }
+        )
+    ]
+
 def compile_morgan(**kwargs):
     return [
         # Macro example
@@ -325,6 +351,33 @@ def compile_gylm(**kwargs):
         ),
     ]
 
+def compile_gylm_grid(**kwargs):
+    return [
+        Module(
+            tag="gylm_grid",
+            transforms=[
+                ExtXyzInput(tag="input"),
+                GylmAverage(
+                    tag="desc",
+                    inputs={"configs": "input.configs"}),
+                KernelDot(
+                    inputs={"X": "desc.X"}),
+                KernelRidge(
+                    args={"alpha": 1e-5, "power": 2},
+                    inputs={"K": "KernelDot.K", "y": "input.y"})
+            ],
+            hyper=GridHyper(
+                Hyper({ "KernelRidge.alpha": np.logspace(-5,+1, 7), }),
+                Hyper({ "KernelRidge.power": [ 2. ] }),
+                init_points=10,
+                n_iter=30,
+                convert={
+                    "KernelRidge.alpha": "lambda p: 10**p"}),
+            broadcast={ "meta": "input.meta" },
+            outputs={ "y": "KernelRidge.y" }
+        ),
+    ]
+
 def register_all():
     return {
         "asap": compile_asap,
@@ -333,7 +386,9 @@ def register_all():
         "ecfp": compile_morgan,
         "gylm": compile_gylm,
         "gylm_match": compile_gylm_match,
+        "gylm_grid": compile_gylm_grid,
         "morgan": compile_morgan,
+        "morgan_krr": compile_morgan_krr,
         "null": compile_null,
         "physchem": compile_physchem,
         "soap": compile_soap

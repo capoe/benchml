@@ -32,16 +32,47 @@ class KernelDot(Transform):
     allow_stream = {'K'}
     stream_kernel = ('K',)
     precompute = True
-    def __init__(self, **kwargs):
-        Transform.__init__(self, **kwargs)
     def evaluate(self, x1, x2=None):
         if x2 is None: x2 = x1
         return x1.dot(x2.T)**self.args["power"]
     def _fit(self, inputs):
         K = self.evaluate(inputs["X"])
+        print(K)
         self.params().put("X", np.copy(inputs["X"]))
         self.stream().put("K", K)
     def _map(self, inputs):
         K = self.evaluate(inputs["X"], self.params().get("X"))
         self.stream().put("K", K)
 
+class KernelGaussian(Transform):
+    default_args = {'scale': 1}
+    req_inputs = ('X',)
+    allow_params = {'X','sigma'}
+    allow_stream = {'K'}
+    stream_kernel = ('K',)
+    precompute = True
+    def evaluate(self, x1, x2=None, sigma=None):
+        x1s = x1/sigma
+        z1 = np.sum(x1s**2, axis=1)
+        if x2 is None:
+            x2s = x1s
+            z2 = z1
+        else:
+            x2s = x2/sigma
+            z2 = np.sum(x2s**2, axis=1)
+        zz = -0.5*np.add.outer(z1, z2)
+        xx = x1s.dot(x2s.T)
+        K = np.exp(zz+xx)
+        #print(K)
+        return K
+    def _fit(self, inputs):
+        X = inputs["X"]
+        sigma = self.args["scale"]*np.std(X, axis=0)
+        K = self.evaluate(x1=inputs["X"], sigma=sigma)
+        self.params().put("sigma", sigma)
+        self.params().put("X", np.copy(inputs["X"]))
+        self.stream().put("K", K)
+    def _map(self, inputs):
+        K = self.evaluate(x1=inputs["X"], x2=self.params().get("X"), 
+            sigma=self.params().get("sigma"))
+        self.stream().put("K", K)

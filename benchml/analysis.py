@@ -5,13 +5,14 @@ from .accumulator import Accumulator
 def read_split_props_single(split):
     props = { k: v for kv in split.split(";") for k, v in [ kv.split("=") ] }
     props["id"] = split
+    props["train:test"] = list(map(int, props["train:test"].split(":")))
     return props
 
 def read_split_props(splits):
     for split in splits:
         yield read_split_props_single(split)
 
-def analyse_section(split_this, benchmark_section):
+def analyse_section(split_this, benchmark_section, return_ordered=False):
     models = []
     P = []
     P_std = []
@@ -46,17 +47,33 @@ def analyse_section(split_this, benchmark_section):
     rank = np.mean(R, axis=1)
     order = np.argsort(rank)
     P = P*S
-    log << "    %-20s" % "Model" << log.flush
-    log << "Rank" << log.flush
+    log << "    %-30s" % "Model" << log.flush
+    log << "Rank " << log.flush
     for i in range(len(metrics)):
         log << "| %-18s" % metrics[i] << log.flush
     log << log.endl
     log << "   " << "-"*(20+5+21*len(metrics)) << log.endl
     for o in order:
-        log << "    %-20s %5.2f" % (models[o], rank[o]) << log.flush
+        log << "    %-30s %5.2f" % (models[o], rank[o]) << log.flush
         for i in range(len(metrics)):
             log << "| %+1.4f +- %+1.4f" % (P[o, i], P_std[o,i]) << log.flush
         log << log.endl
+    if return_ordered:
+        return {
+            "models": [models[o] for o in order],
+            "ranks": [rank[o] for o in order],
+            "metrics": metrics,
+            "mmatrix": P[order],
+            "mmatrix_std": P_std[order]
+        }
+    else:
+        return {
+            "models": models,
+            "ranks": rank,
+            "metrics": metrics,
+            "mmatrix": P,
+            "mmatrix_std": P_std
+        }
 
 def analyse(benchmark):
     sections = {}
@@ -68,8 +85,11 @@ def analyse(benchmark):
         log << log.mg << "Section:" << section_name << log.endl
         splits_section = sorted(list(set(
             [ s for r in benchmark_section for s in r["splits"] ])))
-        for split_name in splits_section:
-            split_this = read_split_props_single(split_name)
+        splits_section = list(map(read_split_props_single, splits_section))
+        splits_section = sorted(splits_section, key=lambda s: s["train:test"][0])
+        for split_this in splits_section:
+            if split_this["perf"] == "train": continue
             log << log.mg << "  Split:" << split_this << log.endl
-            analyse_section(split_this, benchmark_section)
+            ranking = analyse_section(split_this, benchmark_section)
+            yield {**split_this, **ranking}
 

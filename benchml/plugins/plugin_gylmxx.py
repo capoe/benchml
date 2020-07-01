@@ -163,7 +163,8 @@ def gylm_evaluate(
         reduce_molecular=None,
         norm_molecular=False,
         centres=None):
-    log = GylmTransform.log
+    #log = GylmTransform.log
+    log.verbose = True
     t0 = time.time()
     X = []
     for cidx, config in enumerate(configs):

@@ -19,6 +19,20 @@ class SklearnTransform(Transform):
     def check_available():
         return check_sklearn_available(SklearnTransform)
 
+class LinearRegression(SklearnTransform):
+    req_inputs = ('X', 'y')
+    allow_params = {'model'}
+    allow_stream = {'y'}
+    def _fit(self, inputs):
+        model = sklearn.linear_model.LinearRegression(**self.args)
+        model.fit(X=inputs["X"], y=inputs["y"])
+        yp = model.predict(inputs["X"])
+        self.params().put("model", model)
+        self.stream().put("y", yp)
+    def _map(self, inputs):
+        y = self.params().get("model").predict(inputs["X"])
+        self.stream().put("y", y)
+
 class Ridge(SklearnTransform):
     default_args = { 'alpha': 1. }
     req_inputs = ('X', 'y')

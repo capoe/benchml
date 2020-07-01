@@ -1,0 +1,43 @@
+#! /usr/bin/env python
+import os
+import numpy as np
+import json
+import benchml
+import glob
+log = benchml.log
+
+def validate_args(args):
+    return args
+
+def write_batch(meta, args):
+    metad = json.load(open(meta))
+    path = os.path.abspath(os.getcwd())
+    jobname = metad["name"]
+    cmd = args.cmd.format(
+        models=" ".join(args.models),
+        meta=meta,
+        jobname=jobname)
+    template = open(args.template).read()
+    template = template.format(
+       jobname=jobname,
+       path=path,
+       meta=meta,
+       nodes=args.nodes,
+       cmd=cmd)
+    qfile = os.path.join(args.output_folder, "q_%s.sh" % jobname)
+    with open(qfile, 'w') as q:
+        q.write(template)
+
+if __name__ == "__main__":
+    log.Connect()
+    log.AddArg("template", str)
+    log.AddArg("meta_regex", str)
+    log.AddArg("models", (list,str))
+    log.AddArg("cmd", str, default="bml --mode benchmark --meta {meta} --models {models} --benchmark_json {jobname}_benchmark.json")
+    log.AddArg("nodes", str, default="nodes=1:ppn=4")
+    log.AddArg("output_folder", str, default="batches")
+    args = validate_args(log.Parse())
+
+    metas = sorted(glob.glob(args.meta_regex))
+    for meta in metas:
+        write_batch(meta, args)

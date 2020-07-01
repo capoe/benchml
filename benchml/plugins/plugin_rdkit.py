@@ -1,5 +1,6 @@
 from ..kernels import KernelDot
 from ..pipeline import Transform, Macro
+from ..logger import log
 import numpy as np
 from .plugin_check import *
 
@@ -21,6 +22,7 @@ class MorganFP(Transform):
         self.length = self.args["length"]
         self.normalize = self.args["normalize"]
     def _map(self, inputs):
+        log << "Evaluate morgan ..." << log.endl
         configs = inputs["configs"]
         smiles = [ get_smiles(c) for c in configs ]
         mols = [ rchem.MolFromSmiles(s) for s in smiles ]

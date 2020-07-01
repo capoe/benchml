@@ -95,7 +95,11 @@ class Stream(object):
                 key, self.tf.tag))
         self.storage[key] = value
     def get(self, key):
-        return self.storage[key]
+        try:
+            return self.storage[key]
+        except KeyError:
+            raise KeyError("No such field '%s' in tf '%s'" % (
+                key, self.tf.tag))
     def resolve(self, addr):
         tf, field = addr.split(".")
         return self.tf.module[tf].stream(self.tag).get(field)
@@ -517,7 +521,7 @@ class Module(Transform):
                 print("    Setting {0:15s}.{1:10s} = {2}".format(
                     tf_tag, arg_name, val))
             self[tf_tag].args[arg_name] = val
-        self.hashState()
+        # >>> self.hashState() # Removed this
     def hyperEval(self,
             stream,
             updates,
@@ -545,7 +549,7 @@ class Module(Transform):
     def hyperfit(self, stream, log=None, **kwargs):
         if self.hyper is None:
             raise ValueError("<Module.hyperfit>: Hyper configuration is missing")
-        if log: log << "Hyperfit on stream" << stream.tag << log.endl
+        if log: log << "Hyperfit" << self.tag << "on stream" << stream.tag << log.endl
         updates = self.hyper.optimize(self, stream, log=log, **kwargs)
         self.hyperUpdate(updates)
         return self.fit(stream)

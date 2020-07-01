@@ -24,7 +24,6 @@ class Add(Transform):
     req_args = ('coeffs',)
     req_inputs = ('X',)
     allow_stream = {'y'}
-    precompute = True
     def _map(self, inputs):
         coeffs = self.args["coeffs"]
         assert len(coeffs) == len(inputs["X"])
@@ -32,6 +31,25 @@ class Add(Transform):
         for i in range(len(inputs["X"])):
             y = y + coeffs[i]*inputs["X"][i]
         self.stream().put("y", y)
+
+class Mult(Transform):
+    req_inputs = ('X',)
+    allow_stream = {'y'}
+    def _map(self, inputs):
+        y = np.ones_like(inputs["X"][0])
+        for i in range(len(inputs["X"])):
+            y = y*inputs["X"][i]
+        self.stream().put("y", y)
+
+class Delta(Transform):
+    allow_stream = {'y'}
+    req_inputs = {'target', 'ref'}
+    stream_samples = ("y",)
+    def _map(self, inputs):
+        self.stream().put("y", None)
+    def _fit(self, inputs):
+        delta = inputs["target"] - inputs["ref"]
+        self.stream().put("y", delta)
 
 class Concatenate(Transform):
     req_inputs = ('X',)
