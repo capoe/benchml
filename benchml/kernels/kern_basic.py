@@ -37,7 +37,6 @@ class KernelDot(Transform):
         return x1.dot(x2.T)**self.args["power"]
     def _fit(self, inputs):
         K = self.evaluate(inputs["X"])
-        print(K)
         self.params().put("X", np.copy(inputs["X"]))
         self.stream().put("K", K)
     def _map(self, inputs):
@@ -63,7 +62,6 @@ class KernelGaussian(Transform):
         zz = -0.5*np.add.outer(z1, z2)
         xx = x1s.dot(x2s.T)
         K = np.exp(zz+xx)
-        #print(K)
         return K
     def _fit(self, inputs):
         X = inputs["X"]

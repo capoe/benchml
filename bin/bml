@@ -10,7 +10,7 @@ def load_models_and_dataset(args):
     dataset = list(benchml.data.DatasetIterator(meta_json=args.meta))
     log << "... done" << log.endl
     log << "Compile models" << log.endl
-    models = benchml.models.compile(args.models)
+    models = benchml.models.compile_and_filter(args.models)
     for model in models:
         if not model.check_available():
             raise RuntimeError("Model '%s' requested but not available" % model.tag)
@@ -87,7 +87,7 @@ def run(args):
             models=models, 
             log=benchml.log, 
             verbose=False,
-            detailed=False)
+            detailed=True)
         json.dump(bench, open(args.benchmark_json, "w"), indent=1, sort_keys=True)
     elif args.mode == "train":
         models, dataset = load_models_and_dataset(args)

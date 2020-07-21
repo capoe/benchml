@@ -91,27 +91,29 @@ def make_soap_krr(tag):
         broadcast={"meta": "input.meta"},
         outputs={ "y": "predictor.y" })
 
-def compile_soap(**kwargs):
-    hyper = GridHyper(
-        Hyper({"descriptor.normalize": [ True ] }),
-        Hyper({"descriptor.mode": [ "minimal", "smart", "longrange" ] }),
-        Hyper({"descriptor.crossover": [ False, True ] }),
-        Hyper({"reduce.reduce_op": [ "sum", "mean" ]}),
-        Hyper({"reduce.normalize": [ True ]}),
-        Hyper({"reduce.reduce_by_type": [ False, True ]}),
-        Hyper({"whiten.centre": [ False, True ]}),
-        Hyper({"whiten.scale":  [ False, True ]}),
-        Hyper({"predictor.power": [ 2 ] }))
-    hyper = GridHyper(
-        Hyper({"descriptor.normalize": [ False ] }),
-        Hyper({"descriptor.mode": [ "minimal" ] }),
-        Hyper({"descriptor.crossover": [ True ] }),
-        Hyper({"reduce.reduce_op": [ "sum" ]}),
-        Hyper({"reduce.normalize": [ True ]}),
-        Hyper({"reduce.reduce_by_type": [ False ]}),
-        Hyper({"whiten.centre": [ False ]}),
-        Hyper({"whiten.scale":  [ False ]}),
-        Hyper({"predictor.power": [ 2 ] }))
+def compile_soap(basic=False, **kwargs):
+    if basic:
+        hyper = GridHyper(
+            Hyper({"descriptor.normalize": [ False ] }),
+            Hyper({"descriptor.mode": [ "minimal" ] }),
+            Hyper({"descriptor.crossover": [ True ] }),
+            Hyper({"reduce.reduce_op": [ "sum" ]}),
+            Hyper({"reduce.normalize": [ True ]}),
+            Hyper({"reduce.reduce_by_type": [ False ]}),
+            Hyper({"whiten.centre": [ False ]}),
+            Hyper({"whiten.scale":  [ False ]}),
+            Hyper({"predictor.power": [ 2 ] }))
+    else:
+        hyper = GridHyper(
+            Hyper({"descriptor.normalize": [ True ] }),
+            Hyper({"descriptor.mode": [ "minimal", "smart", "longrange" ] }),
+            Hyper({"descriptor.crossover": [ False, True ] }),
+            Hyper({"reduce.reduce_op": [ "mean" ]}),     # + "sum"
+            Hyper({"reduce.normalize": [ True ]}),
+            Hyper({"reduce.reduce_by_type": [ False ]}), # + True
+            Hyper({"whiten.centre": [ False ]}),         # + True
+            Hyper({"whiten.scale":  [ False ]}),         # + True
+            Hyper({"predictor.power": [ 2 ] }))
     models = []
     for hidx, updates in enumerate(hyper):
         model = make_soap_krr(tag="soap_krr_%02d" % hidx)
@@ -196,7 +198,6 @@ def compile_morgan_krr(**kwargs):
                     inputs={"K": "kern.K", "y": "input.y"})
             ],
             hyper=GridHyper(
-                Hyper({ "desc.radius": [ 2 ] }),
                 Hyper({ "KernelRidge.alpha": np.logspace(-6,+1, 8), }),
                 Hyper({ "KernelRidge.power": [ 2. ] })),
             broadcast={ "meta": "input.meta" },
@@ -241,7 +242,7 @@ def compile_morgan(**kwargs):
         # >>>     outputs={ "y": "KernelRidge.y" },
         # >>> ),
         Module(
-            tag="morgan_krr",
+            tag="morgan_krr_ext",
             transforms=[
                 ExtXyzInput(tag="input"),
                 MorganFP(
@@ -387,7 +388,6 @@ def register_all():
         "gylm": compile_gylm,
         "gylm_match": compile_gylm_match,
         "gylm_grid": compile_gylm_grid,
-        "morgan": compile_morgan,
         "morgan_krr": compile_morgan_krr,
         "null": compile_null,
         "physchem": compile_physchem,

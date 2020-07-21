@@ -48,10 +48,10 @@ class DatasetIterator(object):
 
 class Dataset(object):
     target_converter = {
-        "": (lambda y: y),
-        "log": (lambda y: np.log(y)),
-        "log10": (lambda y: np.log10(y)),
-        "plog": (lambda y: -np.log10(y)),
+        "": "lambda y: y",
+        "log": "lambda y: np.log(y)",
+        "log10": "lambda y: np.log10(y)",
+        "plog": "lambda y: -np.log10(y)",
     }
     def __init__(self, ext_xyz=None, meta=None, configs=None):
         self.configs = configs
@@ -65,7 +65,7 @@ class Dataset(object):
         self.meta = meta
         self.convert = self.target_converter[self.meta.pop("convert", "")]
         if meta is not None and "target" in meta:
-            self.y = self.convert(
+            self.y = eval(self.convert)(
                 np.array([ float(s.info[meta["target"]]) \
                     for s in self.configs ]))
         return

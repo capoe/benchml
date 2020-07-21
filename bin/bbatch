@@ -6,38 +6,62 @@ import benchml
 import glob
 log = benchml.log
 
+def create_jobname(meta, args):
+    jobname = meta["name"]+"."+"+".join(args.models)
+    jobname = "".join(filter(lambda c: c.isalnum() or c in "._+-", jobname))
+    return jobname
+
 def validate_args(args):
+    assert (len(args.meta) > 0) ^ (args.walk != "") # Specify _either_ --meta _or_ --walk
+    if args.walk != "":
+        paths = map(lambda sdf: sdf[0], filter(
+            lambda subdir_dirs_files: "meta.json" in subdir_dirs_files[2],
+                os.walk(args.walk)))
+        args.meta = list(map(lambda p: os.path.join(p, "meta.json"), paths))
     return args
 
-def write_batch(meta, args):
-    metad = json.load(open(meta))
+def write_batch(meta_json, args):
+    metadata = json.load(open(meta))
     path = os.path.abspath(os.getcwd())
-    jobname = metad["name"]
+    jobname = create_jobname(metadata, args)
     cmd = args.cmd.format(
-        models=" ".join(args.models),
-        meta=meta,
+        models=" ".join([ '"%s"' % m for m in args.models]),
+        meta=meta_json,
         jobname=jobname)
     template = open(args.template).read()
     template = template.format(
        jobname=jobname,
        path=path,
-       meta=meta,
+       meta=meta_json,
        nodes=args.nodes,
        cmd=cmd)
-    qfile = os.path.join(args.output_folder, "q_%s.sh" % jobname)
+    qfile = os.path.join(args.output_folder, "q%s.sh" % jobname)
+    log << " -" << qfile << log.endl
     with open(qfile, 'w') as q:
         q.write(template)
 
 if __name__ == "__main__":
     log.Connect()
     log.AddArg("template", str)
-    log.AddArg("meta_regex", str)
+    log.AddArg("meta", (list,str), default=[])
+    log.AddArg("walk", str, default="")
+    log.AddArg("atomize", "toggle", default=False)
     log.AddArg("models", (list,str))
-    log.AddArg("cmd", str, default="bml --mode benchmark --meta {meta} --models {models} --benchmark_json {jobname}_benchmark.json")
-    log.AddArg("nodes", str, default="nodes=1:ppn=4")
+    log.AddArg("collections", (list,str), default=[".*"])
+    log.AddArg("cmd", str, default="bml --mode benchmark --meta {meta} --models {models} --benchmark_json results/{jobname}_benchmark.json")
+    log.AddArg("nodes", str, default="nodes=1:ppn=1")
     log.AddArg("output_folder", str, default="batches")
     args = validate_args(log.Parse())
 
-    metas = sorted(glob.glob(args.meta_regex))
-    for meta in metas:
-        write_batch(meta, args)
+    if args.atomize:
+        models = benchml.models.compile_and_filter(
+            filter_collections=args.collections, 
+            filter_models=args.models)
+        log << "Writing batch-files" << log.endl
+        for meta in args.meta:
+            for m in models:
+                args.models = ["^%s$" % m.tag]
+                write_batch(meta, args)
+    else:
+        for meta in args.meta:
+            write_batch(meta, args)
