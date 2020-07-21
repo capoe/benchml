@@ -456,8 +456,9 @@ class Module(Transform):
     # Streams
     def open(self, data=None, **kwargs):
         return self.openStream(data=data, **kwargs)
-    def close(self, check=True):
-        self.clearStreams()
+    def close(self, clear_stream=True, check=True):
+        if clear_stream:
+            self.clearStreams()
         param_streams = { tf.params().tag for tf in self.transforms \
             if tf.params() is not None }
         if check and len(param_streams) > 1:
@@ -493,18 +494,41 @@ class Module(Transform):
         return self.inputStream()
     def inputStream(self):
         return self.transforms[0].stream()
+    def stream(self):
+        return self.inputStream()
     def get(self, addr):
         tf, field = addr.split(".")
         if field.startswith("_"):
             return self[tf].params().get(field[1:])
         else:
             return self[tf].stream().get(field)
+    def compileStream(self, typestr_only=False):
+        output = {}
+        def get_typestr(v):
+            if hasattr(v, "shape"):
+                return "<mat, %s>" % repr(v.shape)
+            elif isinstance(v, list):
+                t = ",".join(map(get_typestr, v))
+                return "<list, len=%d, %s>" % (len(v), t)
+            return str(type(v))
+        for tf in self.transforms:
+            for key, v in tf.stream().items():
+                type_str = get_typestr(v)
+                output["%s.%s" % (tf.tag, key)] = type_str \
+                    if typestr_only else [ v, type_str ]
+        return output
     def compileArgs(self):
         args = {}
         for tf in self.transforms:
             for key, v in tf.args.items():
                 args["%s.%s" % (tf.tag, key)] = v
         return args
+    def compileInputs(self):
+        inputs = {}
+        for tf in self.transforms:
+            for key, v in tf.inputs.items():
+                inputs["%s.%s" % (tf.tag, key)] = v
+        return inputs
     def resolveArgs(self):
         for tf in self.transforms: tf.resolveArgs()
     def resolveOutputs(self):
@@ -586,7 +610,7 @@ class Module(Transform):
         if verbose: print("Map '%s'" % stream.tag)
         self.activateStream(stream.tag)
         sweep = self.filter(endpoint=endpoint)
-        for tidx, t in enumerate(self.transforms):
+        for tidx, t in enumerate(sweep):
             if verbose: log << " ".join([" "*tidx, "Map", t.tag,
                 "using stream", stream.tag]) << log.flush
             t.map(stream.tag, verbose=verbose)
