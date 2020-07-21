@@ -1,5 +1,6 @@
 import json
 import copy
+import time
 from .accumulator import Accumulator
 from .splits import Split
 from .logger import log
@@ -34,6 +35,7 @@ def evaluate_model(dataset, model,
         "performance": {},
     }
     # Open and precompute
+    t_in = time.time()
     stream = model.open(dataset)
     model.precompute(stream)
     for split_args in dataset["splits"]:
@@ -82,11 +84,13 @@ def evaluate_model(dataset, model,
                     "pred": output_train["y"].tolist(), 
                     "true": stream_train.resolve("input.y").tolist()})
         model.close(check=False)
+    t_out = time.time()
     perf = accu.evaluateAll(
         metrics=dataset.meta["metrics"],
         bootstrap=100,
         log=log)
     record["performance"] = perf
+    record["walltime"] = float(t_out - t_in)
     return record
 
 def evaluate_ensemble(dataset, models, log, verbose=False, detailed=False):
