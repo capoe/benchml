@@ -48,7 +48,7 @@ if __name__ == "__main__":
     log.AddArg("atomize", "toggle", default=False)
     log.AddArg("models", (list,str))
     log.AddArg("collections", (list,str), default=[".*"])
-    log.AddArg("cmd", str, default="bml --mode benchmark --meta {meta} --models {models} --benchmark_json results/{jobname}_benchmark.json")
+    log.AddArg("cmd", str, default="bml --use_ase --mode benchmark --meta {meta} --models {models} --benchmark_json results/{jobname}_benchmark.json")
     log.AddArg("nodes", str, default="nodes=1:ppn=1")
     log.AddArg("output_folder", str, default="batches")
     args = validate_args(log.Parse())

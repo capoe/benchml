@@ -29,6 +29,7 @@ def evaluate_model(dataset, model,
         "model": model.tag,
         "splits": [],
         "hypers": {},
+        "slices": {},
         "output": {},
         "performance": {},
     }
@@ -38,6 +39,9 @@ def evaluate_model(dataset, model,
     for split_args in dataset["splits"]:
         # Evaluate splits
         for stream_train, stream_test in stream.split(**split_args):
+            train_id = make_split_id(dataset["splits"][0]["method"], "train", stream_train, stream_test)
+            test_id = make_split_id(dataset["splits"][0]["method"], "test", stream_train, stream_test)
+            log << "Evaluating %s|%s" % (train_id, test_id) << log.endl
             # Hyper fit
             if model.hyper is not None:
                 model.hyperfit(
@@ -53,8 +57,6 @@ def evaluate_model(dataset, model,
             # Evaluate
             output_train = model.map(stream_train)
             output_test = model.map(stream_test)
-            test_id = make_split_id(dataset["splits"][0]["method"], "test", stream_train, stream_test)
-            train_id = make_split_id(dataset["splits"][0]["method"], "train", stream_train, stream_test)
             accu.append(test_id, output_test["y"], stream_test.resolve("input.y"))
             accu.append(train_id, output_train["y"], stream_train.resolve("input.y"))
             # Log hyper args and output
@@ -63,12 +65,16 @@ def evaluate_model(dataset, model,
                 record["splits"].append(train_id)
                 record["hypers"][train_id] = []
                 record["hypers"][test_id] = []
+                record["slices"][train_id] = []
+                record["slices"][test_id] = []
                 record["output"][train_id] = []
                 record["output"][test_id] = []
             if detailed:
                 model_args = copy.deepcopy(model.compileArgs())
                 record["hypers"][train_id].append(model_args)
                 record["hypers"][test_id].append("@"+train_id)
+                record["slices"][train_id].append(stream_train.slice.tolist())
+                record["slices"][test_id].append(stream_test.slice.tolist())
                 record["output"][test_id].append({
                     "pred": output_test["y"].tolist(), 
                     "true": stream_test.resolve("input.y").tolist()})

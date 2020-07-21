@@ -7,9 +7,11 @@ def synchronize(seed):
     SEED = seed
 
 class SplitBase(object):
-    def __init__(self):
+    tag = "__none__"
+    def __init__(self, dset):
         self.step = 0
         self.n_reps = 0
+        self.n_samples = dset if (type(dset) is int) else len(dset)
     def isDone(self):
         return self.step >= self.n_reps
     def _next(self):
@@ -23,10 +25,9 @@ class SplitBase(object):
             yield self._next()
 
 class SplitJson(SplitBase):
+    tag = "json"
     def __init__(self, dset, **kwargs):
-        SplitBase.__init__(self)
-        self.tag = "json"
-        self.n_samples = dset if (type(dset) is int) else len(dset)
+        SplitBase.__init__(self, dset)
         self.splits = json.load(open(kwargs["json"]))
         self.n_reps = len(self.splits)
     def next(self):
@@ -34,10 +35,9 @@ class SplitJson(SplitBase):
         return info, self.splits[self.step]["train"], self.splits[self.step]["test"]
 
 class SplitLOO(SplitBase):
+    tag = "loo"
     def __init__(self, dset, **kwargs):
-        SplitBase.__init__(self)
-        self.tag = "loo"
-        self.n_samples = dset if (type(dset) is int) else len(dset)
+        SplitBase.__init__(self, dset)
         self.n_reps = dset if (type(dset) is int) else len(dset)
     def next(self):
         info = "%s_i%03d" % (self.tag, self.step)
@@ -46,9 +46,9 @@ class SplitLOO(SplitBase):
         return info, idcs_train, idcs_test
 
 class SplitMC(SplitBase):
+    tag = "random"
     def __init__(self, dset, **kwargs):
-        SplitBase.__init__(self)
-        self.n_samples = dset if (type(dset) is int) else len(dset)
+        SplitBase.__init__(self, dset)
         self.n_reps = kwargs["n_splits"]
         self.f_mccv = kwargs["train_fraction"]
         self.rng = np.random.RandomState(SEED)
@@ -61,10 +61,33 @@ class SplitMC(SplitBase):
         info = "%s_i%03d" % (self.tag, self.step)
         idcs = np.arange(self.n_samples)
         self.rng.shuffle(idcs)
-        idcs_train = idcs[0:self.n_train]
-        idcs_test = idcs[self.n_train:]
+        idcs_train = np.sort(idcs[0:self.n_train])
+        idcs_test = np.sort(idcs[self.n_train:])
         return info, idcs_train, idcs_test
 
+class SplitSequentialMC(SplitBase):
+    tag = "sequential"
+    def __init__(self, dset, **kwargs):
+        SplitBase.__init__(self, dset)
+        self.rng = np.random.RandomState(SEED)
+        self.f_train = eval(kwargs["train_fraction"])
+        self.repeat_fct = eval(kwargs["repeat_fraction_fct"])
+        self.n_train_sequence = []
+        for f in self.f_train:
+            n_train = int(f*self.n_samples)
+            n_test = self.n_samples - n_train
+            self.n_train_sequence.extend([n_train]*int(
+                self.repeat_fct(self.n_samples, n_train, n_test, f)))
+        self.n_reps = len(self.n_train_sequence)
+    def next(self):
+        info = "%s_i%03d" % (self.tag, self.step)
+        n_train = self.n_train_sequence[self.step]
+        idcs = np.arange(self.n_samples)
+        self.rng.shuffle(idcs)
+        idcs_train = np.sort(idcs[0:n_train])
+        idcs_test = np.sort(idcs[n_train:])
+        return info, idcs_train, idcs_test
+            
 def Split(dset, **kwargs):
     return split_generators[kwargs["method"]](dset, **kwargs)
 
@@ -72,5 +95,6 @@ split_generators = {
   "loo": SplitLOO,
   "mc": SplitMC,
   "json": SplitJson,
-  "random": SplitMC
+  "random": SplitMC,
+  "sequential": SplitSequentialMC,
 }
