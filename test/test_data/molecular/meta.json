@@ -11,6 +11,13 @@
  },
  "splits": [ {"method": "random", "n_splits": 2, "train_fraction": 0.7 } ],
  "elements": [ "C", "N", "O", "S", "H", "F", "Cl", "Br", "I", "P", "B", "Si" ],
+ "override": {
+    "Physchem2D.select": [
+        "tpsa", "mollogp", "n_hacc", "h_hdon"
+    ],
+    "PhyschemUser.fields": [
+    ]
+ },
  "has_smiles": true,
  "periodic": false,
  "datasets": [
