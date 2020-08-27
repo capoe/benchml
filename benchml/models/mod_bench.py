@@ -2,28 +2,221 @@ import numpy as np
 from ..transforms import *
 
 def compile_physchem(custom_fields=[], with_hyper=False, **kwargs):
-    return [
-        Module(
-            tag="bmol_physchem",
-            transforms=[
-                ExtXyzInput(tag="input"),
-                Physchem2D(tag="Physchem2D",
-                    inputs={"configs": "input.configs"}),
-                PhyschemUser(tag="PhyschemUser",
-                    args={
-                        "fields": custom_fields
-                    },
-                    inputs={"configs": "input.configs"}),
-                Concatenate(tag="desc",
-                    inputs={"X": [ "Physchem2D.X", "PhyschemUser.X" ]}),
-                RandomForestRegressor(tag="pred",
-                    inputs={"X": "desc.X", "y": "input.y"})
-            ],
-            hyper=GridHyper(
-                Hyper({"pred.max_depth": [None]})),
-            broadcast={"meta": "input.meta"},
-            outputs={"y": "pred.y"}),
-    ]
+    models = []
+    for descriptor_set in ["basic", "core", "logp", "extended"]:
+        models.extend([
+            Module(
+                tag="bmol_physchem_%s_rf" % descriptor_set,
+                transforms=[
+                    ExtXyzInput(tag="input"),
+                    Physchem2D(tag="Physchem2D",
+                        args={"select_predef": descriptor_set},
+                        inputs={"configs": "input.configs"}),
+                    PhyschemUser(tag="PhyschemUser",
+                        args={
+                            "fields": custom_fields
+                        },
+                        inputs={"configs": "input.configs"}),
+                    Concatenate(tag="desc",
+                        inputs={"X": [ "Physchem2D.X", "PhyschemUser.X" ]}),
+                    RandomForestRegressor(tag="pred",
+                        inputs={"X": "desc.X", "y": "input.y"})
+                ],
+                hyper=GridHyper(
+                    Hyper({"pred.max_depth": [None]})),
+                broadcast={"meta": "input.meta"},
+                outputs={"y": "pred.y"}),
+            Module(
+                tag="bmol_physchem_%s_rr" % descriptor_set,
+                transforms=[
+                    ExtXyzInput(tag="input"),
+                    Physchem2D(tag="Physchem2D",
+                        args={"select_predef": descriptor_set},
+                        inputs={"configs": "input.configs"}),
+                    PhyschemUser(tag="PhyschemUser",
+                        args={
+                            "fields": custom_fields
+                        },
+                        inputs={"configs": "input.configs"}),
+                    Concatenate(tag="desc",
+                        inputs={"X": [ "Physchem2D.X", "PhyschemUser.X" ]}),
+                    WhitenMatrix(tag="whiten",
+                        inputs={"X": "desc.X"}),
+                    Ridge(tag="pred",
+                        args={"alpha": None},
+                        inputs={"X": "desc.X", "y": "input.y"})
+                ],
+                hyper=GridHyper(
+                    Hyper({ "pred.alpha": np.logspace(-5,+5, 7), })),
+                broadcast={"meta": "input.meta"},
+                outputs={"y": "pred.y"}),
+        ])
+    return models
+
+def compile_acsf(adjust_to_species=["C", "N", "O"], *args, **kwargs):
+    models = []
+    for scalerange, scale in zip(
+        [ 1.0, 1.2, 1.8 ],
+        [ "minimal", "smart", "longrange" ]):
+        models.extend([
+            Module(
+                tag="bmol_acsf_%s_rr" % scale,
+                transforms=[
+                    ExtXyzInput(tag="input"),
+                    UniversalDscribeACSF(
+                        tag="descriptor",
+                        args={
+                            "adjust_to_species": adjust_to_species,
+                            "scalerange": scalerange},
+                        inputs={"configs": "input.configs"}),
+                    ReduceMatrix(
+                        tag="reduce",
+                        inputs={"X": "descriptor.X"}),
+                    WhitenMatrix(
+                        tag="whiten",
+                        inputs={
+                            "X": "reduce.X"
+                        }),
+                    Ridge(
+                        tag="predictor",
+                        inputs={"X": "reduce.X", "y": "input.y"}) ],
+                hyper=GridHyper(
+                    Hyper({ "predictor.alpha": np.logspace(-5,+5, 7), })),
+                broadcast={"meta": "input.meta"},
+                outputs={ "y": "predictor.y" }),
+            Module(
+                tag="bmol_acsf_%s_krr" % scale,
+                transforms=[
+                    ExtXyzInput(tag="input"),
+                    UniversalDscribeACSF(
+                        tag="descriptor",
+                        args={
+                            "adjust_to_species": adjust_to_species,
+                            "scalerange": scalerange},
+                        inputs={"configs": "input.configs"}),
+                    ReduceMatrix(
+                        tag="reduce",
+                        inputs={"X": "descriptor.X"}),
+                    KernelDot(
+                        tag="kernel",
+                        inputs={
+                            "X": "reduce.X"
+                        }),
+                    KernelRidge(
+                        tag="predictor",
+                        args={
+                            "alpha": None
+                        },
+                        inputs={
+                            "K": "kernel.K",
+                            "y": "input.y"
+                        }) ],
+                hyper=GridHyper(
+                    Hyper({ "predictor.alpha": np.logspace(-7, +7, 15), })),
+                broadcast={"meta": "input.meta"},
+                outputs={ "y": "predictor.y" })
+        ])
+    return models
+
+def compile_cm(*args, **kwargs):
+    models = []
+    for permutation in ["sorted_l2", "eigenspectrum"]:
+        models.extend([
+            Module(
+                tag="bmol_cm_%s_rr" % permutation,
+                transforms=[
+                    ExtXyzInput(tag="input"),
+                    DscribeCM(
+                        tag="descriptor",
+                        args={
+                            "permutation": permutation
+                        },
+                        inputs={"configs": "input.configs"}),
+                    ReduceMatrix(
+                        tag="reduce",
+                        inputs={"X": "descriptor.X"}),
+                    WhitenMatrix(
+                        tag="whiten",
+                        inputs={
+                            "X": "reduce.X"
+                        }),
+                    Ridge(
+                        tag="predictor",
+                        inputs={"X": "reduce.X", "y": "input.y"}) ],
+                hyper=GridHyper(
+                    Hyper({ "predictor.alpha": np.logspace(-5,+5, 7), })),
+                broadcast={"meta": "input.meta"},
+                outputs={ "y": "predictor.y" }),
+            Module(
+                tag="bmol_cm_%s_krr" % permutation,
+                transforms=[
+                    ExtXyzInput(tag="input"),
+                    DscribeCM(
+                        tag="descriptor",
+                        args={
+                            "permutation": permutation
+                        },
+                        inputs={"configs": "input.configs"}),
+                    ReduceMatrix(
+                        tag="reduce",
+                        inputs={"X": "descriptor.X"}),
+                    KernelDot(
+                        tag="kernel",
+                        inputs={
+                            "X": "reduce.X"
+                        }),
+                    KernelRidge(
+                        tag="predictor",
+                        args={
+                            "alpha": None
+                        },
+                        inputs={
+                            "K": "kernel.K",
+                            "y": "input.y"
+                        }) ],
+                hyper=GridHyper(
+                    Hyper({ "predictor.alpha": np.logspace(-7, +7, 15), })),
+                broadcast={"meta": "input.meta"},
+                outputs={ "y": "predictor.y" })
+        ])
+    return models
+
+def compile_soap(*args, **kwargs):
+    krr_hyper = GridHyper(
+        Hyper({"descriptor.normalize": [ False ] }),
+        Hyper({"descriptor.mode": [ "minimal", "smart", "longrange" ] }),
+        Hyper({"descriptor.crossover": [ False, True ] }),
+        Hyper({"reduce.reduce_op": [ "sum" ]}),
+        Hyper({"reduce.normalize": [ True ]}),
+        Hyper({"reduce.reduce_by_type": [ False ]}),
+        Hyper({"whiten.centre": [ False ]}),
+        Hyper({"whiten.scale":  [ False ]}),
+        Hyper({"predictor.power": [ 2 ] }))
+    rr_hyper = GridHyper(
+        Hyper({"descriptor.normalize": [ True ] }),
+        Hyper({"descriptor.mode": [ "minimal", "smart", "longrange" ] }),
+        Hyper({"descriptor.crossover": [ False, True ] }),
+        Hyper({"reduce.reduce_op": [ "mean" ]}),    
+        Hyper({"reduce.normalize": [ True ]}),
+        Hyper({"reduce.reduce_by_type": [ False ]}),
+        Hyper({"whiten.centre": [ True ]}),         
+        Hyper({"whiten.scale":  [ True ]}))         
+    models = []
+    for hidx, updates in enumerate(krr_hyper):
+        tag = "%s_%s" % (
+            updates["descriptor.mode"], 
+            "cross" if updates["descriptor.crossover"] else "nocross")
+        model = make_soap_krr(tag="bmol_soap_%s_krr" % tag)
+        model.hyperUpdate(updates)
+        models.append(model)
+    for hidx, updates in enumerate(rr_hyper):
+        tag = "%s_%s" % (
+            updates["descriptor.mode"], 
+            "cross" if updates["descriptor.crossover"] else "nocross")
+        model = make_soap_krr(tag="bmol_soap_%s_rr" % tag)
+        model.hyperUpdate(updates)
+        models.append(model)
+    return models
 
 def make_soap_krr(tag):
     return Module(
@@ -67,37 +260,7 @@ def make_soap_krr(tag):
         broadcast={"meta": "input.meta"},
         outputs={ "y": "predictor.y" })
 
-def compile_soap_krr(basic=False, **kwargs):
-    if basic:
-        hyper = GridHyper(
-            Hyper({"descriptor.normalize": [ False ] }),
-            Hyper({"descriptor.mode": [ "minimal" ] }),
-            Hyper({"descriptor.crossover": [ True ] }),
-            Hyper({"reduce.reduce_op": [ "sum" ]}),
-            Hyper({"reduce.normalize": [ True ]}),
-            Hyper({"reduce.reduce_by_type": [ False ]}),
-            Hyper({"whiten.centre": [ False ]}),
-            Hyper({"whiten.scale":  [ False ]}),
-            Hyper({"predictor.power": [ 2 ] }))
-    else:
-        hyper = GridHyper(
-            Hyper({"descriptor.normalize": [ True ] }),
-            Hyper({"descriptor.mode": [ "minimal", "smart", "longrange" ] }),
-            Hyper({"descriptor.crossover": [ False, True ] }),
-            Hyper({"reduce.reduce_op": [ "mean" ]}),     # + "sum"
-            Hyper({"reduce.normalize": [ True ]}),
-            Hyper({"reduce.reduce_by_type": [ False ]}), # + True
-            Hyper({"whiten.centre": [ False ]}),         # + True
-            Hyper({"whiten.scale":  [ False ]}),         # + True
-            Hyper({"predictor.power": [ 2 ] }))
-    models = []
-    for hidx, updates in enumerate(hyper):
-        model = make_soap_krr(tag="bmol_soap_krr_%02d" % hidx)
-        model.hyperUpdate(updates)
-        models.append(model)
-    return models
-
-def make_soap_ridge(tag):
+def make_soap_rr(tag):
     return Module(
         tag=tag,
         transforms=[
@@ -127,34 +290,6 @@ def make_soap_ridge(tag):
         broadcast={"meta": "input.meta"},
         outputs={ "y": "predictor.y" })
 
-def compile_soap_rr(basic=False, **kwargs):
-    if basic:
-        hyper = GridHyper(
-            Hyper({"descriptor.normalize": [ False ] }),
-            Hyper({"descriptor.mode": [ "minimal" ] }),
-            Hyper({"descriptor.crossover": [ True ] }),
-            Hyper({"reduce.reduce_op": [ "sum" ]}),
-            Hyper({"reduce.normalize": [ True ]}),
-            Hyper({"reduce.reduce_by_type": [ False ]}),
-            Hyper({"whiten.centre": [ False ]}),
-            Hyper({"whiten.scale":  [ False ]}))
-    else:
-        hyper = GridHyper(
-            Hyper({"descriptor.normalize": [ True ] }),
-            Hyper({"descriptor.mode": [ "minimal", "smart", "longrange" ] }),
-            Hyper({"descriptor.crossover": [ False, True ] }),
-            Hyper({"reduce.reduce_op": [ "mean" ]}),     # + "sum"
-            Hyper({"reduce.normalize": [ True ]}),
-            Hyper({"reduce.reduce_by_type": [ False ]}), # + True
-            Hyper({"whiten.centre": [ False ]}),         # + True
-            Hyper({"whiten.scale":  [ False ]}))         # + True
-    models = []
-    for hidx, updates in enumerate(hyper):
-        model = make_soap_krr(tag="bmol_soap_rr_%02d" % hidx)
-        model.hyperUpdate(updates)
-        models.append(model)
-    return models
-
 def compile_dscribe(**kwargs):
     return [
         Module(
@@ -174,10 +309,72 @@ def compile_dscribe(**kwargs):
                 Hyper({ "predictor.alpha": np.logspace(-5,+5, 7), })),
             broadcast={"meta": "input.meta"},
             outputs={ "y": "predictor.y" }) \
-        for DescriptorClass in [ DscribeCM, DscribeACSF, DscribeMBTR, DscribeLMBTR ]
+        for DescriptorClass in [ DscribeMBTR, DscribeLMBTR ]
     ]
 
-def compile_ecfp_krr(**kwargs):
+def compile_mbtr(**kwargs):
+    models = []
+    for _ in ["default"]:
+        models.extend([
+            Module(
+                tag="bmol_mbtr_rr",
+                transforms=[
+                    ExtXyzInput(tag="input"),
+                    DscribeMBTR(
+                        tag="descriptor",
+                        args={
+                        },
+                        inputs={"configs": "input.configs"}),
+                    ReduceMatrix(
+                        tag="reduce",
+                        inputs={"X": "descriptor.X"}),
+                    WhitenMatrix(
+                        tag="whiten",
+                        inputs={
+                            "X": "reduce.X"
+                        }),
+                    Ridge(
+                        tag="predictor",
+                        inputs={"X": "reduce.X", "y": "input.y"}) ],
+                hyper=GridHyper(
+                    Hyper({ "predictor.alpha": np.logspace(-5,+5, 7), })),
+                broadcast={"meta": "input.meta"},
+                outputs={ "y": "predictor.y" }),
+            Module(
+                tag="bmol_mbtr_krr",
+                transforms=[
+                    ExtXyzInput(tag="input"),
+                    DscribeMBTR(
+                        tag="descriptor",
+                        args={
+                        },
+                        inputs={"configs": "input.configs"}),
+                    ReduceMatrix(
+                        tag="reduce",
+                        inputs={"X": "descriptor.X"}),
+                    KernelDot(
+                        tag="kernel",
+                        inputs={
+                            "X": "reduce.X"
+                        }),
+                    KernelRidge(
+                        tag="predictor",
+                        args={
+                            "alpha": None
+                        },
+                        inputs={
+                            "K": "kernel.K",
+                            "y": "input.y"
+                        }) ],
+                hyper=GridHyper(
+                    Hyper({ "predictor.alpha": np.logspace(-7, +7, 15), })),
+                broadcast={"meta": "input.meta"},
+                outputs={ "y": "predictor.y" })
+        ])
+    return models
+    
+
+def compile_ecfp(**kwargs):
     return [
         Module(
             tag="bmol_ecfp_krr",
@@ -199,11 +396,7 @@ def compile_ecfp_krr(**kwargs):
                 Hyper({ "KernelRidge.power": [ 2. ] })),
             broadcast={ "meta": "input.meta" },
             outputs={ "y": "KernelRidge.y" }
-        )
-    ]
-
-def compile_ecfp_rr(**kwargs):
-    return [
+        ),
         Module(
             tag="bmol_ecfp_rr",
             transforms=[
@@ -214,17 +407,36 @@ def compile_ecfp_rr(**kwargs):
                 Ridge(inputs={"X": "MorganFP.X", "y": "input.y"})
             ],
             hyper=BayesianHyper(
-                Hyper({"Ridge.alpha": np.linspace(-2,2,5)}),
+                Hyper({"Ridge.alpha": np.linspace(-5,5,7)}),
                 convert={
                     "Ridge.alpha": "lambda p: 10**p"}),
             outputs={"y": "Ridge.y"}
         )
     ]
 
-def compile_gylm_bay(**kwargs):
+def compile_gylm(**kwargs):
     return [
         Module(
-            tag="bmol_gylm_bay_krr",
+            tag="bmol_gylm_grid_krr",
+            transforms=[
+                ExtXyzInput(tag="input"),
+                GylmAverage(
+                    tag="desc",
+                    inputs={"configs": "input.configs"}),
+                KernelDot(
+                    inputs={"X": "desc.X"}),
+                KernelRidge(
+                    args={"alpha": 1e-5, "power": 2},
+                    inputs={"K": "KernelDot.K", "y": "input.y"})
+            ],
+            hyper=GridHyper(
+                Hyper({ "KernelRidge.alpha": np.logspace(-5,+1, 7), }),
+                Hyper({ "KernelRidge.power": [ 2. ] })),
+            broadcast={ "meta": "input.meta" },
+            outputs={ "y": "KernelRidge.y" }
+        ),
+        Module(
+            tag="bmol_gylm_bayes_krr",
             transforms=[
                 ExtXyzInput(tag="input"),
                 GylmAverage(
@@ -248,41 +460,13 @@ def compile_gylm_bay(**kwargs):
         ),
     ]
 
-def compile_gylm_grid(**kwargs):
-    return [
-        Module(
-            tag="bmol_gylm_grid_krr",
-            transforms=[
-                ExtXyzInput(tag="input"),
-                GylmAverage(
-                    tag="desc",
-                    inputs={"configs": "input.configs"}),
-                KernelDot(
-                    inputs={"X": "desc.X"}),
-                KernelRidge(
-                    args={"alpha": 1e-5, "power": 2},
-                    inputs={"K": "KernelDot.K", "y": "input.y"})
-            ],
-            hyper=GridHyper(
-                Hyper({ "KernelRidge.alpha": np.logspace(-5,+1, 7), }),
-                Hyper({ "KernelRidge.power": [ 2. ] }),
-                init_points=10,
-                n_iter=30,
-                convert={
-                    "KernelRidge.alpha": "lambda p: 10**p"}),
-            broadcast={ "meta": "input.meta" },
-            outputs={ "y": "KernelRidge.y" }
-        ),
-    ]
-
 def register_all():
     return {
         "bmol_physchem": compile_physchem,
-        "bmol_ecfp_rr": compile_ecfp_rr,
-        "bmol_ecfp_krr": compile_ecfp_krr,
-        "bmol_dscribe": compile_dscribe,
-        "bmol_soap_krr": compile_soap_krr,
-        "bmol_soap_rr": compile_soap_rr,
-        "bmol_gylm_bay": compile_gylm_bay,
-        "bmol_gylm_grid": compile_gylm_grid,
+        "bmol_ecfp": compile_ecfp,
+        "bmol_cm": compile_cm,
+        "bmol_acsf": compile_acsf,
+        "bmol_mbtr": compile_mbtr,
+        "bmol_soap": compile_soap,
+        "bmol_gylm": compile_gylm,
     }

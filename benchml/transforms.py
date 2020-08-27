@@ -2,6 +2,7 @@ from .pipeline import Module, Macro, Transform
 from .hyper import Hyper, GridHyper, BayesianHyper
 from .logger import log
 import numpy as np
+import inspect
 import sklearn.linear_model
 import sklearn.kernel_ridge
 
@@ -159,7 +160,8 @@ from .predictors import *
 
 def transform_info(tf, log, verbose=True):
     if verbose:
-        log << log.mg << "<%s>" % tf.__name__ << log.endl
+        log << log.mg << "%-25s from %s" % (
+            "<%s>" % tf.__name__, inspect.getfile(tf))<< log.endl
         log << "  Required args:       "
         for arg in tf.req_args: log << "'%s'" % arg
         log << log.endl
@@ -202,7 +204,6 @@ def get_bases_recursive(obj):
 
 def list_all(verbose=False):
     import sys
-    import inspect
     for name, obj in inspect.getmembers(sys.modules[__name__]):
         if inspect.isclass(obj):
             if Transform in get_bases_recursive(obj):

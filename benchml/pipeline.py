@@ -6,6 +6,7 @@ import hashlib
 import json
 import itertools
 import numpy as np
+import inspect
 VERBOSE = False
 
 def force_json(data):
@@ -173,6 +174,10 @@ class Transform(object):
     stream_copy = tuple()
     stream_samples = tuple()
     stream_kernel = tuple()
+    help_args = {}
+    help_inputs = {}
+    help_stream = {}
+    help_params = {}
     def check_available():
         return True
     def __init__(self, **kwargs):
@@ -202,6 +207,38 @@ class Transform(object):
         self.hash_deps = None
         self.hash_total = None
         self.hash_prev = None
+    def showHelpMessage(self):
+        log << log.mb << " Node %-30s [tag='%s']" % (
+            self.__class__.__name__, self.tag) << log.endl
+        log << "  Implemented in %s" % inspect.getfile(self.__class__) << log.endl
+        for arg in self.args:
+            req = arg in self.req_args
+            info = self.help_args[arg] if arg in self.help_args \
+                else [ 
+                    type(self.args[arg]).__name__ if arg in self.args else "?", # type info
+                    "",                                                         # help mssg
+                    []]                                                         # allowed vals
+            val = self.args[arg] if arg in self.args else "?"
+            if type(info[2]) is str and info[2].startswith('lambda'):
+                allow = eval(info[2])(self)
+            else:
+                allow = info[2]
+            log << "  Arg %-30s  val=%-10s type=%-10s req=%s %s" % (
+                "'%s'" % arg, str(self.args[arg]) if type(val) is not list else "[...]", 
+                str(info[0]), str(req), 
+                "help=%s" % info[1] if info[1] != "" else "") << log.endl
+            if type(val) is list:
+                log << "   val=[" << log.endl
+                for idx, v in enumerate(val):
+                    log << "    %-15s" % str(v) << log.flush
+                    if (idx+1) != len(val) and (idx+1) % 5 == 0: log << log.endl
+                log << "    ]" << log.endl
+            if type(allow) is list and len(allow) > 0:
+                log << log.my << "   allow=[" << log.endl
+                for idx, a in enumerate(allow):
+                    log << log.my << "    %-15s" % str(a) << log.flush
+                    if (idx+1) != len(allow) and (idx+1) % 5 == 0: log << log.endl
+                log << log.my << " ]" << log.endl
     def attach(self, module):
         self.module = module
     def parseArgsLinks(self):
@@ -415,6 +452,18 @@ class Module(Transform):
         self.updateDependencies()
     def check_available(self):
         return np.array([ tf.__class__.check_available() for tf in self.transforms ]).all()
+    def showHelpMessage(self):
+        avail = self.check_available()
+        log << (log.mg if avail else log.mr) << \
+            "Help message for module '%s' (is available=%s)" % (
+            self.tag, avail) << log.endl
+        for tf in self.transforms:
+            tf.showHelpMessage()
+        if self.hyper is not None:
+            log << log.pp << " Hyperparameter optimization: %s" % self.hyper.__class__.__name__ << log.endl
+            for h in self.hyper.hypers:
+                log << log.pp << "  " << h.instr << log.endl
+        return
     # Transforms
     def __getitem__(self, tag):
         return self.map_transforms[tag]

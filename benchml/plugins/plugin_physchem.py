@@ -1,9 +1,7 @@
 from ..pipeline import Transform, Macro
+from ..utils import get_smiles
 import numpy as np
 from .plugin_check import *
-
-def get_smiles(c):
-    return c.info["smiles"] if "smiles" in c.info else c.info["SMILES"]
 
 class PhyschemUser(Transform):
     req_inputs = {"configs",}
@@ -15,9 +13,12 @@ class PhyschemUser(Transform):
     stream_samples = ("X",)
     def _map(self, inputs):
         X = []
-        for config in inputs["configs"]:
-            x = [ float(config.info[f]) for f in self.args["fields"] ]
-            X.append(x)
+        try:
+            for config in inputs["configs"]:
+                x = [ float(config.info[f]) for f in self.args["fields"] ]
+                X.append(x)
+        except KeyError as err:
+            raise KeyError("PhyschemUser node expects missing custom field %s" % err)
         X = np.array(X)
         self.stream().put("X", X)
 
@@ -26,8 +27,45 @@ class Physchem2D(Transform):
     stream_samples = ("X",)
     req_inputs = ("configs",)
     precompute = True
+    help_args = {
+        "select": [ 
+            "list(str)", 
+            "choice of descriptors", 
+            "lambda t: [ d[0] for d in t.descriptors ]" ]
+    }
     default_args = {
-        "select": [
+        "select_predef": "extended",
+        "select": None
+    }
+    predefined = {
+        "basic": [
+            "tpsa",       
+            "mollogp",
+        ],
+        "core": [
+            "molwt",      
+            "n_hacc",     
+            "n_hdon",     
+            "tpsa",       
+            "mollogp",
+        ],
+        "logp": [
+            "tpsa",       
+            "mollogp",
+            "slogp01",
+            "slogp02",
+            "slogp03",
+            "slogp04",
+            "slogp05",
+            "slogp06",
+            "slogp07",
+            "slogp08",
+            "slogp09",
+            "slogp10",
+            "slogp11",
+            "slogp12"
+        ],
+        "extended": [
             "molwt",      
             "n_hacc",     
             "n_hdon",     
@@ -82,7 +120,7 @@ class Physchem2D(Transform):
         ["n_ring",        "rdesc.RingCount"],
         # Complexity
         ["balabanj",      "rdesc.BalabanJ"],
-        ["BertzCT",       "rdesc.BertzCT"],
+        ["bertzct",       "rdesc.BertzCT"],
         ["ipc",           "rdesc.Ipc"],
         ["hallkieralpha", "rdesc.HallKierAlpha"],
         ["kappa1",        "rdesc.Kappa1"],
@@ -139,9 +177,16 @@ class Physchem2D(Transform):
         ["peoe14",        "rdesc.PEOE_VSA14"],
     ]
     def _setup(self, *args, **kwargs):
+        if self.args["select"] is not None:
+            select = set(self.args["select"])
+        else:
+            select = set(self.predefined[
+                self.args["select_predef"]]) # Invalid arg in Physchem2D.select_set?
         self.descriptors_active = list(filter(
-            lambda d: d[0] in self.args["select"],
+            lambda d: d[0] in select,
             self.descriptors))
+        if len(self.descriptors_active) < 1:
+            raise ValueError("Empty or invalid descriptor list in Physchem2D.select")
     def _map(self, inputs):
         configs = inputs["configs"]
         smiles = [ get_smiles(c) for c in configs ]

@@ -1,0 +1,29 @@
+#! /usr/bin/env python
+import json
+import os
+import benchml
+from benchml.transforms import *
+log = benchml.log
+
+if __name__ == "__main__":
+    log.Connect()
+    log.AddArg("models", (list, str), default="", help="Display help string for these models")
+    log.AddArg("transform", str, default="", help="Display help string for this transform")
+    log.AddArg("list_models", type='toggle', default=False, 
+        help="List all models")
+    log.AddArg("list_transforms", type='toggle', default=False, 
+        help="List all transforms")
+    log.AddArg("compact", type='toggle', default=False,
+        help="Reduce output")
+    args = log.Parse()
+
+    if args.list_models:
+        benchml.models.list_all(verbose=True)
+    if args.list_transforms:
+        benchml.transforms.list_all(verbose=not args.compact)
+    if len(args.models):
+        models = benchml.models.compile_and_filter([".*"], args.models)
+        for m in models:
+            m.showHelpMessage()
+    if args.transform != "":
+        pass

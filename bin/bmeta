@@ -91,8 +91,16 @@ def write_meta(configs, extxyz, meta_json):
                 "convert": conv
             }
         },
-        "splits": [ {"method": "random", "n_splits": 5, "train_fraction": 0.7 } ],
-        "hypersplit": {"method": "random", "n_splits": 10, "train_fraction": 0.75 },
+        "splits": [ {
+             "method": "sequential", 
+             "train_fraction": "np.arange(0.1, 1.0, 0.1)", 
+             "repeat_fraction_fct": "lambda s,t,p,f: 2*int(1./(f*(1-f))**0.5)" 
+           } 
+        ],
+        "hypersplit": {
+            "method": "random", 
+            "n_splits": 10, 
+            "train_fraction": 0.75 },
         "elements": elements,
         "has_smiles": has_smiles,
         "periodic": periodic,

@@ -9,15 +9,17 @@ def load_models_and_dataset(args):
     log << "Load dataset" << log.flush
     dataset = list(benchml.data.DatasetIterator(meta_json=args.meta))
     log << "... done" << log.endl
-    log << "Compile models" << log.endl
-    print(args.models, type(args.models))
     models = benchml.models.compile_and_filter([".*"], args.models)
     for model in models:
         if not model.check_available():
             raise RuntimeError("Model '%s' requested but not available" % model.tag)
-    for m in models:
-        log << "-" << m.tag << log.endl
-    if args.configure != "": configure_models(models, args.configure)
+    if args.override != "": 
+        if len(dataset) and "override" in dataset[0].meta:
+            override_json_str_meta = json.dumps(dataset[0].meta["override"])
+        else:
+            override_json_str_meta = "{}"
+        # NOTE that cmdline config takes precedence over meta config:
+        configure_models(models, override_json_str_meta, args.override)
     return models, dataset
 
 def train_models(models, dataset, args):
@@ -41,19 +43,27 @@ def train_models(models, dataset, args):
         benchml.save(archfile, model)
     return model
 
-def configure_models(models, configure_json_str):
+def configure_models(
+        models, 
+        *override_json_str):
     log << "Configure models" << log.endl
-    configure = json.loads(configure_json_str)
+    override = {}
+    for jstr in override_json_str:
+        override.update(json.loads(jstr))
     for m in models:
-        for addr, val in configure.items():
-            tf, field = addr.split(".")
-            if tf in m.map_transforms:
-                if not field in m[tf].args:
-                    raise KeyError(
-                        "Invalid parameter field '%s' in transform '%s'" % (
-                        field, tf))
-                log << "-" << "Setting %s.%s = %s" % (tf, field, val) << log.endl
-                m[tf].args[field] = val
+        for tf in m.transforms:
+            for addr, val in override.items():
+                # Note that tf_tag could be both the name 
+                # or class name of the target transform:
+                tf_tag, field = addr.split(".")
+                if tf_tag == tf.tag or tf_tag == tf.__class__.__name__:
+                    if not field in tf.args:
+                        raise KeyError(
+                            "Invalid parameter field '%s' in transform '%s'" % (
+                            field, tf.tag))
+                    log << " - Model %s: Override %s[%s].%s = %s" % (
+                        m.tag, tf.tag, tf.__class__.__name__, field, val) << log.endl
+                    tf.args[field] = val
 
 def run(args):
     if args.mode == "analyse":
@@ -105,7 +115,7 @@ if __name__ == "__main__":
     log.AddArg("archfile", str, default="{model}.arch", help="Input model file used when mode=map")
     log.AddArg("store_as", str, default="", help="Key under which predictions are stored in ext-xyz file when mode=map")
     log.AddArg("benchmark_json", str, default="", help="Output json-file storing benchmark results")
-    log.AddArg("configure", str, default="", help="Json string with name-value pairs for parameter overrides")
+    log.AddArg("override", str, default="", help="Json string with name-value pairs for parameter overrides")
     log.AddArg("seed", int, default=971, help="RNG seed")
     log.AddArg("use_ase", "toggle", default=False, help="Use ASE parse")
     args = log.Parse()

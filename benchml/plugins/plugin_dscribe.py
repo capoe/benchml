@@ -1,5 +1,6 @@
 from ..pipeline import Transform, Macro
 from ..logger import log, Mock
+from ..ptable import lookup
 import numpy as np
 from .plugin_check import *
 
@@ -71,6 +72,69 @@ class DscribeACSF(DscribeTransform):
         "periodic": False,
         "sparse": False}
     CalculatorClass = dd.ACSF
+
+class UniversalDscribeACSF(DscribeTransform):
+    default_args = {
+        "adjust_to_species": None,
+        "scalerange": 1.0,
+        "sharpness": 1.0,
+        "verbose": False,
+        "cutoff": None,
+        "species": None,
+        "periodic": False,
+        "n_select_g2": None,
+        "n_select_g4": None
+    }
+    CalculatorClass = dd.ACSF
+    def check_available():
+        return check_dscribe_available(UniversalDscribeACSF) \
+            and check_asap_available(UniversalDscribeACSF)
+    def _prepare(self, inputs):
+        # Find "universal" hyperparameters for this set of elements
+        if self.args["adjust_to_species"] is None:
+            types = self.args["species"] if self.args["species"] is not None \
+                else inputs["meta"]["elements"]
+        else:   
+            types = self.args["adjust_to_species"]
+        types_z = [ lookup[t].z for t in types ]
+        paramsets = asaplib.hypers.gen_default_acsf_hyperparameters(
+            Zs=types_z,
+            scalerange=self.args["scalerange"],
+            sharpness=self.args["sharpness"],
+            verbose=self.args["verbose"],
+            cutoff=self.args["cutoff"])
+        assert len(paramsets) == 1 # No multiresolution ACSF implemented
+        pars = paramsets[list(paramsets.keys())[0]]
+        rcut = pars.pop("cutoff")
+        _ = pars.pop("type")
+        # Collect in args
+        args = {
+            "rcut": rcut,
+            **pars }
+        # Add boundary settings and named elements
+        if "meta" in inputs:
+            if "periodic" in inputs["meta"]:
+                args["periodic"] = inputs["meta"]["periodic"]
+            if "elements" in inputs["meta"]:
+                args["species"] = inputs["meta"]["elements"]
+        # Subselect
+        if self.args["n_select_g2"] is not None:
+            log << log.mr << "WARNING Using random subselection" << log.endl
+            s2 = np.arange(len(args["g2_params"]))
+            np.random.shuffle(s2)
+            s2 = s2[0:self.args["n_select_g2"]]
+            args["g2_params"] = [ args["g2_params"][_] for _ in s2 ]
+        if self.args["n_select_g4"] is not None:
+            log << log.mr << "WARNING Using random subselection" << log.endl
+            s4 = np.arange(len(args["g4_params"]))
+            np.random.shuffle(s4)
+            s4 = s4[0:self.args["n_select_g4"]]
+            args["g4_params"] = [ args["g4_params"][_] for _ in s4 ]
+        for key, val in args.items():
+            log << "  Set %-15s = %s" % (
+                key, str(val) if type(val) is not list \
+                    else "[...%d items...]" % len(val)) << log.endl
+        return args
 
 class DscribeMBTR(DscribeTransform):
     default_args = dict(

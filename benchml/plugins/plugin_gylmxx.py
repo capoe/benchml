@@ -29,8 +29,6 @@ class KernelSmoothMatch(Transform):
             for j in range(i if symmetric else 0, X2.shape[0]):
                 xj = X2[j]
                 if self.verbose: log << log.back << " Match %4d/%-4d   " % (i, j) << log.flush
-                #kij = np.zeros((xi.shape[0], xj.shape[0]))
-                #kij = xi.dot(xj.T)**self.args["base_power"]
                 kij = eval(self.args["base_kernel"])**self.args["base_power"]
                 pij = np.zeros_like(kij)
                 gylm.smooth_match(pij, kij, kij.shape[0], kij.shape[1],
@@ -65,6 +63,7 @@ class GylmTransform(Transform):
         "ldamp": 0.5,
         "power": True,
         "types": None,
+        "heavy_only": True,
         "normalize": True}
     req_inputs = ('configs',)
     allow_params = ("calc",)
@@ -76,6 +75,7 @@ class GylmTransform(Transform):
         return check_gylmxx_available(GylmAverage)
     def _setup(self, *args):
         self.procs = self.args.pop("procs", 1)
+        self.heavy_only = self.args.pop("heavy_only", True)
         if self.args["types"] is None:
             self.calc = None
         else:
@@ -88,11 +88,65 @@ class GylmTransform(Transform):
         self.params().put("calc", self.calc)
         self._map(inputs)
 
+class NlocX(Transform):
+    default_args = {
+        "gylmb": {
+            "rcut": 7.5,
+            "rcut_width": 0.5,
+            "nmax": 10,
+            "lmax": 6,
+            "sigma": 1.0,
+            "part_sigma": 0.5,
+            "wconstant": False,
+            "wscale": 0.5,
+            "wcentre": 0.5,
+            "ldamp": 0.5,
+            "power": False,
+            "normalize": True,
+            "types": ["C", "N", "O", "S", "H"]},
+        "gylma": {
+            "rcut": 7.5, # TODO Think about this
+            "rcut_width": 0.5,
+            "nmax": 10,
+            "lmax": 6,
+            "sigma": 1.0,
+            "part_sigma": 0.5,
+            "wconstant": False,
+            "wscale": 0.5,
+            "wcentre": 0.5,
+            "ldamp": 0.5,
+            "power": False,
+            "normalize": True,
+            "types": ["C", "N", "O", "S", "H"]
+        }
+    }
+    def check_available():
+        return check_gylmxx_available(NlocX)
+    def _map(self, inputs):
+        calc_a = gylm.GylmCalculator(
+            **self.args["gylma"])
+        calc_b = gylm.GylmCalculator(
+            **self.args["gylmb"])
+        cA_list = inputs["centres_A"]
+        cB_list = inputs["centres_B"]
+        configs = inputs["configs"]
+        for c in range(len(configs)):
+            cA = cA_list[c]
+            cB = cB_list[c]
+            config = configs[c]
+            xa = calc_a.evaluate(system=config, positions=cA)
+            xb = calc_b.evaluate(system=config, positions=cB)
+            print(len(config), len(cA), len(cB), "=>", xa.shape, xb.shape)
+        return
+
 class GylmAverage(GylmTransform):
     def _map(self, inputs):
+        if not hasattr(self, "heavy_only"): # NOTE For backwards-compatibility only
+            self.heavy_only = True
         X = gylm_evaluate(
             configs=inputs["configs"],
             dcalc=self.calc,
+            heavy_only=self.heavy_only,
             reduce_molecular=np.sum,
             norm_molecular=True,
             centres=inputs.pop("centres", None))
@@ -100,21 +154,15 @@ class GylmAverage(GylmTransform):
 
 class GylmAtomic(GylmTransform):
     def _map(self, inputs):
-        if self.procs == 1:
-            X = gylm_evaluate(
-                configs=inputs["configs"],
-                dcalc=self.calc,
-                reduce_molecular=None,
-                norm_molecular=False,
-                centres=inputs.pop("centres", None))
-        else:
-            X = gylm_evaluate_mp(
-                configs=inputs["configs"],
-                dcalc=self.calc,
-                procs=self.procs,
-                reduce_molecular=None,
-                norm_molecular=False,
-                centres=inputs.pop("centres", None))
+        if not hasattr(self, "heavy_only"): # TODO For backwards-compatibility only
+            self.heavy_only = True
+        X = gylm_evaluate(
+            configs=inputs["configs"],
+            dcalc=self.calc,
+            heavy_only=self.heavy_only,
+            reduce_molecular=None,
+            norm_molecular=False,
+            centres=inputs.pop("centres", None))
         self.stream().put("X", X)
 
 def gylm_evaluate_single(args):
@@ -162,18 +210,21 @@ def gylm_evaluate(
         dcalc,
         reduce_molecular=None,
         norm_molecular=False,
+        heavy_only=True,
         centres=None):
     #log = GylmTransform.log
-    log.verbose = True
+    log.verbose = False
     t0 = time.time()
     X = []
     for cidx, config in enumerate(configs):
         if log and log.verbose: log << log.back << \
             "%d/%d" % (cidx+1, len(configs)) << log.flush
-        if centres is None:
+        if centres is not None:
+            pos_centres = centres[cidx]
+        elif heavy_only:
             heavy, types_centres, pos_centres = config.getHeavy()
         else:
-            pos_centres = centres[cidx]
+            pos_centres = config.positions
         x = dcalc.evaluate(system=config,
             positions=pos_centres)
         if reduce_molecular is not None:

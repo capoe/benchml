@@ -1,11 +1,9 @@
 from ..kernels import KernelDot
 from ..pipeline import Transform, Macro
 from ..logger import log
+from ..utils import get_smiles
 import numpy as np
 from .plugin_check import *
-
-def get_smiles(c):
-    return c.info["smiles"] if "smiles" in c.info else c.info["SMILES"]
 
 class MorganFP(Transform):
     default_args = {
