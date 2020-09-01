@@ -4,12 +4,19 @@ The bbatch tool assists with partitioning the benchmark onto batch jobs. In the 
 The input arguments specify the data directory which is scanned for metadata files ("meta.json"), the models to be included in the benchmark, and a template batch script (here for the torque queueing system).
 
 ```bash
-bbatch --walk data --collections "^bmol_.*" --models ".*" \
+bbatch --walk data --collections "^bmol_.*$" --models ".*" \
     --template batches/template.sh \
     --nodes "nodes=cpu:ppn=2" \
     --atomize
 
 mkdir -p logs # Collects stdout
+```
+   
+See below an example bbatch command that creates a batch script for a single model only:
+```bash
+bbatch --walk subdirectory/in/data/repository --collections ".*" --models "^bmol_ecfp_krr$" \
+    --template batches/template.sh \
+    --atomize
 ```
 
 ## Test a single benchmark instance
