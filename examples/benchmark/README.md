@@ -11,3 +11,13 @@ bbatch --walk data --collections "^bmol_.*" --models ".*" \
 
 mkdir -p logs # Collects stdout
 ```
+
+## Test a single benchmark instance
+
+In the "atomized" form, a batch consists of benchmarking a single model against a single dataset. If you would like to verify that the benchmark command does not result in any start-up or runtime errors for a particular model/dataset, use the following bml command:
+
+```bash
+bml --meta path/to/meta.json --models "^my_model_tag$" --benchmark_json results/test.json --use_ase
+```
+
+Note that the model tag is treated as a regular expression that is matched against all model tags in the benchml collection (these can be inspected via binfo --list_collections), hence the circumflex and dollar sign to guarantee matching against a single model entry only. 
