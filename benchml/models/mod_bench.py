@@ -53,7 +53,7 @@ def compile_physchem(custom_fields=[], with_hyper=False, **kwargs):
         ])
     return models
 
-def compile_acsf(adjust_to_species=["C", "N", "O"], *args, **kwargs):
+def compile_acsf(adjust_to_species=None, *args, **kwargs):
     models = []
     for scalerange, scale in zip(
         [ 1.0, 1.2, 1.8 ],
@@ -213,7 +213,7 @@ def compile_soap(*args, **kwargs):
         tag = "%s_%s" % (
             updates["descriptor.mode"], 
             "cross" if updates["descriptor.crossover"] else "nocross")
-        model = make_soap_krr(tag="bmol_soap_%s_rr" % tag)
+        model = make_soap_rr(tag="bmol_soap_%s_rr" % tag)
         model.hyperUpdate(updates)
         models.append(model)
     return models
