@@ -13,8 +13,10 @@ if __name__ == "__main__":
     for data in datasets:
         for model in models:
             stream = model.open(data)
-            model.fit(stream)
-            K = stream.resolve('kernel.K')
-            print(K)
-            input('...')
+            model.precompute(stream)
+            for train, test in stream.split(method="random", n_splits=1, train_fraction=100./len(data)):
+                model.fit(train) # .fit rather than .map because some descriptors need to be "fitted"
+                K = train.resolve('kernel.K')
+                print(K)
+                print(K.shape)
 
