@@ -244,7 +244,7 @@ def make_soap_krr(tag):
         transforms=[
             ExtXyzInput(
                 tag="input"),
-            UniversalSoapGylmxx(
+            UniversalSoapDscribe(
                 tag="descriptor",
                 inputs={
                     "configs": "input.configs"
@@ -286,7 +286,7 @@ def make_soap_alt_rr(tag):
         transforms=[
             ExtXyzInput(
                 tag="input"),
-            UniversalSoapGylmxx(
+            UniversalSoapDscribe(
                 tag="descriptor",
                 inputs={
                     "configs": "input.configs"
@@ -316,7 +316,7 @@ def make_soap_rr(tag):
         transforms=[
             ExtXyzInput(
                 tag="input"),
-            UniversalSoapGylmxx(
+            UniversalSoapDscribe(
                 tag="descriptor",
                 inputs={
                     "configs": "input.configs"

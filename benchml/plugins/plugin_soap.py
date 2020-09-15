@@ -36,9 +36,9 @@ class SoapBase(Transform):
             if log and log.verbose: log << log.back << \
                 "%d/%d" % (cidx+1, len(configs)) << log.flush
             if centres is None:
-                #heavy, types_centres, pos_centres = config.getHeavy() # HACK
-                pos_centres = None # HACK
-                types_centres = config.symbols # HACK
+                # heavy, types_centres, pos_centres = config.getHeavy() # HACK
+                pos_centres = None
+                types_centres = config.symbols
             else:
                 pos_centres = centres[cidx]
                 types_centres = None
