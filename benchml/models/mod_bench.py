@@ -218,6 +218,25 @@ def compile_soap(*args, **kwargs):
         models.append(model)
     return models
 
+def compile_soap_alt(*args, **kwargs):
+    rr_hyper = GridHyper(
+        Hyper({"descriptor.normalize": [ False ] }),
+        Hyper({"descriptor.mode": [ "minimal", "smart", "longrange" ] }),
+        Hyper({"descriptor.crossover": [ False, True ] }),
+        Hyper({"reduce.reduce_op": [ "mean" ]}),
+        Hyper({"reduce.normalize": [ False ]}),
+        Hyper({"reduce.reduce_by_type": [ False ]}),
+        Hyper({"whiten.centre": [ True ]}),         
+        Hyper({"whiten.scale":  [ True ]}))
+    for hidx, updates in enumerate(rr_hyper):
+        tag = "%s_%s" % (
+            updates["descriptor.mode"], 
+            "cross" if updates["descriptor.crossover"] else "nocross")
+        model = make_soap_rr(tag="bmol_soap_alt_%s_rr" % tag)
+        model.hyperUpdate(updates)
+        models.append(model)
+    return models
+
 def make_soap_krr(tag):
     return Module(
         tag=tag,
@@ -385,11 +404,11 @@ def compile_ecfp(**kwargs):
                     args={"length": 4096, "radius": 2, "normalize": True},
                     inputs={"configs": "input.configs"}),
                 KernelDot(
-                    tag="kern",
+                    tag="kernel",
                     inputs={"X": "desc.X"}),
                 KernelRidge(
                     args={"alpha": 1e-5, "power": 2},
-                    inputs={"K": "kern.K", "y": "input.y"})
+                    inputs={"K": "kernel.K", "y": "input.y"})
             ],
             hyper=GridHyper(
                 Hyper({ "KernelRidge.alpha": np.logspace(-6,+1, 8), }),
@@ -424,10 +443,11 @@ def compile_gylm(**kwargs):
                     tag="desc",
                     inputs={"configs": "input.configs"}),
                 KernelDot(
+                    tag="kernel",
                     inputs={"X": "desc.X"}),
                 KernelRidge(
                     args={"alpha": 1e-5, "power": 2},
-                    inputs={"K": "KernelDot.K", "y": "input.y"})
+                    inputs={"K": "kernel.K", "y": "input.y"})
             ],
             hyper=GridHyper(
                 Hyper({ "KernelRidge.alpha": np.logspace(-5,+1, 7), }),
@@ -443,10 +463,11 @@ def compile_gylm(**kwargs):
                     tag="desc",
                     inputs={"configs": "input.configs"}),
                 KernelDot(
+                    tag="kernel",
                     inputs={"X": "desc.X"}),
                 KernelRidge(
                     args={"alpha": 1e-5, "power": 2},
-                    inputs={"K": "KernelDot.K", "y": "input.y"})
+                    inputs={"K": "kernel.K", "y": "input.y"})
             ],
             hyper=BayesianHyper(
                 Hyper({ "KernelRidge.alpha": np.linspace(-5,+1, 7), }),
