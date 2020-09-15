@@ -219,6 +219,7 @@ def compile_soap(*args, **kwargs):
     return models
 
 def compile_soap_alt(*args, **kwargs):
+    models = []
     rr_hyper = GridHyper(
         Hyper({"descriptor.normalize": [ False ] }),
         Hyper({"descriptor.mode": [ "minimal", "smart", "longrange" ] }),

@@ -2,14 +2,15 @@ import benchml as bml
 
 if __name__ == "__main__":
     bml.log.Connect()
-    bml.log.AddArg("models", (list,str), default=["^bmol_ecfp_krr$"])
+    bml.log.AddArg("models", (list,str), default=["^bmol_.*_krr$"])
     bml.log.AddArg("meta_json", str, default="../../test/test_data/molecular/meta.json")
     args = bml.log.Parse()
 
     bml.readwrite.configure(use_ase=True)
-    models = bml.models.compile_and_filter(["^bmol_ecfp.*$"], args.models)
-    datasets = bml.data.DatasetIterator(meta_json=args.meta_json)
+    bml.splits.synchronize(seed=0)
 
+    models = list(bml.models.compile_and_filter(["^bmol_.*$"], args.models))
+    datasets = bml.data.DatasetIterator(meta_json=args.meta_json)
     for data in datasets:
         for model in models:
             stream = model.open(data)
@@ -18,5 +19,5 @@ if __name__ == "__main__":
                 K = train.resolve('kernel.K')
                 print(K)
                 print(K.shape)
-                input('< voila, the kernel')
+                input('< voila, the kernel for model %s' % model.tag)
 
