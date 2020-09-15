@@ -286,7 +286,7 @@ def make_soap_alt_rr(tag):
         transforms=[
             ExtXyzInput(
                 tag="input"),
-            UniversalSoapDscribe(
+            UniversalSoapGylmxx(
                 tag="descriptor",
                 inputs={
                     "configs": "input.configs"
