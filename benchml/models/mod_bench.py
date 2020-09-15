@@ -232,7 +232,7 @@ def compile_soap_alt(*args, **kwargs):
         tag = "%s_%s" % (
             updates["descriptor.mode"], 
             "cross" if updates["descriptor.crossover"] else "nocross")
-        model = make_soap_rr(tag="bmol_soap_alt_%s_rr" % tag)
+        model = make_soap_alt_rr(tag="bmol_soap_alt_%s_rr" % tag)
         model.hyperUpdate(updates)
         models.append(model)
     return models
@@ -274,6 +274,36 @@ def make_soap_krr(tag):
                     "y": "input.y"
                 })
         ],
+        hyper=GridHyper(
+            Hyper({ "predictor.alpha": np.logspace(-7, +7, 15), })),
+        broadcast={"meta": "input.meta"},
+        outputs={ "y": "predictor.y" })
+
+def make_soap_alt_rr(tag):
+    return Module(
+        tag=tag,
+        transforms=[
+            ExtXyzInput(
+                tag="input"),
+            UniversalSoapDscribe(
+                tag="descriptor",
+                inputs={
+                    "configs": "input.configs"
+                }),
+            ReduceTypedMatrix(
+                tag="reduce",
+                inputs={
+                    "X": "descriptor.X",
+                    "T": "descriptor.T"
+                }),
+            WhitenMatrix(
+                tag="whiten",
+                inputs={
+                    "X": "reduce.X"
+                }),
+            Ridge(
+                tag="predictor",
+                inputs={"X": "reduce.X", "y": "input.y"}) ],
         hyper=GridHyper(
             Hyper({ "predictor.alpha": np.logspace(-7, +7, 15), })),
         broadcast={"meta": "input.meta"},
@@ -489,5 +519,6 @@ def register_all():
         "bmol_acsf": compile_acsf,
         "bmol_mbtr": compile_mbtr,
         "bmol_soap": compile_soap,
+        "bmol_soap_alt": compile_soap_alt,
         "bmol_gylm": compile_gylm,
     }
