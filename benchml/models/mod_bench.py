@@ -240,11 +240,11 @@ def compile_soap_alt(*args, **kwargs):
         Hyper({"descriptor_atomic.normalize": [ False ] }),
         Hyper({"descriptor_atomic.mode": [ "minimal", "smart", "longrange" ] }),
         Hyper({"descriptor_atomic.crossover": [ False, True ] }),
-        Hyper({"descriptor.reduce_op": [ "mean" ]}),
+        Hyper({"descriptor.reduce_op": [ "sum" ]}),
         Hyper({"descriptor.normalize": [ False ]}),
         Hyper({"descriptor.reduce_by_type": [ False ]}),
-        Hyper({"whiten.centre": [ True ]}),         
-        Hyper({"whiten.scale":  [ True ]}))
+        Hyper({"whiten.centre": [ False ]}),
+        Hyper({"whiten.scale":  [ False ]})) 
     for hidx, updates in enumerate(rr_hyper):
         tag = "%s_%s" % (
             updates["descriptor_atomic.mode"], 
@@ -308,7 +308,7 @@ def make_soap_alt_rr(tag):
         transforms=[
             ExtXyzInput(
                 tag="input"),
-            UniversalSoapDscribe(
+            UniversalSoapGylmxx(
                 tag="descriptor_atomic",
                 inputs={
                     "configs": "input.configs"
@@ -334,7 +334,7 @@ def make_soap_alt_rr(tag):
                 tag="predictor",
                 inputs={"X": "whiten.X", "y": "input.y"}) ],
         hyper=GridHyper(
-            Hyper({ "predictor.alpha": np.logspace(-7, +7, 15), })),
+            Hyper({ "predictor.alpha": np.logspace(-9, +7, 15), })),
         broadcast={"meta": "input.meta"},
         outputs={ "y": "predictor.y" })
 
@@ -518,6 +518,55 @@ def compile_ecfp(**kwargs):
 
 def compile_gylm(**kwargs):
     return [
+        Module(
+            tag="bmol_gylm_minimal_rr",
+            transforms=[
+                ExtXyzInput(
+                    tag="input"),
+                GylmAtomic(
+                    tag="descriptor_atomic",
+                    args={
+                        "normalize": False,
+                        "rcut": 3.0,
+                        "rcut_width": 0.5,
+                        "nmax": 6,
+                        "lmax": 4,
+                        "sigma": 0.75,
+                        "part_sigma": 0.5,
+                        "wconstant": False,
+                        "wscale": 1.0,
+                        "wcentre": 1.0,
+                        "ldamp": 4,
+                        "power": True,
+                    },
+                    inputs={
+                        "configs": "input.configs"
+                    }),
+                ReduceTypedMatrix(
+                    tag="descriptor",
+                    args = {
+                        "reduce_op": "sum",
+                        "normalize": False,
+                        "reduce_by_type": False,
+                        "types": None,
+                        "epsilon": 1e-10 },
+                    inputs={
+                        "X": "descriptor_atomic.X",
+                        "T": None
+                    }),
+                WhitenMatrix(
+                    tag="whiten",
+                    inputs={
+                        "X": "descriptor.X"
+                    }),
+                Ridge(
+                    tag="predictor",
+                    inputs={"X": "whiten.X", "y": "input.y"}) ],
+            hyper=GridHyper(
+                Hyper({ "predictor.alpha": np.logspace(-7, +7, 15), })),
+            broadcast={"meta": "input.meta"},
+            outputs={ "y": "predictor.y" }
+        ),
         Module(
             tag="bmol_gylm_grid_krr",
             transforms=[
