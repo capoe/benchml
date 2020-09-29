@@ -214,7 +214,7 @@ class Transform(object):
         for arg in self.args:
             req = arg in self.req_args
             info = self.help_args[arg] if arg in self.help_args \
-                else [ 
+                else [
                     type(self.args[arg]).__name__ if arg in self.args else "?", # type info
                     "",                                                         # help mssg
                     []]                                                         # allowed vals
@@ -224,8 +224,8 @@ class Transform(object):
             else:
                 allow = info[2]
             log << "  Arg %-30s  val=%-10s type=%-10s req=%s %s" % (
-                "'%s'" % arg, str(self.args[arg]) if type(val) is not list else "[...]", 
-                str(info[0]), str(req), 
+                "'%s'" % arg, str(self.args[arg]) if type(val) is not list else "[...]",
+                str(info[0]), str(req),
                 "help=%s" % info[1] if info[1] != "" else "") << log.endl
             if type(val) is list:
                 log << "   val=[" << log.endl
