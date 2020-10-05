@@ -26,31 +26,49 @@ class KernelDotDeprecated(KernelBase):
         return k
 
 class KernelDot(Transform):
-    default_args = {'power': 1}
+    default_args = {
+        'power': 1,
+        'self_kernel': False
+    }
     req_inputs = ('X',)
     allow_params = {'X'}
-    allow_stream = {'K'}
+    allow_stream = {'K', 'K_self'}
     stream_kernel = ('K',)
+    stream_samples = ('K_self',)
     precompute = True
-    def evaluate(self, x1, x2=None):
+    def evaluate(self, x1, x2=None, diagonal_only=False):
         if x2 is None: x2 = x1
-        return x1.dot(x2.T)**self.args["power"]
+        if diagonal_only:
+            return np.einsum('ai,ai->a', x1, x2, 
+                optimize='greedy')**self.args["power"]
+        else:
+            return x1.dot(x2.T)**self.args["power"]
     def _fit(self, inputs):
         K = self.evaluate(inputs["X"])
         self.params().put("X", np.copy(inputs["X"]))
         self.stream().put("K", K)
+        if self.args["self_kernel"]:
+            self.stream().put("K_self", K.diagonal())
     def _map(self, inputs):
         K = self.evaluate(inputs["X"], self.params().get("X"))
         self.stream().put("K", K)
+        if self.args["self_kernel"]:
+            K_self = self.evaluate(inputs["X"], inputs["X"], 
+                diagonal_only=True)
+            self.stream().put("K_self", K_self)
 
 class KernelGaussian(Transform):
-    default_args = {'scale': 1}
+    default_args = {
+        'scale': 1,
+        'self_kernel': False
+    }
     req_inputs = ('X',)
     allow_params = {'X','sigma'}
-    allow_stream = {'K'}
+    allow_stream = {'K', 'K_self'}
     stream_kernel = ('K',)
+    stream_samples = ('K_self',)
     precompute = True
-    def evaluate(self, x1, x2=None, sigma=None):
+    def evaluate(self, x1, x2=None, sigma=None, diagonal_only=False):
         x1s = x1/sigma
         z1 = np.sum(x1s**2, axis=1)
         if x2 is None:
@@ -59,10 +77,14 @@ class KernelGaussian(Transform):
         else:
             x2s = x2/sigma
             z2 = np.sum(x2s**2, axis=1)
-        zz = -0.5*np.add.outer(z1, z2)
-        xx = x1s.dot(x2s.T)
-        K = np.exp(zz+xx)
-        return K
+        if diagonal_only:
+            zz = -0.5*(z1+z2)
+            xx = np.einsum('ai,ai->a', x1s, x2s, 
+                optimize='greedy')
+        else:
+            zz = -0.5*np.add.outer(z1, z2)
+            xx = x1s.dot(x2s.T)
+        return np.exp(zz+xx)
     def _fit(self, inputs):
         X = inputs["X"]
         sigma = self.args["scale"]*np.std(X, axis=0)
@@ -70,7 +92,15 @@ class KernelGaussian(Transform):
         self.params().put("sigma", sigma)
         self.params().put("X", np.copy(inputs["X"]))
         self.stream().put("K", K)
+        if self.args["self_kernel"]:
+            self.stream().put("K_self", K.diagonal())
     def _map(self, inputs):
         K = self.evaluate(x1=inputs["X"], x2=self.params().get("X"), 
             sigma=self.params().get("sigma"))
         self.stream().put("K", K)
+        if self.args["self_kernel"]:
+            K_self = self.evaluate(x1=inputs["X"], x2=inputs["X"], 
+                sigma=self.params().get("sigma"),
+                diagonal_only=True)
+            self.stream().put("K_self", K_self)
+

@@ -35,7 +35,8 @@ class GridHyper(object):
             accu_args,
             target,
             target_ref,
-            log=None):
+            log=None,
+            **kwargs):
         update_cache = []
         fields = self.getFields()
         ln_length = 12*(len(fields)+2)+3
@@ -49,7 +50,8 @@ class GridHyper(object):
         invert = -1 if Accumulator.select(**accu_args) == "smallest" else +1
         for hyperidx, updates in enumerate(self):
             metric = module.hyperEval(stream, updates,
-                split_args, accu_args, target, target_ref)
+                split_args, accu_args, target, target_ref,
+                **kwargs)
             update_cache.append({
                 "metric": metric,
                 "updates": updates
@@ -121,7 +123,8 @@ class BayesianHyper(object):
             accu_args,
             target,
             target_ref,
-            log=None):
+            log=None,
+            **kwargs):
         bounds = self.findBounds()
         bounds = self.atomizeArrays(bounds)
         def f(**kwargs):

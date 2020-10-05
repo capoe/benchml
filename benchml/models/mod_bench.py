@@ -260,7 +260,7 @@ def make_soap_krr(tag):
         transforms=[
             ExtXyzInput(
                 tag="input"),
-            UniversalSoapDscribe(
+            UniversalSoapGylmxx(
                 tag="descriptor_atomic",
                 inputs={
                     "configs": "input.configs"

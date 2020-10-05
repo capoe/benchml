@@ -7,6 +7,7 @@ import json
 import itertools
 import numpy as np
 import inspect
+import time
 VERBOSE = False
 
 def force_json(data):
@@ -119,6 +120,10 @@ class Stream(object):
                 if VERBOSE: print("    KERN  ", self.tf.tag, self.tag,
                     '<-', self.parent.tag, key)
                 self.put(key, self.parent.get(key)[self.slice][:,self.slice_ax2])
+            for key in self.parent.tf.stream_self_kernel:
+                if VERBOSE: print("    SELF  ", self.tf.tag, self.tag,
+                    '<-', self.parent.tag, key)
+                self.put(key, self.parent.get(key)[self.slice][:,self.slice])
     def has(self, key):
         return key in self.storage
     def items(self):
@@ -174,6 +179,7 @@ class Transform(object):
     stream_copy = tuple()
     stream_samples = tuple()
     stream_kernel = tuple()
+    stream_self_kernel = tuple()
     help_args = {}
     help_inputs = {}
     help_stream = {}
@@ -286,6 +292,10 @@ class Transform(object):
         stream = Stream(tag=tag, data=data, parent=parent,
             slice=slice, slice_ax2=slice_ax2, tf=self)
         self.map_streams[tag] = stream
+        self.active_stream = stream
+    def openPrivateStream(self, stream_tag):
+        stream = Stream(tag=stream_tag, tf=self)
+        self.map_streams[stream_tag] = stream
         self.active_stream = stream
     def activateStream(self, stream_tag):
         self.active_stream = self.map_streams[stream_tag]
@@ -619,13 +629,13 @@ class Module(Transform):
             accu.append("test", out[target], self.get(target_ref))
         metric, metric_std = accu.evaluate("test")
         return metric
-    def hyperfit(self, stream, log=None, **kwargs):
+    def hyperfit(self, stream, log=None, verbose=False, **kwargs):
         if self.hyper is None:
             raise ValueError("<Module.hyperfit>: Hyper configuration is missing")
         if log: log << "Hyperfit" << self.tag << "on stream" << stream.tag << log.endl
         updates = self.hyper.optimize(self, stream, log=log, **kwargs)
         self.hyperUpdate(updates)
-        return self.fit(stream)
+        return self.fit(stream, verbose=verbose)
     # Fit, map, precompute
     def filter(self, endpoint):
         if endpoint is None: return self.transforms
@@ -645,25 +655,35 @@ class Module(Transform):
         sweep = self.filter(endpoint=endpoint)
         for tidx, t in enumerate(sweep):
             if hasattr(t, "_fit"):
-                if verbose: log << " ".join([" "*tidx, "Fit", t.tag,
-                    "using stream", stream.tag]) << log.flush
+                if verbose: 
+                    log << " ".join([" "*tidx, "Fit", t.tag,
+                        "using stream", stream.tag]) << log.flush
+                    t0 = time.time()
                 t.fit(stream.tag, verbose=verbose)
-                if verbose: log << log.endl
             else:
-                if verbose: log << " ".join([" "*tidx, "Map", t.tag,
-                    "using stream", stream.tag]) << log.flush
+                if verbose: 
+                    log << " ".join([" "*tidx, "Map", t.tag,
+                        "using stream", stream.tag]) << log.flush
+                    t0 = time.time()
                 t.map(stream.tag, verbose=verbose)
-                if verbose: log << log.endl
+            if verbose:
+                t1 = time.time()
+                log << "[%1.4f]" % (t1-t0) << log.flush
         return
     def map(self, stream, endpoint=None, verbose=VERBOSE):
         if verbose: print("Map '%s'" % stream.tag)
         self.activateStream(stream.tag)
         sweep = self.filter(endpoint=endpoint)
         for tidx, t in enumerate(sweep):
-            if verbose: log << " ".join([" "*tidx, "Map", t.tag,
-                "using stream", stream.tag]) << log.flush
+            if verbose: 
+                log << " ".join([" "*tidx, "Map", t.tag,
+                    "using stream", stream.tag]) << log.flush
+                t0 = time.time()
             t.map(stream.tag, verbose=verbose)
-            if verbose: log << log.endl
+            if verbose: 
+                t1 = time.time()
+                log << "[%1.4f]" % (t1-t0) << log.flush
+                log << log.endl
         return self.resolveOutputs()
     def precompute(self, stream, verbose=VERBOSE):
         precomps = list(filter(lambda tf: tf.precompute, self.transforms))
@@ -675,15 +695,21 @@ class Module(Transform):
         for tidx, tf in enumerate(filter(
                 lambda tf: tf.tag in precomps_deps, self.transforms)):
             if hasattr(tf, "_fit"):
-                if verbose: log << " ".join([" "*tidx, "Fit (precompute)",
-                    tf.tag, "using stream", stream.tag]) << log.flush
+                if verbose: 
+                    log << " ".join([" "*tidx, "Fit (precompute)",
+                        tf.tag, "using stream", stream.tag]) << log.flush
+                    t0 = time.time()
                 tf.fit(stream.tag, verbose=verbose)
-                if verbose: log << log.endl
             else:
-                if verbose: log << " ".join([" "*tidx, "Map (precompute)",
-                    tf.tag, "using stream", stream.tag]) << log.flush
+                if verbose: 
+                    log << " ".join([" "*tidx, "Map (precompute)",
+                        tf.tag, "using stream", stream.tag]) << log.flush
+                    t0 = time.time()
                 tf.map(stream.tag, verbose=verbose)
-                if verbose: log << log.endl
+            if verbose: 
+                t1 = time.time()
+                log << "[%1.4f]" % (t1-t0) << log.flush
+                log << log.endl
         return self.inputStream()
     def __str__(self):
         return "Module='%s'" % self.tag + \

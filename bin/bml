@@ -34,9 +34,10 @@ def train_models(models, dataset, args):
                     accu_args={"metric": dataset["metrics"][0]},
                     target="y",
                     target_ref="input.y",
-                    log=benchml.log)
+                    log=benchml.log,
+                    verbose=args.verbose)
             else:
-                model.fit(stream)
+                model.fit(stream, verbose=args.verbose)
         archfile = args.archfile.format(model=model.tag)
         if os.path.dirname(archfile) != '':
             log >> 'mkdir -p %s' % os.path.dirname(archfile)
@@ -77,7 +78,7 @@ def run(args):
         configs = benchml.read(args.extxyz)
         model = benchml.load(args.archfile)
         with benchml.sopen(model, configs) as stream:
-            out = model.map(stream)
+            out = model.map(stream, verbose=args.verbose)
         if args.store_as != "":
             for idx, y in enumerate(out["y"]):
                 configs[idx].info[args.store_as] = y
@@ -97,7 +98,7 @@ def run(args):
             data=dataset,
             models=models, 
             log=benchml.log, 
-            verbose=False,
+            verbose=args.verbose,
             detailed=True)
         json.dump(bench, open(args.benchmark_json, "w"), indent=1, sort_keys=True)
     elif args.mode == "train":
@@ -117,6 +118,7 @@ if __name__ == "__main__":
     log.AddArg("benchmark_json", str, default="", help="Output json-file storing benchmark results")
     log.AddArg("override", str, default="", help="Json string with name-value pairs for parameter overrides")
     log.AddArg("seed", int, default=971, help="RNG seed")
+    log.AddArg("verbose", "toggle", default=False, help="Enable verbose output")
     log.AddArg("use_ase", "toggle", default=False, help="Use ASE parse")
     args = log.Parse()
     if args.use_ase:
