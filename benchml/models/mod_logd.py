@@ -1,6 +1,165 @@
 import numpy as np
 from ..transforms import *
 
+def compile_logd_extensive(**kwargs):
+    return [
+        Module(
+            tag="logd_gylm_minimal_rr",
+            transforms=[
+                ExtXyzInput(
+                    tag="input"),
+                GylmAtomic(
+                    tag="descriptor_atomic",
+                    args={
+                        "normalize": False,
+                        "rcut": 3.0,
+                        "rcut_width": 0.5,
+                        "nmax": 6,
+                        "lmax": 4,
+                        "sigma": 0.75,
+                        "part_sigma": 0.5,
+                        "wconstant": False,
+                        "wscale": 1.0,
+                        "wcentre": 1.0,
+                        "ldamp": 4,
+                        "power": True,
+                    },
+                    inputs={
+                        "configs": "input.configs"
+                    }),
+                ReduceTypedMatrix(
+                    tag="descriptor",
+                    args = {
+                        "reduce_op": "sum",
+                        "normalize": False,
+                        "reduce_by_type": False,
+                        "types": None,
+                        "epsilon": 1e-10 },
+                    inputs={
+                        "X": "descriptor_atomic.X",
+                        "T": None
+                    }),
+                WhitenMatrix(
+                    tag="whiten",
+                    inputs={
+                        "X": "descriptor.X"
+                    }),
+                Ridge(
+                    tag="predictor",
+                    args={ "alpha": 1e2 },
+                    inputs={"X": "whiten.X", "y": "input.y"}) ],
+            hyper=GridHyper(
+                Hyper({ "predictor.alpha": np.logspace(-1, +5, 7), })),
+            broadcast={"meta": "input.meta"},
+            outputs={ "y": "predictor.y" }
+        ),
+        Module(
+            tag="logd_gylm_hybrid_rr",
+            transforms=[
+                ExtXyzInput(
+                    tag="input"),
+                GylmAtomic(
+                    tag="descriptor_atomic",
+                    args={
+                        "normalize": False,
+                        "rcut": 5.5,
+                        "rcut_width": 0.5,
+                        "nmax": 9,
+                        "lmax": 6,
+                        "sigma": 0.75,
+                        "part_sigma": 0.5,
+                        "wconstant": False,
+                        "wscale": 0.5,
+                        "wcentre": 0.5,
+                        "ldamp": 0.5,
+                        "power": True,
+                    },
+                    inputs={
+                        "configs": "input.configs"
+                    }),
+                ReduceTypedMatrix(
+                    tag="descriptor_struct",
+                    args = {
+                        "reduce_op": "sum",
+                        "normalize": False,
+                        "reduce_by_type": False,
+                        "types": None,
+                        "epsilon": 1e-10 },
+                    inputs={
+                        "X": "descriptor_atomic.X",
+                        "T": None
+                    }),
+                CxCalcTransform(tag="cx",
+                    args={"reshape_as_matrix": True},
+                    inputs={"configs": "input.configs"}),
+                Concatenate(tag="descriptor",
+                    inputs={"X": [ "descriptor_struct.X", "cx.X" ]}),
+                WhitenMatrix(
+                    tag="whiten",
+                    inputs={
+                        "X": "descriptor.X"
+                    }),
+                Ridge(
+                    tag="predictor",
+                    args={ "alpha": 1e2 },
+                    inputs={"X": "whiten.X", "y": "input.y"}) ],
+            hyper=GridHyper(
+                Hyper({ "predictor.alpha": np.logspace(-1, +5, 7), })),
+            broadcast={"meta": "input.meta"},
+            outputs={ "y": "predictor.y" }
+        ),
+        Module(
+            tag="logd_gylm_extended_rr",
+            transforms=[
+                ExtXyzInput(
+                    tag="input"),
+                GylmAtomic(
+                    tag="descriptor_atomic",
+                    args={
+                        "normalize": False,
+                        "rcut": 5.5,
+                        "rcut_width": 0.5,
+                        "nmax": 9,
+                        "lmax": 6,
+                        "sigma": 0.75,
+                        "part_sigma": 0.5,
+                        "wconstant": False,
+                        "wscale": 0.5,
+                        "wcentre": 0.5,
+                        "ldamp": 0.5,
+                        "power": True,
+                    },
+                    inputs={
+                        "configs": "input.configs"
+                    }),
+                ReduceTypedMatrix(
+                    tag="descriptor",
+                    args = {
+                        "reduce_op": "sum",
+                        "normalize": False,
+                        "reduce_by_type": False,
+                        "types": None,
+                        "epsilon": 1e-10 },
+                    inputs={
+                        "X": "descriptor_atomic.X",
+                        "T": None
+                    }),
+                WhitenMatrix(
+                    tag="whiten",
+                    inputs={
+                        "X": "descriptor.X"
+                    }),
+                Ridge(
+                    tag="predictor",
+                    args={ "alpha": 1e2 },
+                    inputs={"X": "whiten.X", "y": "input.y"}) ],
+            hyper=GridHyper(
+                Hyper({ "predictor.alpha": np.logspace(-1, +5, 7), })),
+            broadcast={"meta": "input.meta"},
+            outputs={ "y": "predictor.y" }
+        ),
+    ]
+
 def compile_logd(custom_fields=[], **kwargs):
     return [
         Module(
@@ -43,7 +202,7 @@ def compile_logd(custom_fields=[], **kwargs):
             outputs={"y": "pred.y"}
         ),
         Module(
-            tag="delta_kernelcombo_logd_morgan",
+            tag="logd_delta_hybrid_topo_krr",
             transforms=[
                 ExtXyzInput(tag="input"),
                 CxCalcTransform(tag="cx_alt",
@@ -87,7 +246,7 @@ def compile_logd(custom_fields=[], **kwargs):
             outputs={ "y":  "out.y" }
         ),
         Module(
-            tag="delta_kernelcombo_logd_gylm",
+            tag="logd_delta_hybrid_gylm_krr",
             transforms=[
                 ExtXyzInput(tag="input"),
                 CxCalcTransform(tag="cx_alt",
@@ -139,11 +298,12 @@ def compile_logd(custom_fields=[], **kwargs):
             outputs={ "y":  "out.y" }
         ),
         Module(
-            tag="kernelcombo_logd_morgan",
+            tag="hybrid_logd_topo",
             transforms=[
                 ExtXyzInput(tag="input"),
                 CxCalcTransform(tag="cx",
                     args={"reshape_as_matrix": True},
+
                     inputs={"configs": "input.configs"}),
                 KernelGaussian(
                     tag="kern_gaussian",
@@ -173,7 +333,78 @@ def compile_logd(custom_fields=[], **kwargs):
             outputs={ "y":  "KernelRidge.y" }
         ),
         Module(
-            tag="kernelcombo_logd_gylm",
+            tag="logd_topo_gp",
+            transforms=[
+                ExtXyzInput(tag="input"),
+                MorganFP(
+                    tag="desc",
+                    args={"length": 2048, "radius": 2, "normalize": True},
+                    inputs={"configs": "input.configs"}),
+                KernelDot(
+                    tag="kern",
+                    args={"self_kernel": True},
+                    inputs={"X": "desc.X"}),
+                ResidualGaussianProcess(
+                    tag="gp",
+                    args={"alpha": 1e-5, "power": 2},
+                    inputs={"K": "kern.K", "K_self": "kern.K_self", "y": "input.y"}),
+            ],
+            hyper=GridHyper(
+                Hyper({ "desc.radius": [ 2 ] }),
+                Hyper({ "gp.alpha": np.logspace(-5,+1, 7), }),
+                Hyper({ "gp.power": [ 2. ] })
+            ),
+            broadcast={ "meta": "input.meta" },
+            outputs={ "y":  "gp.y", "dy": "gp.dy", "dk": "gp.dk" }
+        ),
+        Module(
+            tag="logd_hybrid_topo_gp",
+            transforms=[
+                ExtXyzInput(tag="input"),
+                CxCalcTransform(tag="cx",
+                    args={"reshape_as_matrix": True},
+                    inputs={"configs": "input.configs"}),
+                KernelGaussian(
+                    tag="kern_gaussian",
+                    args={"self_kernel": True},
+                    inputs={"X": "cx.X"}),
+                MorganFP(
+                    tag="desc",
+                    args={"length": 4096, "radius": 2, "normalize": True},
+                    inputs={"configs": "input.configs"}),
+                KernelDot(
+                    tag="kern",
+                    args={"self_kernel": True},
+                    inputs={"X": "desc.X"}),
+                Add(
+                    tag="add_k",
+                    args={"coeffs": [0.5,0.5]},
+                    inputs={"X": ["kern_gaussian.K", "kern.K"] }),
+                Add(
+                    tag="add_k_self",
+                    args={"coeffs": [0.5,0.5]},
+                    inputs={"X": ["kern_gaussian.K_self", "kern.K_self"] }),
+                GaussianProcess(
+                    args={"alpha": 1e-5, "power": 2},
+                    inputs={"K": "add_k.y", "K_self": "add_k_self.y", "y": "input.y"}),
+            ],
+            hyper=GridHyper(
+                Hyper({ "desc.radius": [ 2 ] }),
+                Hyper({ "GaussianProcess.alpha": np.logspace(-5,+1, 7), }),
+                Hyper({ "kern_gaussian.scale": [ 1., 2. ] }),
+                Hyper(
+                    { 
+                      "add_k.coeffs": [ [0.25,0.75] ],
+                      "add_k_self.coeffs": [ [0.25,0.75] ] 
+                    }
+                ),
+                Hyper({ "GaussianProcess.power": [ 2. ] })
+            ),
+            broadcast={ "meta": "input.meta" },
+            outputs={ "y":  "GaussianProcess.y", "dy": "GaussianProcess.dy" }
+        ),
+        Module(
+            tag="logd_hybrid_gylm_krr",
             transforms=[
                 ExtXyzInput(tag="input"),
                 CxCalcTransform(tag="cx",
@@ -218,7 +449,7 @@ def compile_logd(custom_fields=[], **kwargs):
             outputs={ "y":  "KernelRidge.y" }
         ),
         Module(
-            tag="delta_logd_gylm",
+            tag="logd_delta_gylm_krr",
             transforms=[
                 ExtXyzInput(tag="input"),
                 CxCalcTransform(tag="cx",
@@ -255,7 +486,7 @@ def compile_logd(custom_fields=[], **kwargs):
             outputs={ "y": "Add.y" }
         ),
         Module(
-            tag="delta_logd_morgan",
+            tag="delta_logd_topo",
             transforms=[
                 ExtXyzInput(tag="input"),
                 CxCalcTransform(tag="cx",
@@ -287,5 +518,6 @@ def compile_logd(custom_fields=[], **kwargs):
 
 def register_all():
     return {
+        "logd_extensive": compile_logd_extensive,
         "logd": compile_logd
     }

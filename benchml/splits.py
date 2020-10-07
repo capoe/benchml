@@ -45,6 +45,19 @@ class SplitLOO(SplitBase):
         idcs_test = [ self.step ]
         return info, idcs_train, idcs_test
 
+class SplitKfold(SplitBase):
+    tag = "kfold"
+    def __init__(self, dset, **kwargs):
+        SplitBase.__init__(self, dset)
+        self.n_reps = kwargs["k"]
+        self.length = len(dset)
+        self.stride = len(dset)//self.n_reps + (1 if len(dset) % self.n_reps > 0 else 0)
+    def next(self):
+        info = "%s_i%03d" % (self.tag, self.step)
+        idcs_train = list(np.arange(0, self.step*self.stride)) + list(np.arange((self.step+1)*self.stride, self.length))
+        idcs_test = list(np.arange(self.step*self.stride, min(self.length, (self.step+1)*self.stride)))
+        return info, idcs_train, idcs_test
+
 class SplitMC(SplitBase):
     tag = "random"
     def __init__(self, dset, **kwargs):

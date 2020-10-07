@@ -37,7 +37,7 @@ def evaluate_model(dataset, model,
     # Open and precompute
     t_in = time.time()
     stream = model.open(dataset)
-    model.precompute(stream)
+    model.precompute(stream, verbose=verbose)
     for split_args in dataset["splits"]:
         # Evaluate splits
         for stream_train, stream_test in stream.split(**split_args):
