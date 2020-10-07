@@ -237,3 +237,46 @@ def gylm_evaluate(
         log << "[Finished in %fs]" % (t1-t0) << log.flush
     X = np.array(X)
     return X
+
+class GylmReduceConvolve(Transform):
+    req_args = {
+        "nmax", "lmax", "types"
+    }
+    default_args = {
+        "nmax": None,
+        "lmax": None,
+        "types": None,
+        "epsilon": 1e-10,
+        "normalize": True
+    }
+    req_inputs = {
+        "Q"
+    }
+    allow_stream = ("X",)
+    stream_samples = ("X",)
+    precompute = True
+    def _map(self, inputs):
+        # Find dimensions
+        n_types = len(self.args["types"])
+        nmax = self.args["nmax"]
+        lmax = self.args["lmax"]
+        dim_orig = nmax*(lmax+1)**2*n_types
+        dim_conv = nmax**2*(lmax+1)*n_types*(n_types+1)//2
+        # Convolve
+        Q_list = inputs["Q"]
+        Q_red = list(map(
+            lambda Q: np.sum(Q, axis=0).reshape((1,-1)), 
+            Q_list))
+        Q_red = np.concatenate(Q_red, axis=0)
+        assert Q_red.shape[1] == dim_orig # Unexpected input shape in GylmConvolve
+        n_src = Q_red.shape[0]
+        X = np.zeros((n_src, dim_conv), dtype=Q_red.dtype)
+        gylm.evaluate_power(
+            X, Q_red, n_src, n_types, nmax, lmax)
+        # Normalize
+        if self.args["normalize"]:
+            z = 1./(np.sum(X**2, axis=1)+self.args["epsilon"])**0.5
+            X = (X.T*z).T
+        # Store
+        self.stream().put("X", X)
+

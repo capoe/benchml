@@ -16,6 +16,7 @@ class SoapBase(Transform):
         "types": None,
         "crossover": True,
         "periodic": None,
+        "power": True,
         "normalize": False }
     req_inputs = ('configs',)
     allow_params = ("calc", "channel_dim")
@@ -72,12 +73,17 @@ class SoapBase(Transform):
         self.stream().put("X", X)
         self.stream().put("T", T)
 
+class SoapGylmxx(SoapBase):
+    def evaluateSingle(self, dcalc, config, centres):
+        return dcalc.evaluate(system=config, positions=centres)
+
 class UniversalSoapBase(SoapBase):
     default_args = {
         "types": None,
         "periodic": None,
         "normalize": True,
         "crossover": True,
+        "power": True,
         "mode": "minimal" }
     allow_params = ("calcs",)
     CalculatorClass = None
@@ -118,6 +124,7 @@ class UniversalSoapGylmxx(UniversalSoapBase):
         out["sigma"] = par.pop("atom_gaussian_width")
         out["normalize"] = self.args["normalize"]
         out["crossover"] = self.args["crossover"]
+        out["power"] = self.args["power"]
         out["periodic"] = meta["periodic"] if "periodic" in meta \
             else self.args["periodic"]
         return out
