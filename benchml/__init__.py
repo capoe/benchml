@@ -10,4 +10,5 @@ from .filters import filters
 from .splits import Split
 from .accumulator import Accumulator
 from .readwrite import read, write, load, save
+from .transforms import Transform
 

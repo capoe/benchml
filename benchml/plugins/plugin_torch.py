@@ -1,6 +1,8 @@
 from ..logger import log, Mock
-from ..pipeline import Transform
+from ..pipeline import Transform, sopen
+from ..readwrite import load
 from .plugin_check import *
+import numpy as np
 
 class TorchModuleTransform(Transform, nn.Module):
     default_args = {
@@ -34,6 +36,38 @@ class TorchModuleTransform(Transform, nn.Module):
         self.to(device=self.device)
         if not self._is_setup or self.args["reset_optimizer"]:
             self._optimizer(*args, **kwargs)
+
+class TorchTransformDescriptor(Transform):
+    allow_stream = ("X",)
+    default_args = {
+        "path": None,
+        "feed": None,
+        "descriptor": "X",
+        "field": "X",
+        "to_numpy": True,
+        "pop_inputs": []
+    }
+    req_args = {"path", "feed"}
+    req_inputs = {"configs",}
+    precompute = True
+    stream_samples = ("X",)
+    def _setup(self, *args, **kwargs):
+        self.model = load(self.args["path"], method=torch)
+        for p in self.args["pop_inputs"]:
+            self.model[self.args["descriptor"]].inputs.pop(p, None)
+        self.model[self.args["descriptor"]].clearDependencies()
+        self.model[self.args["descriptor"]].updateDependencies()
+        print(self.model[self.args["descriptor"]].deps)
+        print(self.model[self.args["descriptor"]].inputs)
+    def _map(self, inputs):
+        feed_fct = eval(self.args["feed"])
+        feed = feed_fct(inputs)
+        stream = self.model.open(feed)
+        self.model.map(stream, endpoint=[self.args["descriptor"]], verbose=True)
+        X = stream.resolve("%s.%s" % (self.args["descriptor"], self.args["field"]))
+        if self.args["to_numpy"]:
+            X = np.array([ X[i].detach().numpy() for i in range(len(X)) ])
+        self.stream().put("X", X)
 
 class TorchDevice(TorchModuleTransform):
     allow_stream = ("device",)

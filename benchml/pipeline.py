@@ -311,7 +311,7 @@ class Transform(object):
     def clearDependencies(self):
         self.deps = None
     def updateDependencies(self):
-        if self.deps  is not None: return self.deps
+        if self.deps is not None: return self.deps
         deps = deps_from_inputs(self.inputs)
         if self.tag in deps: deps.remove(self.tag)
         deps_parents = set()

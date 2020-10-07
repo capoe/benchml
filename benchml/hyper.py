@@ -17,7 +17,10 @@ class Hyper(object):
 
 class GridHyper(object):
     def __init__(self, *hypers, **kwargs):
-        self.hypers = hypers
+        self.hypers = list(hypers)
+    def add(self, grid_hyper):
+        for h in grid_hyper.hypers:
+            self.hypers.append(h)
     def getFields(self):
         return [ field for h in self.hypers for field in h.instr ]
     def __iter__(self):
