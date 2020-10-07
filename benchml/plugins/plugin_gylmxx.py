@@ -63,7 +63,7 @@ class GylmTransform(Transform):
         "ldamp": 0.5,
         "power": True,
         "types": None,
-        "heavy_only": True,
+        "heavy_only": False,
         "normalize": True}
     req_inputs = ('configs',)
     allow_params = ("calc",)

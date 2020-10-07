@@ -81,7 +81,7 @@ class ReduceMatrix(Transform):
 
 class ReduceTypedMatrix(Transform):
     default_args = {
-        "reduce_op": "np.sum(x, axis=0)",
+        "reduce_op": "sum",
         "normalize": False,
         "reduce_by_type": False,
         "types": None,
