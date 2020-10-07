@@ -6,6 +6,7 @@ try:
     import sklearn.linear_model
     import sklearn.kernel_ridge
     import sklearn.ensemble
+    import sklearn.gaussian_process
 except ImportError:
     sklearn = None
 
@@ -121,3 +122,34 @@ class KernelRidge(SklearnTransform):
         y = self.params().get("model").predict(inputs["K"]**self.power)
         y = y*self.params().get("y_std") + self.params().get("y_mean")
         self.stream().put("y", y)
+
+class GaussianProcessRegressor(SklearnTransform):
+    req_args = ('alpha',)
+    default_args = {'power': 1}
+    req_inputs = ('K', 'y')
+    allow_params = {'model', 'y_mean', 'y_std', 'y'}
+    allow_stream = {'y', 'dy'}
+    def _setup(self):
+        self.power = self.args["power"]
+    def _fit(self, inputs):
+        y_mean = np.mean(inputs["y"])
+        y_std = np.std(inputs["y"])
+        y_train = (inputs["y"]-y_mean)/y_std
+        model = sklearn.gaussian_process.GaussianProcessRegressor(
+            kernel='precomputed', alpha=self.args["alpha"])
+        model.fit(inputs["K"]**self.power, y_train)
+        y_pred, dy_pred = model.predict(inputs["K"]**self.power, return_std=True)
+        dy_pred = dy_pred*y_std 
+        y_pred = y_pred*y_std + y_mean
+        self.params().put("model", model)
+        self.params().put("y_mean", y_mean)
+        self.params().put("y_std", y_std)
+        self.stream().put("y", y_pred)
+        self.stream().put("dy", dy)
+    def _map(self, inputs):
+        y, dy = self.params().get("model").predict(inputs["K"]**self.power, return_std=True)
+        y = y*self.params().get("y_std") + self.params().get("y_mean")
+        dy = dy*self.params().get("y_std")
+        self.stream().put("y", y)
+        self.stream().put("dy", dy)
+

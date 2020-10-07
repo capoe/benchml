@@ -10,8 +10,8 @@ class GaussianProcess(Transform):
         'predict_variance': True
     }
     req_inputs = ('K', 'y')
-    allow_params = {'K_inv', 'w', 'y_mean', 'y_std', 'y'}
-    allow_stream = {'y', 'dy'}
+    allow_params = {'K_inv', 'w', 'y_mean', 'y_std', 'y', 'dy_sorted', 'dy_std', 'dy_mean'}
+    allow_stream = {'y', 'dy', 'dy_rank', 'dy_zscore'}
     def _fit(self, inputs):
         # Read
         y_mean = np.mean(inputs["y"])
@@ -26,7 +26,11 @@ class GaussianProcess(Transform):
         self.params().put("w", w)
         self.params().put("y_mean", y_mean)
         self.params().put("y_std", y_std)
-        self._map(inputs)
+        y, dy, dr, dz = self._map(inputs)
+        if dy is not None:
+            self.params().put("dy_sorted", np.sort(dy))
+            self.params().put("dy_std", np.std(dy))
+            self.params().put("dy_mean", np.mean(dy))
     def _map(self, inputs):
         p = self.args["power"]
         k = inputs["K"]
@@ -37,14 +41,37 @@ class GaussianProcess(Transform):
         self.stream().put("y", mean)
         # Variance
         if self.args["predict_variance"]:
-            k_self = inputs["K_self"]
-            var = k_self**p - np.einsum('ab,bc,ac->a',
-                k**p, self.params().get("K_inv"), k**p,
-                optimize='greedy')
-            dy = self.params().get("y_std")*var**0.5
-            self.stream().put("dy", dy)
+            dy = self.predictError(k, inputs["K_self"])
+            dr = self.rankError(dy)
+            dz = self.zscoreError(dy)
         else:
-            self.stream().put("dy", None)
+            dy = None
+            dr = None
+            dz = None
+        self.stream().put("dy", dy)
+        self.stream().put("dy_rank", dr)
+        self.stream().put("dy_zscore", dz)
+        return mean, dy, dr, dz
+    def predictError(self, k, k_self):
+        p = self.args["power"]
+        var = k_self**p - np.einsum('ab,bc,ac->a',
+            k**p, self.params().get("K_inv"), k**p,
+            optimize='greedy')
+        dy = self.params().get("y_std")*var**0.5
+        return dy
+    def rankError(self, dy):
+        if self.params().has("dy_sorted"):
+            dy_sorted = self.params().get("dy_sorted")
+            ranks = 1.*np.searchsorted(dy_sorted, dy)/len(dy_sorted)
+        else:
+            ranks = None
+        return ranks
+    def zscoreError(self, dy):
+        if self.params().has("dy_std"):
+            z = (dy-self.params().get("dy_mean"))/self.params().get("dy_std")
+        else:
+            z = None
+        return z
 
 class ResidualGaussianProcess(Transform):
     req_args = ('alpha',)
@@ -76,7 +103,7 @@ class ResidualGaussianProcess(Transform):
             K_i_inv = np.linalg.inv(K_i**self.args["power"] + self.args["alpha"]*np.identity(K_i.shape[0]))
             w_i = K_i_inv.dot(y_i)
             r_i = y_std*(y_i_test - (K[test][:,train]**self.args["power"]).dot(w_i))
-            residuals.append(r_i)
+            residuals.append(np.abs(r_i))
 
         #K_i_inv = np.linalg.inv(K**self.args["power"] + self.args["alpha"]*np.identity(K.shape[0]))
         #w_i = K_i_inv.dot(y_train)
@@ -134,17 +161,16 @@ class ResidualGaussianProcess(Transform):
                 optimize='greedy')
             dy = self.params().get("y_std")*var**0.5
             self.stream().put("dy", dy)
+
             self.params().get("res_model")._map({"K": k})
-
             dk = self.params().get("res_model").stream().get("y")
-
-            n = 1
-            dk = []
-            for i in range(k.shape[0]):
-                k_sorted = np.sort(k[i])[::-1]
-                dk_i = np.sum(k_sorted[0:n])
-                dk.append(dk_i)
-            dk = np.array(dk)
+            #n = 1
+            #dk = []
+            #for i in range(k.shape[0]):
+            #    k_sorted = np.sort(k[i])[::-1]
+            #    dk_i = np.sum(k_sorted[0:n])
+            #    dk.append(dk_i)
+            #dk = np.array(dk)
 
             self.stream().put("dk", dk)
         else:

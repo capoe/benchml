@@ -109,18 +109,22 @@ class Stream(object):
         if self.parent.has("version") and self.parent.get("version") != None:
             self.put("version", self.parent.get("version"), force=True)
             for key in self.parent.tf.stream_copy:
+                if not self.parent.has(key): continue
                 if VERBOSE: print("    COPY  ", self.tf.tag, self.tag,
                     '<-', self.parent.tag, key)
                 self.put(key, self.parent.get(key))
             for key in self.parent.tf.stream_samples:
+                if not self.parent.has(key): continue
                 if VERBOSE: print("    SLICE ", self.tf.tag, self.tag,
                     '<-', self.parent.tag, key)
                 self.put(key, self.parent.get(key)[self.slice])
             for key in self.parent.tf.stream_kernel:
+                if not self.parent.has(key): continue
                 if VERBOSE: print("    KERN  ", self.tf.tag, self.tag,
                     '<-', self.parent.tag, key)
                 self.put(key, self.parent.get(key)[self.slice][:,self.slice_ax2])
             for key in self.parent.tf.stream_self_kernel:
+                if not self.parent.has(key): continue
                 if VERBOSE: print("    SELF  ", self.tf.tag, self.tag,
                     '<-', self.parent.tag, key)
                 self.put(key, self.parent.get(key)[self.slice][:,self.slice])
