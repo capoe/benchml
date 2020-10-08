@@ -1,7 +1,10 @@
 import numpy as np
 import scipy.stats
-import sklearn.metrics
 import json
+try:
+    import sklearn.metrics
+except:
+    pass
 
 def metric_mse(yp, yt):
     return np.sum((yp-yt)**2)/yp.shape[0]

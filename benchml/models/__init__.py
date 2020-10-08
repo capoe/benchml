@@ -2,13 +2,15 @@ from . import mod_basic
 from . import mod_dscribe
 from . import mod_logd
 from . import mod_bench
+from . import mod_logd_ai
 
 collections = {}
 for register in [ 
         mod_basic.register_all,
         mod_dscribe.register_all,
         mod_logd.register_all,
-        mod_bench.register_all
+        mod_bench.register_all,
+        mod_logd_ai.register_all
       ]:
     collections.update(register())
 

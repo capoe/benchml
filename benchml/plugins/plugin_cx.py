@@ -12,7 +12,7 @@ class CxCalcTransform(Transform):
         "cmd": "logp --method consensus",
         "tmpdir": "tmp",
         "reshape_as_matrix": False,
-        "batch_size": 100
+        "batch_size": 100 # To avoid a line buffer overflow in tmux ... :/
     }
     allow_stream = {"X",}
     stream_samples = ("X",)

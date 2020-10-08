@@ -3,8 +3,6 @@ from .hyper import Hyper, GridHyper, BayesianHyper
 from .logger import log
 import numpy as np
 import inspect
-import sklearn.linear_model
-import sklearn.kernel_ridge
 
 class ExtXyzInput(Transform):
     allow_stream = {'configs', 'y', 'meta'}

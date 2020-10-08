@@ -60,7 +60,8 @@ class KernelDot(Transform):
 class KernelGaussian(Transform):
     default_args = {
         'scale': 1,
-        'self_kernel': False
+        'self_kernel': False,
+        'epsilon': 1e-10
     }
     req_inputs = ('X',)
     allow_params = {'X','sigma'}
@@ -69,7 +70,7 @@ class KernelGaussian(Transform):
     stream_samples = ('K_self',)
     precompute = True
     def evaluate(self, x1, x2=None, sigma=None, diagonal_only=False):
-        x1s = x1/sigma
+        x1s = x1/(sigma+self.args["epsilon"])
         z1 = np.sum(x1s**2, axis=1)
         if x2 is None:
             x2s = x1s
