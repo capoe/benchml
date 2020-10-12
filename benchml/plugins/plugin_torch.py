@@ -44,6 +44,7 @@ class TorchTransformDescriptor(Transform):
         "feed": None,
         "descriptor": "X",
         "field": "X",
+        "device": "cpu",
         "to_numpy": True,
         "pop_inputs": []
     }
@@ -52,7 +53,10 @@ class TorchTransformDescriptor(Transform):
     precompute = True
     stream_samples = ("X",)
     def _setup(self, *args, **kwargs):
-        self.model = load(self.args["path"], method=torch)
+        self.model = load(
+            self.args["path"], 
+            method=torch, 
+            map_location=torch.device(self.args["device"]))
         for p in self.args["pop_inputs"]:
             self.model[self.args["descriptor"]].inputs.pop(p, None)
         self.model[self.args["descriptor"]].clearDependencies()
@@ -66,7 +70,7 @@ class TorchTransformDescriptor(Transform):
         self.model.map(stream, endpoint=[self.args["descriptor"]], verbose=True)
         X = stream.resolve("%s.%s" % (self.args["descriptor"], self.args["field"]))
         if self.args["to_numpy"]:
-            X = np.array([ X[i].detach().numpy() for i in range(len(X)) ])
+            X = np.array([ X[i].detach().cpu().numpy() for i in range(len(X)) ])
         self.stream().put("X", X)
 
 class TorchDevice(TorchModuleTransform):
