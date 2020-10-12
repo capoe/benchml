@@ -189,10 +189,6 @@ class DoDivideBySize(Transform):
             sizes = np.array(list(map(s_fct, configs)))
             assert np.min(sizes) > 0 # DoDivideBySize: sample size <= 0 not allowed
             y_out = y_in/sizes
-        # print(y_in)
-        # print(y_out)
-        # print(sizes)
-        # input('...')
         self.stream().put("y", y_out)
         self.stream().put("sizes", sizes)
 
