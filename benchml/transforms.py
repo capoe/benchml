@@ -151,6 +151,61 @@ class WhitenMatrix(Transform):
             X_w = X_w/self.params().get("x_std")
         self.stream().put("X", X_w)
 
+class DoDivideBySize(Transform):
+    default_args = {
+        "config_to_size": "lambda c: len(c)",
+        "skip_if_not_force": False,
+        "force": False
+    }
+    req_inputs = ("y", "configs", "meta")
+    allow_stream = ("y", "sizes")
+    def checkDoDivide(self, inputs):
+        do_divide_by_size = False
+        if self.args["force"]:
+            do_divide_by_size = True
+        elif self.args["skip_if_not_force"]:
+            pass
+        elif inputs["meta"]["scaling"] == "additive":
+            do_divide_by_size = True
+        elif inputs["meta"]["scaling"] == "unknown":
+            pass
+        elif inputs["meta"]["scaling"] == "non-additive":
+            pass
+        else:
+            raise ValueError("Scaling should be one of additive|non-additive|unknown")
+        return do_divide_by_size
+    def _map(self, inputs):
+        do_div = self.checkDoDivide(inputs)
+        y_in = inputs["y"]
+        if not do_div:
+            sizes = np.ones_like(inputs["y"])
+            y_out = np.copy(y_in)
+        else:
+            if type(self.args["config_to_size"]) is str:
+                s_fct = eval(self.args["config_to_size"])
+            else:
+                s_fct = self.args["config_to_size"]
+            configs = inputs["configs"]
+            sizes = np.array(list(map(s_fct, configs)))
+            assert np.min(sizes) > 0 # DoDivideBySize: sample size <= 0 not allowed
+            y_out = y_in/sizes
+        # print(y_in)
+        # print(y_out)
+        # print(sizes)
+        # input('...')
+        self.stream().put("y", y_out)
+        self.stream().put("sizes", sizes)
+
+class UndoDivideBySize(Transform):
+    req_inputs = ("y", "sizes",)
+    allow_stream = ("y",)
+    def _map(self, inputs):
+        y_in = inputs["y"]
+        sizes = inputs["sizes"]
+        assert y_in.shape[0] == sizes.shape[0] # UndoDivideBySize: inconsistent input dim
+        y_out = y_in*sizes
+        self.stream().put("y", y_out)
+
 from .plugins import *
 from .descriptors import *
 from .kernels import *
