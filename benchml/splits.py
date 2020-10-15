@@ -43,7 +43,7 @@ class SplitLOO(SplitBase):
         info = "%s_i%03d" % (self.tag, self.step)
         idcs_train = list(np.arange(self.step)) + list(np.arange(self.step+1, self.n_samples))
         idcs_test = [ self.step ]
-        return info, idcs_train, idcs_test
+        return info, np.array(idcs_train), np.array(idcs_test)
 
 class SplitKfold(SplitBase):
     tag = "kfold"

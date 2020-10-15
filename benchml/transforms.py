@@ -19,6 +19,13 @@ class ExtXyzInput(Transform):
         else:
             self.stream().put("meta", {})
 
+class XyInput(Transform):
+    allow_stream = {'X', 'y'}
+    stream_samples = {'X', 'y'}
+    def _feed(self, data):
+        self.stream().put("X", data.X)
+        self.stream().put("y", data.y)
+
 class Add(Transform):
     req_args = ('coeffs',)
     req_inputs = ('X',)
