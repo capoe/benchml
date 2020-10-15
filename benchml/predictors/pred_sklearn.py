@@ -7,6 +7,7 @@ try:
     import sklearn.kernel_ridge
     import sklearn.ensemble
     import sklearn.gaussian_process
+    import sklearn.svm
 except ImportError:
     sklearn = None
 
@@ -117,7 +118,7 @@ class RandomForestClassifier(SklearnTransform):
         class_weight=None,
         ccp_alpha=0.0, 
         max_samples=None)
-    allow_stream = {"y"}
+    allow_stream = {"y", "z"}
     allow_params = {"model"}
     req_inputs = {"X", "y"}
     def _fit(self, inputs):
@@ -128,7 +129,9 @@ class RandomForestClassifier(SklearnTransform):
         self.stream().put("y", y_pred)
     def _map(self, inputs):
         y_pred = self.params().get("model").predict(inputs["X"])
+        z_pred = self.params().get("model").predict_proba(inputs["X"])[:,0]
         self.stream().put("y", y_pred)
+        self.stream().put("z", z_pred)
 
 class KernelRidge(SklearnTransform):
     req_args = ('alpha',)
@@ -186,4 +189,34 @@ class GaussianProcessRegressor(SklearnTransform):
         dy = dy*self.params().get("y_std")
         self.stream().put("y", y)
         self.stream().put("dy", dy)
+
+class SupportVectorClassifier(SklearnTransform):
+    default_args = dict(
+        C=1.,
+        power=2,
+        kernel='precomputed',
+        class_weight=None)
+    req_inputs = {"K", "y"}
+    allow_params = {'model',}
+    allow_stream = {"y", "z"}
+    def _setup(self):
+        self.power = self.args["power"]
+    def _fit(self, inputs):
+        Kp = inputs["K"]**self.power
+        model = sklearn.svm.SVC(
+            kernel=self.args["kernel"],
+            C=self.args["C"], 
+            class_weight=self.args["class_weight"])
+        model.fit(Kp, inputs["y"])
+        y_pred = model.predict(Kp)
+        z_pred = model.decision_function(Kp)
+        self.params().put("model", model)
+        self.stream().put("y", y_pred)
+        self.stream().put("z", z_pred)
+    def _map(self, inputs):
+        Kp = inputs["K"]**self.power
+        y = self.params().get("model").predict(Kp)
+        z = self.params().get("model").decision_function(Kp)
+        self.stream().put("y", y)
+        self.stream().put("z", z)
 
