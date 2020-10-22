@@ -1,3 +1,8 @@
 *.pyc
 *.swp
 examples/benchmark/batches
+*.py.sw?
+q*.sh
+*.json
+*.back
+*.txt
