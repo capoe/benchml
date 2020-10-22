@@ -100,7 +100,7 @@ def compile_logd_ai(*args, **kwargs):
                 "y":  "GaussianProcess.y", 
                 "dy": "GaussianProcess.dy",
                 "dy_rank": "GaussianProcess.dy_rank",
-                "dy_zscore": "GaussianProcess.dy_zscore"})
+                "dy_zscore": "GaussianProcess.dy_zscore"}),
         ]
 
 def register_all():

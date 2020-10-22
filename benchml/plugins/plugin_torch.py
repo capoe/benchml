@@ -25,6 +25,10 @@ class TorchModuleTransform(Transform, nn.Module):
             if devstr != "" else None
         self.to(device=self.device)
         return self.device
+    def freeze(self, freeze=True):
+        Transform.freeze(self, freeze=freeze)
+        for par in self.parameters():
+            par.requires_grad = False if freeze else True
     def _parametrize(self, *args):
         return
     def _optimizer(self, *args, **kwargs):
@@ -61,9 +65,7 @@ class TorchTransformDescriptor(Transform):
             self.model[self.args["descriptor"]].inputs.pop(p, None)
         self.model[self.args["descriptor"]].clearDependencies()
         self.model[self.args["descriptor"]].updateDependencies()
-        print(self.model[self.args["descriptor"]].deps)
-        print(self.model[self.args["descriptor"]].inputs)
-    def _map(self, inputs):
+    def _map(self, inputs, stream):
         feed_fct = eval(self.args["feed"])
         feed = feed_fct(inputs)
         stream = self.model.open(feed)
@@ -75,7 +77,7 @@ class TorchTransformDescriptor(Transform):
 
 class TorchDevice(TorchModuleTransform):
     allow_stream = ("device",)
-    def _feed(self, stream, *args, **kwargs):
+    def _feed(self, data, stream, *args, **kwargs):
         stream.put("device", self.device)
         return # <- This automatically calls _setup
 

@@ -4,7 +4,7 @@ from . import models
 from . import pipeline
 from . import transforms
 from . import analysis
-from .pipeline import sopen
+from .pipeline import sopen, hupdate
 from .logger import log
 from .filters import filters
 from .splits import Split

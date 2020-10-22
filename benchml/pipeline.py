@@ -398,6 +398,8 @@ class Transform(object):
                 raise KeyError("Missing input: <%s> requires '%s'" % (
                     self.__class__.__name__, inp))
     # EXECUTION
+    def freeze(self, freeze=True):
+        self._freeze = True
     def frozen(self):
         return self._freeze
     def ready(self):
@@ -547,7 +549,7 @@ class Module(Transform):
             self[tf].inputs.update({ input_field: target })
         self.updateDependencies()
     def freeze(self, *tfs, freeze=True):
-        for tf in tfs: self[tf]._freeze = freeze
+        for tf in tfs: self[tf].freeze(freeze=freeze)
     def unfreeze(self, *tfs):
         self.freeze(*tfs, freeze=False)
     # Params
@@ -628,12 +630,15 @@ class Module(Transform):
             res[key] = stream.resolve(addr)
         return res
     # Hyperfit
-    def hyperUpdate(self, updates, verbose=False):
+    def hyperUpdate(self, updates, verbose=False, check_existing=False):
         for addr, val in updates.items():
             tf_tag, arg_name = addr.split(".")
             if verbose:
                 print("    Setting {0:15s}.{1:10s} = {2}".format(
                     tf_tag, arg_name, val))
+            if check_existing and arg_name not in self[tf_tag].args:
+                raise KeyError("Non-existing field '%s' in '%s' args" % (
+                    arg_name, tf_tag))
             self[tf_tag].args[arg_name] = val
         # >>> self.hashState() # Removed this
     def hyperEval(self,
@@ -699,7 +704,7 @@ class Module(Transform):
                 t.map(stream, verbose=verbose)
             if verbose:
                 t1 = time.time()
-                log << "[%1.4f]" % (t1-t0) << log.flush
+                log << "[%1.4f]" % (t1-t0) << log.endl
         return
     def map(self, stream, endpoint=None, verbose=VERBOSE):
         if verbose: print("Map '%s'" % stream.tag)
@@ -760,3 +765,18 @@ class sopen(object):
         return self.root
     def __exit__(self, *args):
         self.module.close(self.root)
+
+class hupdate(object):
+    def __init__(self, module, updates, verbose=False):
+        self.module = module
+        self.updates = updates
+        self.verbose = verbose
+        self.backup = {}
+        for field, val in self.updates.items():
+            tf, arg = field.split(".")
+            self.backup[field] = self.module[tf].args[arg]
+    def __enter__(self):
+        self.module.hyperUpdate(self.updates)
+    def __exit__(self, *args):
+        self.module.hyperUpdate(self.backup)
+
