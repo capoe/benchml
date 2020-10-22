@@ -61,9 +61,9 @@ class ExtXyzInput(Transform):                 # < All transforms derive from <Tr
     stream_copy = ("meta",)                   # < See section on class attributes
     stream_samples = ("configs", "y")         # < See section on class attributes
     def _feed(self, data):
-        self.stream().put("configs", data)
-        self.stream().put("y", data.y)
-        self.stream().put("meta", data.meta)
+        stream.put("configs", data)
+        stream.put("y", data.y)
+        stream.put("meta", data.meta)
 ```
 
 #### Map transforms
@@ -81,7 +81,7 @@ class RandomDescriptor(Transform):
     allow_stream = {'X'}
     stream_samples = ('X',)
     precompute = True
-    def _map(self, inputs):       # < The inputs dictionary comes preloaded with the appropriate data
+    def _map(self, inputs, stream):       # < The inputs dictionary comes preloaded with the appropriate data
         shape = (
           len(inputs["configs"]), 
           self.args["dim"])
@@ -89,27 +89,27 @@ class RandomDescriptor(Transform):
           self.args["xmin"], 
           self.args["xmax"], 
           size=shape)
-        self.stream().put("X", X) # < The X matrix is stored in the active stream of the transform
+        stream.put("X", X) # < The X matrix is stored in the active stream of the transform
 ```
 
 #### Fit transforms
 
-Fit transforms implement .\_fit and .\_map: The former is called during the training stage within model.fit(stream). The fit stores its parameters in the transform.params() object, but may also access transform.stream(), e.g., to store predicted targets for the training set. The map operation reads model parameters from .params() (e.g. via self.params().get("coeffs")), and releases the mapped output into self.stream(). See below a wrapper around the Ridge predictor from sklearn:
+Fit transforms implement .\_fit and .\_map: The former is called during the training stage within model.fit(stream). The fit stores its parameters in the transform.params() object, but may also access transform.stream(), e.g., to store predicted targets for the training set. The map operation reads model parameters from .params() (e.g. via self.params().get("coeffs")), and releases the mapped output into the stream. See below a wrapper around the Ridge predictor from sklearn:
 ```python
 class Ridge(Transform):
     default_args = { 'alpha': 1. }
     req_inputs = ('X', 'y')
     allow_params = {'model'}
     allow_stream = {'y'}
-    def _fit(self, inputs):
+    def _fit(self, inputs, stream):
         model = sklearn.linear_model.Ridge(**self.args)
         model.fit(X=inputs["X"], y=inputs["y"])
         yp = model.predict(inputs["X"])
         self.params().put("model", model)
-        self.stream().put("y", yp)
-    def _map(self, inputs):
+        stream.put("y", yp)
+    def _map(self, inputs, stream):
         y = self.params().get("model").predict(inputs["X"])
-        self.stream().put("y", y)
+        stream.put("y", y)
 ```
 
 ### Transform class attributes
