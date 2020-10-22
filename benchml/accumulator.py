@@ -27,6 +27,12 @@ def metric_auc(yp, yt):
 def metric_r2(yp, yt):
     return sklearn.metrics.r2_score(yt, yp)
 
+def metric_sup(yp, yt):
+    return np.max(np.abs(yp-yt))
+
+def metric_bal(yp, yt):
+    return 0.5*metric_mae(yp, yt) + 0.25*metric_rmse(yp, yt) + 0.25*metric_sup(yp, yt)
+
 class Accumulator(object):
     eval_map = {
         "mae": metric_mae,
@@ -35,7 +41,9 @@ class Accumulator(object):
         "rhop": metric_rhop,
         "rhor": metric_rhor,
         "auc":  metric_auc,
-        "r2": metric_r2
+        "r2": metric_r2,
+        "sup": metric_sup,
+        "bal": metric_bal,
     }
     select_best = {
         "mae": 'smallest',
@@ -44,7 +52,9 @@ class Accumulator(object):
         "rhop": 'largest',
         "rhor": 'largest',
         "auc":  'largest',
-        "r2": 'largest'
+        "r2": 'largest',
+        "sup": 'smallest',
+        "bal": 'smallest'
     }
     def select(metric, **kwargs):
         return Accumulator.select_best[metric]

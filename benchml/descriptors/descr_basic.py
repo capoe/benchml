@@ -8,7 +8,7 @@ class DescriptorRandom(Transform):
     allow_stream = {'X'}
     stream_samples = ("X",)
     precompute = True
-    def _map(self, inputs):
+    def _map(self, inputs, stream):
         X = np.random.uniform(0., 1., size=(len(inputs["configs"]), self.args["dim"]))
-        self.stream().put("X", X)
+        stream.put("X", X)
 

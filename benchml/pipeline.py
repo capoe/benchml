@@ -54,12 +54,48 @@ class Params(object):
     def items(self):
         return self.storage.items()
 
+class StreamHandle(object):
+    def __init__(self, tag, module):
+        self.module = module
+        self.tag = tag
+        self.map_stream = {}
+        self.map_active_stream = {}
+    def clear(self):
+        self.map_stream.clear()
+        self.map_active_stream.clear()
+    def hasPartition(self, tf):
+        return tf.tag in self.map_stream
+    def setStreamFor(self, tf, stream, set_active=True):
+        if not self.hasPartition(tf):
+            self.map_stream[tf.tag] = {}
+        self.map_stream[tf.tag][stream.tag] = stream
+        if set_active:
+            self.setActive(tf, stream)
+    def getStream(self, tf, stream_tag):
+        if type(tf) is str:
+            return self.map_stream[tf][stream_tag]
+        else:
+            return self.map_stream[tf.tag][stream_tag]
+    def setActive(self, tf, stream):
+        self.map_active_stream[tf.tag] = stream
+    def getActive(self, tf):
+        return self.map_active_stream[tf.tag]
+    def activate(self, tf, stream_tag):
+        active = self.map_stream[tf.tag][stream_tag]
+        self.map_active_stream[tf.tag] = active
+        return active
+    def create(self, *args, **kwargs):
+        return Stream(self, *args, **kwargs)
+    def __getitem__(self, tf_tag):
+        return self.map_stream[tf_tag]
+
 class Stream(object):
-    def __init__(self, tag, tf,
+    def __init__(self, handle, tag, tf,
             data=None,
             parent=None,
             slice=None,
             slice_ax2=None):
+        self.handle = handle
         self.tag = tag
         self.tf = tf
         self.storage = { "version": None }
@@ -77,12 +113,14 @@ class Stream(object):
         self.split_iterator = Split(self, **kwargs)
         for info, train, test in self.split_iterator:
             s1 = self.tf.module.openStream(
+                handle=self.handle,
                 tag=self.tag+".train",
                 data=None,
                 parent_tag=self.tag,
                 slice=train,
                 slice_ax2=None)
             s2 = self.tf.module.openStream(
+                handle=self.handle,
                 tag=self.tag+".test",
                 data=None,
                 parent_tag=self.tag,
@@ -104,7 +142,7 @@ class Stream(object):
                 key, self.tf.tag))
     def resolve(self, addr):
         tf, field = addr.split(".")
-        return self.tf.module[tf].stream(self.tag).get(field)
+        return self.handle.getStream(tf, self.tag).get(field)
     def sliceStorage(self, verbose=VERBOSE):
         if self.parent.has("version") and self.parent.get("version") != None:
             self.put("version", self.parent.get("version"), force=True)
@@ -195,6 +233,7 @@ class Transform(object):
         self.module = None
         self._is_setup = False
         self._freeze = False
+        self._deployed = False
         # Default args, inputs, outputs
         self.args = copy.deepcopy(self.default_args)
         self.args.update(kwargs.pop("args", {}))
@@ -204,7 +243,6 @@ class Transform(object):
         self.checkRequire()
         # Streams
         self.map_streams = {}
-        self.cached_streams = {}
         self.active_stream = None
         # Param sets
         self.map_params = {}
@@ -261,6 +299,7 @@ class Transform(object):
         self.args_links = args_links
         return args_links
     def resolveArgs(self):
+        if self._deployed: return
         # Read "@tf_tag.field_name" -> module["tf_tag"].args["field_name"]
         for key, val in self.args_links.items():
             if type(val) is str and val.startswith('@'):
@@ -273,6 +312,7 @@ class Transform(object):
     def getHash(self):
         return self.hash_total
     def hashState(self):
+        if self._deployed: return
         self.hash_prev = self.hash_total
         self.hash_self_prev = self.hash_self
         self.hash_self = generate_hash_id(self.args)
@@ -283,29 +323,20 @@ class Transform(object):
         return self.hash_prev != self.hash_total
     def hashSelfChanged(self):
         return self.hash_self_prev != self.hash_self
-    # STREAM
-    def clearStreams(self):
-        self.map_streams.clear()
-        self.active_stream = None
-    def openStream(self, data, tag, parent_tag,
+    def openStream(self, handle, data, tag, parent_tag,
             slice, slice_ax2, verbose=VERBOSE):
         if VERBOSE:
             print("  trafo=%-15s: create stream=%-15s  [parent:%s]" % (
                 self.tag, tag, parent_tag))
-        parent = self.map_streams[parent_tag] if parent_tag is not None else None
-        stream = Stream(tag=tag, data=data, parent=parent,
+        parent = handle.getStream(self, parent_tag) if parent_tag is not None else None
+        stream = handle.create(tag=tag, data=data, parent=parent,
             slice=slice, slice_ax2=slice_ax2, tf=self)
-        self.map_streams[tag] = stream
-        self.active_stream = stream
+        handle.setStreamFor(self, stream, set_active=True)
+        return stream
     def openPrivateStream(self, stream_tag):
+        raise NotImplementedError()
         stream = Stream(tag=stream_tag, tf=self)
-        self.map_streams[stream_tag] = stream
         self.active_stream = stream
-    def activateStream(self, stream_tag):
-        self.active_stream = self.map_streams[stream_tag]
-    def stream(self, tag=None):
-        if tag is None: return self.active_stream
-        else: return self.map_streams[tag]
     # PARAMS
     def clearParams(self, keep_active=True):
         self.map_params.clear()
@@ -336,7 +367,7 @@ class Transform(object):
         self.deps = deps
         return deps
     # RESOLVE & CHECK ARGS & INPUTS
-    def resolveInputs(self):
+    def resolveInputs(self, stream):
         res = {}
         for key, addr in self.inputs.items():
             if type(addr) is str:
@@ -344,7 +375,7 @@ class Transform(object):
                 if k.startswith("_"):
                     res[key] = self.module.map_transforms[tf].params().get(k[1:])
                 else:
-                    res[key] = self.module.map_transforms[tf].stream().get(k)
+                    res[key] = stream.resolve(addr)
             elif type(addr) is list:
                 res[key] = list(map(
                     lambda tf_k: self.module.map_transforms[tf_k[0]].stream().get(tf_k[1]),
@@ -371,42 +402,49 @@ class Transform(object):
         return self._freeze
     def ready(self):
         return self._is_setup
-    def feed(self, data, verbose=VERBOSE):
+    def deploy(self, set_deployed=True):
+        if set_deployed:
+            self.resolveArgs()
+            self.hashState()
+            self._deployed = True
+        else:
+            self._deployed = False
+    def feed(self, stream, data, verbose=VERBOSE):
         self.resolveArgs()
         self.hashState()
         self.setup()
-        self._feed(data)
-        self.stream().version(self.getHash())
-    def fit(self, stream_tag, verbose=VERBOSE):
+        self._feed(data, stream)
+        stream.version(self.getHash())
+    def fit(self, stream, verbose=VERBOSE):
         if self._freeze:
             if verbose: log << "[302->Map]" << log.flush
             return self.map(stream_tag, verbose=verbose)
-        self.activateStream(stream_tag)
+        stream = stream.handle.activate(self, stream.tag)
         self.resolveArgs()
         self.hashState()
-        inputs = self.resolveInputs()
-        if self.precompute and self.stream().get("version") == self.getHash():
+        inputs = self.resolveInputs(stream)
+        if self.precompute and stream.get("version") == self.getHash():
             if verbose: log << "[ hash matches, use cache ]" << log.flush
         else:
-            self.openParams(stream_tag)
+            self.openParams(stream.tag)
             self.setup()
-            self._fit(inputs)
+            self._fit(inputs, stream)
             self.hashState()
             self.params().version(self.getHash())
-            self.stream().version(self.getHash())
-    def map(self, stream_tag, verbose=VERBOSE):
-        self.activateStream(stream_tag)
+            stream.version(self.getHash())
+    def map(self, stream, verbose=VERBOSE):
+        stream = stream.handle.activate(self, stream.tag)
         self.resolveArgs()
         self.hashState()
-        inputs = self.resolveInputs()
-        if self.precompute and self.stream().get("version") == self.getHash():
+        inputs = self.resolveInputs(stream)
+        if self.precompute and stream.get("version") == self.getHash():
             if verbose: log << "[ hash matches, use cache ]" << log.flush
         else:
             self.setup()
-            self._map(inputs)
+            self._map(inputs, stream)
             self.hashState()
-            self.stream().version(self.getHash())
-    def _map(self, inputs):
+            stream.version(self.getHash())
+    def _map(self, inputs, stream):
         return
     def setup(self):
         if not self.hashSelfChanged() and self._is_setup: return
@@ -518,25 +556,22 @@ class Module(Transform):
             tf.clearParams(keep_active=keep_active)
     # Streams
     def open(self, data=None, **kwargs):
-        return self.openStream(data=data, **kwargs)
-    def close(self, clear_stream=True, check=True):
+        return self.openStream(handle=None, data=data, **kwargs)
+    def close(self, stream, clear_stream=True, check=True):
         if clear_stream:
-            self.clearStreams()
+            stream.handle.clear()
         param_streams = { tf.params().tag for tf in self.transforms \
             if tf.params() is not None }
         if check and len(param_streams) > 1:
             log << log.mr << "WARNING Model parametrized using more " \
              "than one stream (did you perhaps use .precompute?)" << log.endl
         self.clearParams(keep_active=True)
-    def clearStreams(self):
+    def activateStream(self, stream):
+        stream.handle.activate(self, stream.tag)
         for tf in self.transforms:
-            tf.clearStreams()
-        super().clearStreams()
-    def activateStream(self, stream_tag):
-        self.active_stream = self.map_streams[stream_tag]
-        for tf in self.transforms:
-            tf.activateStream(stream_tag)
+            stream.handle.activate(tf, stream.tag)
     def openStream(self,
+            handle=None,
             data=None,
             tag=None,
             parent_tag=None,
@@ -545,27 +580,19 @@ class Module(Transform):
             verbose=VERBOSE):
         if tag is None: tag = "S%d" % (len(self.map_streams))
         if verbose: print("Open stream '%s'" % tag)
-        super().openStream(data=data, tag=tag, parent_tag=parent_tag,
+        if handle is None: handle = StreamHandle(tag, module=self)
+        super().openStream(handle=handle, data=data, tag=tag, parent_tag=parent_tag,
             slice=slice, slice_ax2=slice_ax2, verbose=verbose)
         for t in self.transforms:
-            t.openStream(data=data, tag=tag, parent_tag=parent_tag,
+            stream = t.openStream(handle=handle, data=data, tag=tag, parent_tag=parent_tag,
                 slice=slice, slice_ax2=slice_ax2, verbose=verbose)
             if data is not None and hasattr(t, "_feed"):
                 if verbose: log << " Feed '%s'" % t.tag << log.flush
-                t.feed(data, verbose=verbose)
+                t.feed(stream, data, verbose=verbose)
                 if verbose: log << log.endl
-        return self.inputStream()
-    def inputStream(self):
-        return self.transforms[0].stream()
-    def stream(self):
-        return self.inputStream()
-    def get(self, addr):
-        tf, field = addr.split(".")
-        if field.startswith("_"):
-            return self[tf].params().get(field[1:])
-        else:
-            return self[tf].stream().get(field)
+        return handle.getActive(self.transforms[0])
     def compileStream(self, typestr_only=False):
+        raise NotImplementedError("Uses old streaming model")
         output = {}
         def get_typestr(v):
             if hasattr(v, "shape"):
@@ -594,11 +621,11 @@ class Module(Transform):
         return inputs
     def resolveArgs(self):
         for tf in self.transforms: tf.resolveArgs()
-    def resolveOutputs(self):
+    def resolveOutputs(self, stream):
         res = {}
         for key, addr in self.outputs.items():
             tf, k = tuple(addr.split("."))
-            res[key] = self.map_transforms[tf].stream().get(k)
+            res[key] = stream.resolve(addr)
         return res
     # Hyperfit
     def hyperUpdate(self, updates, verbose=False):
@@ -630,7 +657,7 @@ class Module(Transform):
         for substream_train, substream_test in stream.split(**split_args):
             self.fit(substream_train, verbose=verbose)
             out = self.map(substream_test)
-            accu.append("test", out[target], self.get(target_ref))
+            accu.append("test", out[target], substream_test.resolve(target_ref))
         metric, metric_std = accu.evaluate("test")
         return metric
     def hyperfit(self, stream, log=None, verbose=False, **kwargs):
@@ -655,7 +682,7 @@ class Module(Transform):
         return shortlist
     def fit(self, stream, endpoint=None, verbose=VERBOSE):
         if verbose: print("Fit '%s'" % stream.tag)
-        self.activateStream(stream.tag)
+        self.activateStream(stream)
         sweep = self.filter(endpoint=endpoint)
         for tidx, t in enumerate(sweep):
             if hasattr(t, "_fit"):
@@ -663,39 +690,39 @@ class Module(Transform):
                     log << " ".join([" "*tidx, "Fit", t.tag,
                         "using stream", stream.tag]) << log.flush
                     t0 = time.time()
-                t.fit(stream.tag, verbose=verbose)
+                t.fit(stream, verbose=verbose)
             else:
                 if verbose: 
                     log << " ".join([" "*tidx, "Map", t.tag,
                         "using stream", stream.tag]) << log.flush
                     t0 = time.time()
-                t.map(stream.tag, verbose=verbose)
+                t.map(stream, verbose=verbose)
             if verbose:
                 t1 = time.time()
                 log << "[%1.4f]" % (t1-t0) << log.flush
         return
     def map(self, stream, endpoint=None, verbose=VERBOSE):
         if verbose: print("Map '%s'" % stream.tag)
-        self.activateStream(stream.tag)
+        self.activateStream(stream)
         sweep = self.filter(endpoint=endpoint)
         for tidx, t in enumerate(sweep):
             if verbose: 
                 log << " ".join([" "*tidx, "Map", t.tag,
                     "using stream", stream.tag]) << log.flush
                 t0 = time.time()
-            t.map(stream.tag, verbose=verbose)
+            t.map(stream, verbose=verbose)
             if verbose: 
                 t1 = time.time()
                 log << "[%1.4f]" % (t1-t0) << log.flush
                 log << log.endl
-        return self.resolveOutputs()
+        return self.resolveOutputs(stream)
     def precompute(self, stream, verbose=VERBOSE):
         precomps = list(filter(lambda tf: tf.precompute, self.transforms))
         precomps_deps = set(
             [ p.tag for p in precomps ] + \
             [ d for p in precomps for d in p.deps ])
         if verbose: print("Precompute '%s'" % stream.tag)
-        self.activateStream(stream.tag)
+        self.activateStream(stream)
         for tidx, tf in enumerate(filter(
                 lambda tf: tf.tag in precomps_deps, self.transforms)):
             if hasattr(tf, "_fit"):
@@ -703,18 +730,21 @@ class Module(Transform):
                     log << " ".join([" "*tidx, "Fit (precompute)",
                         tf.tag, "using stream", stream.tag]) << log.flush
                     t0 = time.time()
-                tf.fit(stream.tag, verbose=verbose)
+                tf.fit(stream, verbose=verbose)
             else:
                 if verbose: 
                     log << " ".join([" "*tidx, "Map (precompute)",
                         tf.tag, "using stream", stream.tag]) << log.flush
                     t0 = time.time()
-                tf.map(stream.tag, verbose=verbose)
+                tf.map(stream, verbose=verbose)
             if verbose: 
                 t1 = time.time()
                 log << "[%1.4f]" % (t1-t0) << log.flush
                 log << log.endl
-        return self.inputStream()
+        return stream
+    def deploy(self, set_deployed=True):
+        super().deploy(set_deployed)
+        for tf in self.transforms: tf.deploy(set_deployed)
     def __str__(self):
         return "Module='%s'" % self.tag + \
             "\n  "+"\n  ".join([ str(t) for t in self.transforms ])
@@ -724,7 +754,9 @@ class sopen(object):
         self.module = module
         self.data = data
         self.verbose = verbose
+        self.root = None
     def __enter__(self):
-        return self.module.open(self.data, verbose=self.verbose)
+        self.root = self.module.open(self.data, verbose=self.verbose)
+        return self.root
     def __exit__(self, *args):
-        self.module.close()
+        self.module.close(self.root)

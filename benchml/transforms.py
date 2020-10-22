@@ -8,54 +8,54 @@ class ExtXyzInput(Transform):
     allow_stream = {'configs', 'y', 'meta'}
     stream_copy = ("meta",)
     stream_samples = ("configs", "y")
-    def _feed(self, data):
-        self.stream().put("configs", data)
+    def _feed(self, data, stream):
+        stream.put("configs", data)
         if hasattr(data, "y"):
-            self.stream().put("y", data.y)
+            stream.put("y", data.y)
         else:
-            self.stream().put("y", [])
+            stream.put("y", [])
         if hasattr(data, "meta"):
-            self.stream().put("meta", data.meta)
+            stream.put("meta", data.meta)
         else:
-            self.stream().put("meta", {})
+            stream.put("meta", {})
 
 class XyInput(Transform):
     allow_stream = {'X', 'y'}
     stream_samples = {'X', 'y'}
-    def _feed(self, data):
-        self.stream().put("X", data.X)
-        self.stream().put("y", data.y)
+    def _feed(self, data, stream):
+        stream.put("X", data.X)
+        stream.put("y", data.y)
 
 class Add(Transform):
     req_args = ('coeffs',)
     req_inputs = ('X',)
     allow_stream = {'y'}
-    def _map(self, inputs):
+    def _map(self, inputs, stream):
         coeffs = self.args["coeffs"]
         assert len(coeffs) == len(inputs["X"])
         y = np.zeros_like(inputs["X"][0])
         for i in range(len(inputs["X"])):
             y = y + coeffs[i]*inputs["X"][i]
-        self.stream().put("y", y)
+        stream.put("y", y)
 
 class Mult(Transform):
     req_inputs = ('X',)
     allow_stream = {'y'}
-    def _map(self, inputs):
+    def _map(self, inputs, stream):
         y = np.ones_like(inputs["X"][0])
         for i in range(len(inputs["X"])):
             y = y*inputs["X"][i]
-        self.stream().put("y", y)
+        stream.put("y", y)
 
 class Delta(Transform):
     allow_stream = {'y'}
     req_inputs = {'target', 'ref'}
     stream_samples = ("y",)
-    def _map(self, inputs):
-        self.stream().put("y", None)
-    def _fit(self, inputs):
+    def _map(self, inputs, stream):
+        stream.put("y", None)
+    def _fit(self, inputs, stream):
         delta = inputs["target"] - inputs["ref"]
-        self.stream().put("y", delta)
+        stream.put("y", delta)
 
 class Concatenate(Transform):
     req_inputs = ('X',)
@@ -65,9 +65,9 @@ class Concatenate(Transform):
     default_args = {
         "axis": 1
     }
-    def _map(self, inputs):
+    def _map(self, inputs, stream):
         X_out = np.concatenate(inputs["X"], axis=self.args["axis"])
-        self.stream().put("X", X_out)
+        stream.put("X", X_out)
 
 class ReduceMatrix(Transform):
     req_inputs = ("X",)
@@ -77,12 +77,12 @@ class ReduceMatrix(Transform):
         "epsilon": 1e-10 }
     allow_stream = ("X",)
     stream_samples = ("X",)
-    def _map(self, inputs):
+    def _map(self, inputs, stream):
         X = map(lambda x: eval(self.args["reduce"]), inputs["X"])
         X = map(lambda x: x/(np.dot(x,x)**0.5+self.args["epsilon"]), X)
         X = map(lambda x: x.reshape((1,-1)), X)
         X = np.concatenate(list(X), axis=0)
-        self.stream().put("X", X)
+        stream.put("X", X)
 
 class ReduceTypedMatrix(Transform):
     default_args = {
@@ -101,7 +101,7 @@ class ReduceTypedMatrix(Transform):
         assert self.args["reduce_op"] in self.allow_ops # Only 'sum' and 'mean' allowed
         if self.args["reduce_by_type"]:
             assert "T" in self.inputs # Require input T if reduce_by_type = True
-    def _fit(self, inputs):
+    def _fit(self, inputs, stream):
         if self.args["reduce_by_type"]:
             if self.args["types"] is not None:
                 self.types = self.args["types"]
@@ -110,8 +110,8 @@ class ReduceTypedMatrix(Transform):
             self.type_to_idx = { t: tidx for tidx, t in \
                 enumerate(self.types) }
             self.params().put("types", self.types)
-        self._map(inputs)
-    def _map(self, inputs):
+        self._map(inputs, stream)
+    def _map(self, inputs, stream):
         X_red = []
         for idx, x in enumerate(inputs["X"]):
             if self.args["reduce_by_type"]:
@@ -133,7 +133,7 @@ class ReduceTypedMatrix(Transform):
                 x_red = x_red/(np.sqrt(np.dot(x_red, x_red))+self.args["epsilon"])
             X_red.append(x_red)
         X_red = np.array(X_red)
-        self.stream().put("X", X_red)
+        stream.put("X", X_red)
 
 class WhitenMatrix(Transform):
     default_args = {
@@ -143,20 +143,20 @@ class WhitenMatrix(Transform):
     req_inputs = ("X",)
     allow_params = ("x_avg", "x_std")
     allow_stream = ("X",)
-    def _fit(self, inputs):
+    def _fit(self, inputs, stream):
         x_avg = np.mean(inputs["X"], axis=0)
         x_std = np.std(inputs["X"], axis=0) + self.args["epsilon"]
         self.params().put("x_avg", x_avg)
         self.params().put("x_std", x_std)
-        self._map(inputs)
-    def _map(self, inputs):
+        self._map(inputs, stream)
+    def _map(self, inputs, stream):
         if self.args["centre"]:
             X_w = inputs["X"]-self.params().get("x_avg")
         else:
             X_w = inputs["X"]
         if self.args["scale"]:
             X_w = X_w/self.params().get("x_std")
-        self.stream().put("X", X_w)
+        stream.put("X", X_w)
 
 class DoDivideBySize(Transform):
     default_args = {
@@ -181,7 +181,7 @@ class DoDivideBySize(Transform):
         else:
             raise ValueError("Scaling should be one of additive|non-additive|unknown")
         return do_divide_by_size
-    def _map(self, inputs):
+    def _map(self, inputs, stream):
         do_div = self.checkDoDivide(inputs)
         y_in = inputs["y"]
         if not do_div:
@@ -196,18 +196,18 @@ class DoDivideBySize(Transform):
             sizes = np.array(list(map(s_fct, configs)))
             assert np.min(sizes) > 0 # DoDivideBySize: sample size <= 0 not allowed
             y_out = y_in/sizes
-        self.stream().put("y", y_out)
-        self.stream().put("sizes", sizes)
+        stream.put("y", y_out)
+        stream.put("sizes", sizes)
 
 class UndoDivideBySize(Transform):
     req_inputs = ("y", "sizes",)
     allow_stream = ("y",)
-    def _map(self, inputs):
+    def _map(self, inputs, stream):
         y_in = inputs["y"]
         sizes = inputs["sizes"]
         assert y_in.shape[0] == sizes.shape[0] # UndoDivideBySize: inconsistent input dim
         y_out = y_in*sizes
-        self.stream().put("y", y_out)
+        stream.put("y", y_out)
 
 from .plugins import *
 from .descriptors import *

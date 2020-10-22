@@ -43,19 +43,19 @@ class KernelDot(Transform):
                 optimize='greedy')**self.args["power"]
         else:
             return x1.dot(x2.T)**self.args["power"]
-    def _fit(self, inputs):
+    def _fit(self, inputs, stream):
         K = self.evaluate(inputs["X"])
         self.params().put("X", np.copy(inputs["X"]))
-        self.stream().put("K", K)
+        stream.put("K", K)
         if self.args["self_kernel"]:
-            self.stream().put("K_self", K.diagonal())
-    def _map(self, inputs):
+            stream.put("K_self", K.diagonal())
+    def _map(self, inputs, stream):
         K = self.evaluate(inputs["X"], self.params().get("X"))
-        self.stream().put("K", K)
+        stream.put("K", K)
         if self.args["self_kernel"]:
             K_self = self.evaluate(inputs["X"], inputs["X"], 
                 diagonal_only=True)
-            self.stream().put("K_self", K_self)
+            stream.put("K_self", K_self)
 
 class KernelGaussian(Transform):
     default_args = {
@@ -86,22 +86,22 @@ class KernelGaussian(Transform):
             zz = -0.5*np.add.outer(z1, z2)
             xx = x1s.dot(x2s.T)
         return np.exp(zz+xx)
-    def _fit(self, inputs):
+    def _fit(self, inputs, stream):
         X = inputs["X"]
         sigma = self.args["scale"]*np.std(X, axis=0)
         K = self.evaluate(x1=inputs["X"], sigma=sigma)
         self.params().put("sigma", sigma)
         self.params().put("X", np.copy(inputs["X"]))
-        self.stream().put("K", K)
+        stream.put("K", K)
         if self.args["self_kernel"]:
-            self.stream().put("K_self", K.diagonal())
-    def _map(self, inputs):
+            stream.put("K_self", K.diagonal())
+    def _map(self, inputs, stream):
         K = self.evaluate(x1=inputs["X"], x2=self.params().get("X"), 
             sigma=self.params().get("sigma"))
-        self.stream().put("K", K)
+        stream.put("K", K)
         if self.args["self_kernel"]:
             K_self = self.evaluate(x1=inputs["X"], x2=inputs["X"], 
                 sigma=self.params().get("sigma"),
                 diagonal_only=True)
-            self.stream().put("K_self", K_self)
+            stream.put("K_self", K_self)
 

@@ -19,7 +19,7 @@ class MorganFP(Transform):
         self.radius = self.args["radius"]
         self.length = self.args["length"]
         self.normalize = self.args["normalize"]
-    def _map(self, inputs):
+    def _map(self, inputs, stream):
         configs = inputs["configs"]
         smiles = [ get_smiles(c) for c in configs ]
         mols = [ rchem.MolFromSmiles(s) for s in smiles ]
@@ -29,7 +29,7 @@ class MorganFP(Transform):
         if self.normalize:
             z = 1./(np.sum(fps**2, axis=1)+1e-10)**0.5
             fps = (fps.T*z).T
-        self.stream().put("X", fps)
+        stream.put("X", fps)
 
 class MorganKernel(Macro):
     req_inputs = ("x.configs",)

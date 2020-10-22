@@ -71,11 +71,11 @@ class TorchTransformDescriptor(Transform):
         X = stream.resolve("%s.%s" % (self.args["descriptor"], self.args["field"]))
         if self.args["to_numpy"]:
             X = np.array([ X[i].detach().cpu().numpy() for i in range(len(X)) ])
-        self.stream().put("X", X)
+        stream.put("X", X)
 
 class TorchDevice(TorchModuleTransform):
     allow_stream = ("device",)
-    def _feed(self, *args, **kwargs):
-        self.stream().put("device", self.device)
+    def _feed(self, stream, *args, **kwargs):
+        stream.put("device", self.device)
         return # <- This automatically calls _setup
 

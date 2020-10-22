@@ -54,7 +54,7 @@ class SoapBase(Transform):
         X = np.array(X)
         T = np.array(T)
         return T, X
-    def _fit(self, inputs):
+    def _fit(self, inputs, stream):
         if self.args["types"] is None:
             self.args["types"] = inputs["meta"]["elements"]
         if self.args["periodic"] is None:
@@ -64,14 +64,14 @@ class SoapBase(Transform):
         self.channel_dim = self.args["nmax"]*self.args["nmax"]*(self.args["lmax"]+1)
         self.params().put("calc", self.calc)
         self.params().put("channel_dim", self.channel_dim)
-        self._map(inputs)
-    def _map(self, inputs):
+        self._map(inputs, stream)
+    def _map(self, inputs, stream):
         configs = inputs["configs"]
         dcalc = self.params().get("calc")
         centres = inputs["centres"] if "centres" in inputs else None
         T, X = self.mapMultiSoap(configs, centres, [ dcalc ])
-        self.stream().put("X", X)
-        self.stream().put("T", T)
+        stream.put("X", X)
+        stream.put("T", T)
 
 class SoapGylmxx(SoapBase):
     def evaluateSingle(self, dcalc, config, centres):
@@ -90,7 +90,7 @@ class UniversalSoapBase(SoapBase):
     def check_available():
         return SoapBase.check_available() \
             and check_asap_available(__class__)
-    def _fit(self, inputs):
+    def _fit(self, inputs, stream):
         types = self.args["types"] if self.args["types"] is not None \
             else inputs["meta"]["elements"]
         types_z = [ lookup[t].z for t in types ]
@@ -102,13 +102,13 @@ class UniversalSoapBase(SoapBase):
             for key, par in sorted(self.pars.items()) ]
         calcs = [ self.CalculatorClass(**par) for par in self.pars ]
         self.params().put("calcs", calcs)
-        self._map(inputs)
-    def _map(self, inputs):
+        self._map(inputs, stream)
+    def _map(self, inputs, stream):
         centres = inputs["centres"] if "centres" in inputs else None
         configs = inputs["configs"]
         T, X = self.mapMultiSoap(configs, centres, self.params().get("calcs"))
-        self.stream().put("T", T)
-        self.stream().put("X", X)
+        stream.put("T", T)
+        stream.put("X", X)
 
 class UniversalSoapGylmxx(UniversalSoapBase):
     CalculatorClass = gylm.SoapGtoCalculator

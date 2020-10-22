@@ -24,12 +24,12 @@ class DscribeTransform(Transform):
             if "elements" in inputs["meta"]:
                 args["species"] = inputs["meta"]["elements"]
         return args
-    def _fit(self, inputs):
+    def _fit(self, inputs, stream):
         args = self._prepare(inputs)
         calc = self.CalculatorClass(**args)
         self.params().put("calc", calc)
-        self._map(inputs)
-    def _map(self, inputs):
+        self._map(inputs, stream)
+    def _map(self, inputs, stream):
         calc = self.params().get("calc")
         X = []
         for cidx, config in enumerate(inputs["configs"]):
@@ -42,7 +42,7 @@ class DscribeTransform(Transform):
         if DscribeTransform.verbose:
             log << log.endl
         X = np.array(X)
-        self.stream().put("X", X)
+        stream.put("X", X)
 
 class DscribeCM(DscribeTransform):
     default_args = {

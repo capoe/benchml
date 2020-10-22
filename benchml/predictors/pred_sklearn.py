@@ -25,44 +25,44 @@ class LinearRegression(SklearnTransform):
     req_inputs = ('X', 'y')
     allow_params = {'model'}
     allow_stream = {'y'}
-    def _fit(self, inputs):
+    def _fit(self, inputs, stream):
         model = sklearn.linear_model.LinearRegression(**self.args)
         model.fit(X=inputs["X"], y=inputs["y"])
         yp = model.predict(inputs["X"])
         self.params().put("model", model)
-        self.stream().put("y", yp)
-    def _map(self, inputs):
+        stream.put("y", yp)
+    def _map(self, inputs, stream):
         y = self.params().get("model").predict(inputs["X"])
-        self.stream().put("y", y)
+        stream.put("y", y)
 
 class Ridge(SklearnTransform):
     default_args = { 'alpha': 1. }
     req_inputs = ('X', 'y')
     allow_params = {'model'}
     allow_stream = {'y'}
-    def _fit(self, inputs):
+    def _fit(self, inputs, stream):
         model = sklearn.linear_model.Ridge(**self.args)
         model.fit(X=inputs["X"], y=inputs["y"])
         yp = model.predict(inputs["X"])
         self.params().put("model", model)
-        self.stream().put("y", yp)
-    def _map(self, inputs):
+        stream.put("y", yp)
+    def _map(self, inputs, stream):
         y = self.params().get("model").predict(inputs["X"])
-        self.stream().put("y", y)
+        stream.put("y", y)
 
 class GradientBoosting(SklearnTransform):
     allow_stream = {"y"}
     allow_params = {"model"}
     req_inputs = {"X", "y"}
-    def _fit(self, inputs):
+    def _fit(self, inputs, stream):
         model = sklearn.ensemble.GradientBoostingRegressor()
         model.fit(inputs["X"], inputs["y"])
         y_pred = model.predict(inputs["X"])
         self.params().put("model", model)
-        self.stream().put("y", y_pred)
-    def _map(self, inputs):
+        stream.put("y", y_pred)
+    def _map(self, inputs, stream):
         y_pred = self.params().get("model").predict(inputs["X"])
-        self.stream().put("y", y_pred)
+        stream.put("y", y_pred)
 
 class RandomForestRegressor(SklearnTransform):
     default_args = dict(
@@ -87,15 +87,15 @@ class RandomForestRegressor(SklearnTransform):
     allow_stream = {"y"}
     allow_params = {"model"}
     req_inputs = {"X", "y"}
-    def _fit(self, inputs):
+    def _fit(self, inputs, stream):
         model = sklearn.ensemble.RandomForestRegressor(**self.args)
         model.fit(inputs["X"], inputs["y"])
         y_pred = model.predict(inputs["X"])
         self.params().put("model", model)
-        self.stream().put("y", y_pred)
-    def _map(self, inputs):
+        stream.put("y", y_pred)
+    def _map(self, inputs, stream):
         y_pred = self.params().get("model").predict(inputs["X"])
-        self.stream().put("y", y_pred)
+        stream.put("y", y_pred)
 
 class RandomForestClassifier(SklearnTransform):
     default_args = dict(
@@ -121,17 +121,17 @@ class RandomForestClassifier(SklearnTransform):
     allow_stream = {"y", "z"}
     allow_params = {"model"}
     req_inputs = {"X", "y"}
-    def _fit(self, inputs):
+    def _fit(self, inputs, stream):
         model = sklearn.ensemble.RandomForestClassifier(**self.args)
         model.fit(inputs["X"], inputs["y"])
         y_pred = model.predict(inputs["X"])
         self.params().put("model", model)
-        self.stream().put("y", y_pred)
-    def _map(self, inputs):
+        stream.put("y", y_pred)
+    def _map(self, inputs, stream):
         y_pred = self.params().get("model").predict(inputs["X"])
         z_pred = self.params().get("model").predict_proba(inputs["X"])[:,0]
-        self.stream().put("y", y_pred)
-        self.stream().put("z", z_pred)
+        stream.put("y", y_pred)
+        stream.put("z", z_pred)
 
 class KernelRidge(SklearnTransform):
     req_args = ('alpha',)
@@ -143,7 +143,7 @@ class KernelRidge(SklearnTransform):
         Transform.__init__(self, **kwargs)
     def _setup(self):
         self.power = self.args["power"]
-    def _fit(self, inputs):
+    def _fit(self, inputs, stream):
         y_mean = np.mean(inputs["y"])
         y_std = np.std(inputs["y"])
         y_train = (inputs["y"]-y_mean)/y_std
@@ -154,11 +154,11 @@ class KernelRidge(SklearnTransform):
         self.params().put("model", model)
         self.params().put("y_mean", y_mean)
         self.params().put("y_std", y_std)
-        self.stream().put("y", y_pred)
-    def _map(self, inputs):
+        stream.put("y", y_pred)
+    def _map(self, inputs, stream):
         y = self.params().get("model").predict(inputs["K"]**self.power)
         y = y*self.params().get("y_std") + self.params().get("y_mean")
-        self.stream().put("y", y)
+        stream.put("y", y)
 
 class GaussianProcessRegressor(SklearnTransform):
     req_args = ('alpha',)
@@ -168,7 +168,7 @@ class GaussianProcessRegressor(SklearnTransform):
     allow_stream = {'y', 'dy'}
     def _setup(self):
         self.power = self.args["power"]
-    def _fit(self, inputs):
+    def _fit(self, inputs, stream):
         y_mean = np.mean(inputs["y"])
         y_std = np.std(inputs["y"])
         y_train = (inputs["y"]-y_mean)/y_std
@@ -181,14 +181,14 @@ class GaussianProcessRegressor(SklearnTransform):
         self.params().put("model", model)
         self.params().put("y_mean", y_mean)
         self.params().put("y_std", y_std)
-        self.stream().put("y", y_pred)
-        self.stream().put("dy", dy)
-    def _map(self, inputs):
+        stream.put("y", y_pred)
+        stream.put("dy", dy)
+    def _map(self, inputs, stream):
         y, dy = self.params().get("model").predict(inputs["K"]**self.power, return_std=True)
         y = y*self.params().get("y_std") + self.params().get("y_mean")
         dy = dy*self.params().get("y_std")
-        self.stream().put("y", y)
-        self.stream().put("dy", dy)
+        stream.put("y", y)
+        stream.put("dy", dy)
 
 class SupportVectorClassifier(SklearnTransform):
     default_args = dict(
@@ -201,7 +201,7 @@ class SupportVectorClassifier(SklearnTransform):
     allow_stream = {"y", "z"}
     def _setup(self):
         self.power = self.args["power"]
-    def _fit(self, inputs):
+    def _fit(self, inputs, stream):
         Kp = inputs["K"]**self.power
         model = sklearn.svm.SVC(
             kernel=self.args["kernel"],
@@ -211,12 +211,12 @@ class SupportVectorClassifier(SklearnTransform):
         y_pred = model.predict(Kp)
         z_pred = model.decision_function(Kp)
         self.params().put("model", model)
-        self.stream().put("y", y_pred)
-        self.stream().put("z", z_pred)
-    def _map(self, inputs):
+        stream.put("y", y_pred)
+        stream.put("z", z_pred)
+    def _map(self, inputs, stream):
         Kp = inputs["K"]**self.power
         y = self.params().get("model").predict(Kp)
         z = self.params().get("model").decision_function(Kp)
-        self.stream().put("y", y)
-        self.stream().put("z", z)
+        stream.put("y", y)
+        stream.put("z", z)
 

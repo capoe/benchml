@@ -20,7 +20,7 @@ class CxCalcTransform(Transform):
     def _setup(self, *args, **kwargs):
         if not os.path.isfile(self.args["cxcalc"]):
             raise IOError("Invalid cxcalc path")
-    def _map(self, inputs):
+    def _map(self, inputs, stream):
         configs = inputs["configs"]
         X_collect = []
         smiles = [ '"%s"' % get_smiles(c) for c in configs ]
@@ -43,5 +43,5 @@ class CxCalcTransform(Transform):
         if self.args["reshape_as_matrix"]:
             X = X.reshape((-1,1))
         assert X.shape[0] == len(configs)
-        self.stream().put("X", X)
+        stream.put("X", X)
 

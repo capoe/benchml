@@ -11,7 +11,7 @@ class PhyschemUser(Transform):
     }
     allow_stream = ("X",)
     stream_samples = ("X",)
-    def _map(self, inputs):
+    def _map(self, inputs, stream):
         X = []
         try:
             for config in inputs["configs"]:
@@ -20,7 +20,7 @@ class PhyschemUser(Transform):
         except KeyError as err:
             raise KeyError("PhyschemUser node expects missing custom field %s" % err)
         X = np.array(X)
-        self.stream().put("X", X)
+        stream.put("X", X)
 
 class Physchem2D(Transform):
     allow_stream = ("X",)
@@ -187,7 +187,7 @@ class Physchem2D(Transform):
             self.descriptors))
         if len(self.descriptors_active) < 1:
             raise ValueError("Empty or invalid descriptor list in Physchem2D.select")
-    def _map(self, inputs):
+    def _map(self, inputs, stream):
         configs = inputs["configs"]
         smiles = [ get_smiles(c) for c in configs ]
         mols = [ rchem.MolFromSmiles(s) for s in smiles ]
@@ -196,5 +196,5 @@ class Physchem2D(Transform):
             x = [ 1.*eval(d[1])(mol) for d in self.descriptors_active ]
             X.append(x)
         X = np.array(X)
-        self.stream().put("X", X)
+        stream.put("X", X)
 

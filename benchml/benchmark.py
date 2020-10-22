@@ -83,7 +83,7 @@ def evaluate_model(dataset, model,
                 record["output"][train_id].append({
                     "pred": output_train["y"].tolist(), 
                     "true": stream_train.resolve("input.y").tolist()})
-        model.close(check=False)
+        model.close(stream, check=False)
     t_out = time.time()
     perf = accu.evaluateAll(
         metrics=dataset.meta["metrics"],

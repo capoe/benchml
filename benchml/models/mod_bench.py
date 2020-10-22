@@ -523,6 +523,11 @@ def compile_soap(*args, **kwargs):
         Hyper({
             "whiten.centre": [ False, True ],         
             "whiten.scale":  [ False, True ]}))         
+    #print("HACK")
+    #rr_int_hyper = GridHyper(
+    #    Hyper({
+    #        "whiten.centre": [ False ],         
+    #        "whiten.scale":  [ False ]}))         
     rr_ext_settings = GridHyper(
         Hyper({"descriptor_atomic.normalize": [ False ] }),
         Hyper({"descriptor_atomic.mode": [ "minimal", "smart", "longrange" ] }),
@@ -536,6 +541,11 @@ def compile_soap(*args, **kwargs):
         Hyper({
             "whiten.centre": [ False, True ],         
             "whiten.scale":  [ False, True ]}))         
+    #print("HACK")
+    #rr_ext_hyper = GridHyper(
+    #    Hyper({
+    #        "whiten.centre": [ False ],         
+    #        "whiten.scale":  [ False ]}))         
     models = []
     for hidx, updates in enumerate(krr_int_settings):
         tag = "%s_%s" % (
@@ -681,6 +691,7 @@ def make_soap_rr(tag, extensive):
         ],
         hyper=GridHyper(
             Hyper({ "predictor.alpha": np.logspace(-9, +7, 17), })),
+            #Hyper({ "predictor.alpha": np.logspace(-4, +7, 17), })), # HACK
         broadcast={"meta": "input.meta"},
         outputs={ "y": "output.y" })
 

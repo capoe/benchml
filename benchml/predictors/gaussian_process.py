@@ -12,7 +12,7 @@ class GaussianProcess(Transform):
     req_inputs = ('K', 'y')
     allow_params = {'K_inv', 'w', 'y_mean', 'y_std', 'y', 'dy_sorted', 'dy_std', 'dy_mean'}
     allow_stream = {'y', 'dy', 'dy_rank', 'dy_zscore'}
-    def _fit(self, inputs):
+    def _fit(self, inputs, stream):
         # Read
         y_mean = np.mean(inputs["y"])
         y_std = np.std(inputs["y"])
@@ -26,19 +26,19 @@ class GaussianProcess(Transform):
         self.params().put("w", w)
         self.params().put("y_mean", y_mean)
         self.params().put("y_std", y_std)
-        y, dy, dr, dz = self._map(inputs)
+        y, dy, dr, dz = self._map(inputs, stream)
         if dy is not None:
             self.params().put("dy_sorted", np.sort(dy))
             self.params().put("dy_std", np.std(dy))
             self.params().put("dy_mean", np.mean(dy))
-    def _map(self, inputs):
+    def _map(self, inputs, stream):
         p = self.args["power"]
         k = inputs["K"]
         # Mean
         mean = self.params().get("y_std")*(
             inputs["K"]**p).dot(self.params().get("w")) \
             + self.params().get("y_mean")
-        self.stream().put("y", mean)
+        stream.put("y", mean)
         # Variance
         if self.args["predict_variance"]:
             dy = self.predictError(k, inputs["K_self"])
@@ -48,9 +48,9 @@ class GaussianProcess(Transform):
             dy = None
             dr = None
             dz = None
-        self.stream().put("dy", dy)
-        self.stream().put("dy_rank", dr)
-        self.stream().put("dy_zscore", dz)
+        stream.put("dy", dy)
+        stream.put("dy_rank", dr)
+        stream.put("dy_zscore", dz)
         return mean, dy, dr, dz
     def predictError(self, k, k_self):
         p = self.args["power"]
@@ -84,7 +84,7 @@ class ResidualGaussianProcess(Transform):
     req_inputs = ('K', 'y')
     allow_params = {'K_inv', 'w', 'y_mean', 'y_std', 'y', 'res_model', 'res'}
     allow_stream = {'y', 'dy', 'dk'}
-    def fitResiduals(self, inputs):
+    def fitResiduals(self, inputs, stream):
         # Centre
         y_mean = np.mean(inputs["y"])
         y_std = np.std(inputs["y"])
@@ -128,9 +128,9 @@ class ResidualGaussianProcess(Transform):
         y = rsd_gp.stream().get("y")
         self.params().put("res", residuals)
         self.params().put("res_model", rsd_gp)
-    def _fit(self, inputs):
+    def _fit(self, inputs, stream):
         if self.args["fit_residuals"]:
-            self.fitResiduals(inputs)
+            self.fitResiduals(inputs, stream)
         # Read
         y_mean = np.mean(inputs["y"])
         y_std = np.std(inputs["y"])
@@ -144,15 +144,15 @@ class ResidualGaussianProcess(Transform):
         self.params().put("w", w)
         self.params().put("y_mean", y_mean)
         self.params().put("y_std", y_std)
-        self._map(inputs)
-    def _map(self, inputs):
+        self._map(inputs, stream)
+    def _map(self, inputs, stream):
         p = self.args["power"]
         k = inputs["K"]
         # Mean
         mean = self.params().get("y_std")*(
             inputs["K"]**p).dot(self.params().get("w")) \
             + self.params().get("y_mean")
-        self.stream().put("y", mean)
+        stream.put("y", mean)
         # Variance
         if self.args["predict_variance"]:
             k_self = inputs["K_self"]
@@ -160,7 +160,7 @@ class ResidualGaussianProcess(Transform):
                 k**p, self.params().get("K_inv"), k**p,
                 optimize='greedy')
             dy = self.params().get("y_std")*var**0.5
-            self.stream().put("dy", dy)
+            stream.put("dy", dy)
 
             self.params().get("res_model")._map({"K": k})
             dk = self.params().get("res_model").stream().get("y")
@@ -172,7 +172,7 @@ class ResidualGaussianProcess(Transform):
             #    dk.append(dk_i)
             #dk = np.array(dk)
 
-            self.stream().put("dk", dk)
+            stream.put("dk", dk)
         else:
-            self.stream().put("dy", None)
-            self.stream().put("dk", None)
+            stream.put("dy", None)
+            stream.put("dk", None)

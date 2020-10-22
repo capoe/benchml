@@ -37,16 +37,16 @@ class KernelSmoothMatch(Transform):
                 if symmetric: K[j,i] = K[i,j]
         if self.verbose: log << log.endl
         return K
-    def _fit(self, inputs):
+    def _fit(self, inputs, stream):
         X = inputs["X"]
         K = self.evaluate(X, X, True)
-        self.stream().put("K", K)
+        stream.put("K", K)
         self.params().put("X", np.copy(inputs["X"]))
-    def _map(self, inputs):
+    def _map(self, inputs, stream):
         X1 = inputs["X"]
         X2 = self.params().get("X")
         K = self.evaluate(X1, X2, False)
-        self.stream().put("K", K)
+        stream.put("K", K)
 
 class GylmTransform(Transform):
     default_args = {
@@ -80,13 +80,13 @@ class GylmTransform(Transform):
             self.calc = None
         else:
             self.calc = gylm.GylmCalculator(**self.args)
-    def _fit(self, inputs):
+    def _fit(self, inputs, stream):
         if self.args["types"] is None:
             self.args["types"] = inputs["meta"]["elements"]
         self.calc = gylm.GylmCalculator(
             **self.args)
         self.params().put("calc", self.calc)
-        self._map(inputs)
+        self._map(inputs, stream)
 
 class NlocX(Transform):
     default_args = {
@@ -122,7 +122,7 @@ class NlocX(Transform):
     }
     def check_available():
         return check_gylmxx_available(NlocX)
-    def _map(self, inputs):
+    def _map(self, inputs, stream):
         calc_a = gylm.GylmCalculator(
             **self.args["gylma"])
         calc_b = gylm.GylmCalculator(
@@ -140,7 +140,7 @@ class NlocX(Transform):
         return
 
 class GylmAverage(GylmTransform):
-    def _map(self, inputs):
+    def _map(self, inputs, stream):
         if not hasattr(self, "heavy_only"): # NOTE For backwards-compatibility only
             self.heavy_only = True
         X = gylm_evaluate(
@@ -150,10 +150,10 @@ class GylmAverage(GylmTransform):
             reduce_molecular=np.sum,
             norm_molecular=True,
             centres=inputs.pop("centres", None))
-        self.stream().put("X", X)
+        stream.put("X", X)
 
 class GylmAtomic(GylmTransform):
-    def _map(self, inputs):
+    def _map(self, inputs, stream):
         if not hasattr(self, "heavy_only"): # TODO For backwards-compatibility only
             self.heavy_only = True
         X = gylm_evaluate(
@@ -163,7 +163,7 @@ class GylmAtomic(GylmTransform):
             reduce_molecular=None,
             norm_molecular=False,
             centres=inputs.pop("centres", None))
-        self.stream().put("X", X)
+        stream.put("X", X)
 
 def gylm_evaluate_single(args):
     config = args["config"]
@@ -255,7 +255,7 @@ class GylmReduceConvolve(Transform):
     allow_stream = ("X",)
     stream_samples = ("X",)
     precompute = True
-    def _map(self, inputs):
+    def _map(self, inputs, stream):
         # Find dimensions
         n_types = len(self.args["types"])
         nmax = self.args["nmax"]
@@ -278,5 +278,5 @@ class GylmReduceConvolve(Transform):
             z = 1./(np.sum(X**2, axis=1)+self.args["epsilon"])**0.5
             X = (X.T*z).T
         # Store
-        self.stream().put("X", X)
+        stream.put("X", X)
 
