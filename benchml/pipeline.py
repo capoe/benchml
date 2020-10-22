@@ -378,10 +378,7 @@ class Transform(object):
                 else:
                     res[key] = stream.resolve(addr)
             elif type(addr) is list:
-                res[key] = list(map(
-                    lambda tf_k: self.module.map_transforms[tf_k[0]].stream().get(tf_k[1]),
-                        map(lambda item: tuple(item.split(".")), addr)
-                ))
+                res[key] = [ stream.resolve(item) for item in addr ]
             else:
                 res[key] = addr
         return res
