@@ -25,11 +25,11 @@ class LinearRegression(SklearnTransform):
     req_inputs = ('X', 'y')
     allow_params = {'model'}
     allow_stream = {'y'}
-    def _fit(self, inputs, stream):
+    def _fit(self, inputs, stream, params):
         model = sklearn.linear_model.LinearRegression(**self.args)
         model.fit(X=inputs["X"], y=inputs["y"])
         yp = model.predict(inputs["X"])
-        self.params().put("model", model)
+        params.put("model", model)
         stream.put("y", yp)
     def _map(self, inputs, stream):
         y = self.params().get("model").predict(inputs["X"])
@@ -38,27 +38,33 @@ class LinearRegression(SklearnTransform):
 class Ridge(SklearnTransform):
     default_args = { 'alpha': 1. }
     req_inputs = ('X', 'y')
-    allow_params = {'model'}
+    allow_params = {'model', 'y_mean', 'y_std'}
     allow_stream = {'y'}
-    def _fit(self, inputs, stream):
+    def _fit(self, inputs, stream, params):
+        y_mean = np.mean(inputs["y"])
+        y_std = np.std(inputs["y"])
+        y_train = (inputs["y"]-y_mean)/y_std
         model = sklearn.linear_model.Ridge(**self.args)
-        model.fit(X=inputs["X"], y=inputs["y"])
-        yp = model.predict(inputs["X"])
-        self.params().put("model", model)
+        model.fit(X=inputs["X"], y=y_train)
+        yp = model.predict(inputs["X"])*y_std + y_mean
+        params.put("model", model)
+        params.put("y_mean", y_mean)
+        params.put("y_std", y_std)
         stream.put("y", yp)
     def _map(self, inputs, stream):
         y = self.params().get("model").predict(inputs["X"])
+        y = self.params().get("y_std")*y + self.params().get("y_mean")
         stream.put("y", y)
 
 class GradientBoosting(SklearnTransform):
     allow_stream = {"y"}
     allow_params = {"model"}
     req_inputs = {"X", "y"}
-    def _fit(self, inputs, stream):
+    def _fit(self, inputs, stream, params):
         model = sklearn.ensemble.GradientBoostingRegressor()
         model.fit(inputs["X"], inputs["y"])
         y_pred = model.predict(inputs["X"])
-        self.params().put("model", model)
+        params.put("model", model)
         stream.put("y", y_pred)
     def _map(self, inputs, stream):
         y_pred = self.params().get("model").predict(inputs["X"])
@@ -87,11 +93,11 @@ class RandomForestRegressor(SklearnTransform):
     allow_stream = {"y"}
     allow_params = {"model"}
     req_inputs = {"X", "y"}
-    def _fit(self, inputs, stream):
+    def _fit(self, inputs, stream, params):
         model = sklearn.ensemble.RandomForestRegressor(**self.args)
         model.fit(inputs["X"], inputs["y"])
         y_pred = model.predict(inputs["X"])
-        self.params().put("model", model)
+        params.put("model", model)
         stream.put("y", y_pred)
     def _map(self, inputs, stream):
         y_pred = self.params().get("model").predict(inputs["X"])
@@ -121,11 +127,11 @@ class RandomForestClassifier(SklearnTransform):
     allow_stream = {"y", "z"}
     allow_params = {"model"}
     req_inputs = {"X", "y"}
-    def _fit(self, inputs, stream):
+    def _fit(self, inputs, stream, params):
         model = sklearn.ensemble.RandomForestClassifier(**self.args)
         model.fit(inputs["X"], inputs["y"])
         y_pred = model.predict(inputs["X"])
-        self.params().put("model", model)
+        params.put("model", model)
         stream.put("y", y_pred)
     def _map(self, inputs, stream):
         y_pred = self.params().get("model").predict(inputs["X"])
@@ -143,7 +149,7 @@ class KernelRidge(SklearnTransform):
         Transform.__init__(self, **kwargs)
     def _setup(self):
         self.power = self.args["power"]
-    def _fit(self, inputs, stream):
+    def _fit(self, inputs, stream, params):
         y_mean = np.mean(inputs["y"])
         y_std = np.std(inputs["y"])
         y_train = (inputs["y"]-y_mean)/y_std
@@ -151,9 +157,9 @@ class KernelRidge(SklearnTransform):
             kernel='precomputed', alpha=self.args["alpha"])
         model.fit(inputs["K"]**self.power, y_train)
         y_pred = model.predict(inputs["K"]**self.power)*y_std + y_mean
-        self.params().put("model", model)
-        self.params().put("y_mean", y_mean)
-        self.params().put("y_std", y_std)
+        params.put("model", model)
+        params.put("y_mean", y_mean)
+        params.put("y_std", y_std)
         stream.put("y", y_pred)
     def _map(self, inputs, stream):
         y = self.params().get("model").predict(inputs["K"]**self.power)
@@ -168,7 +174,7 @@ class GaussianProcessRegressor(SklearnTransform):
     allow_stream = {'y', 'dy'}
     def _setup(self):
         self.power = self.args["power"]
-    def _fit(self, inputs, stream):
+    def _fit(self, inputs, stream, params):
         y_mean = np.mean(inputs["y"])
         y_std = np.std(inputs["y"])
         y_train = (inputs["y"]-y_mean)/y_std
@@ -178,9 +184,9 @@ class GaussianProcessRegressor(SklearnTransform):
         y_pred, dy_pred = model.predict(inputs["K"]**self.power, return_std=True)
         dy_pred = dy_pred*y_std 
         y_pred = y_pred*y_std + y_mean
-        self.params().put("model", model)
-        self.params().put("y_mean", y_mean)
-        self.params().put("y_std", y_std)
+        params.put("model", model)
+        params.put("y_mean", y_mean)
+        params.put("y_std", y_std)
         stream.put("y", y_pred)
         stream.put("dy", dy)
     def _map(self, inputs, stream):
@@ -201,7 +207,7 @@ class SupportVectorClassifier(SklearnTransform):
     allow_stream = {"y", "z"}
     def _setup(self):
         self.power = self.args["power"]
-    def _fit(self, inputs, stream):
+    def _fit(self, inputs, stream, params):
         Kp = inputs["K"]**self.power
         model = sklearn.svm.SVC(
             kernel=self.args["kernel"],
@@ -210,7 +216,7 @@ class SupportVectorClassifier(SklearnTransform):
         model.fit(Kp, inputs["y"])
         y_pred = model.predict(Kp)
         z_pred = model.decision_function(Kp)
-        self.params().put("model", model)
+        params.put("model", model)
         stream.put("y", y_pred)
         stream.put("z", z_pred)
     def _map(self, inputs, stream):

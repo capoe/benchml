@@ -348,6 +348,7 @@ class Transform(object):
         params = Params(tag=params_tag, tf=self)
         self.map_params[params_tag] = params
         self.active_params = params
+        return params
     def activateParams(self, params_tag):
         self.active_params = self.map_params[params_tag]
     def params(self):
@@ -428,9 +429,9 @@ class Transform(object):
         if self.precompute and stream.get("version") == self.getHash():
             if verbose: log << "[ hash matches, use cache ]" << log.flush
         else:
-            self.openParams(stream.tag)
+            params = self.openParams(stream.tag)
             self.setup()
-            self._fit(inputs, stream)
+            self._fit(inputs, stream, params)
             self.hashState()
             self.params().version(self.getHash())
             stream.version(self.getHash())

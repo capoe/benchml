@@ -37,11 +37,11 @@ class KernelSmoothMatch(Transform):
                 if symmetric: K[j,i] = K[i,j]
         if self.verbose: log << log.endl
         return K
-    def _fit(self, inputs, stream):
+    def _fit(self, inputs, stream, params):
         X = inputs["X"]
         K = self.evaluate(X, X, True)
         stream.put("K", K)
-        self.params().put("X", np.copy(inputs["X"]))
+        params.put("X", np.copy(inputs["X"]))
     def _map(self, inputs, stream):
         X1 = inputs["X"]
         X2 = self.params().get("X")
@@ -80,12 +80,12 @@ class GylmTransform(Transform):
             self.calc = None
         else:
             self.calc = gylm.GylmCalculator(**self.args)
-    def _fit(self, inputs, stream):
+    def _fit(self, inputs, stream, params):
         if self.args["types"] is None:
             self.args["types"] = inputs["meta"]["elements"]
         self.calc = gylm.GylmCalculator(
             **self.args)
-        self.params().put("calc", self.calc)
+        params.put("calc", self.calc)
         self._map(inputs, stream)
 
 class NlocX(Transform):

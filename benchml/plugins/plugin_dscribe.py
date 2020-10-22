@@ -24,10 +24,10 @@ class DscribeTransform(Transform):
             if "elements" in inputs["meta"]:
                 args["species"] = inputs["meta"]["elements"]
         return args
-    def _fit(self, inputs, stream):
+    def _fit(self, inputs, stream, params):
         args = self._prepare(inputs)
         calc = self.CalculatorClass(**args)
-        self.params().put("calc", calc)
+        params.put("calc", calc)
         self._map(inputs, stream)
     def _map(self, inputs, stream):
         calc = self.params().get("calc")

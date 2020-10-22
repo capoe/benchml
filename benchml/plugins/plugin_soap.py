@@ -54,7 +54,7 @@ class SoapBase(Transform):
         X = np.array(X)
         T = np.array(T)
         return T, X
-    def _fit(self, inputs, stream):
+    def _fit(self, inputs, stream, params):
         if self.args["types"] is None:
             self.args["types"] = inputs["meta"]["elements"]
         if self.args["periodic"] is None:
@@ -62,8 +62,8 @@ class SoapBase(Transform):
         self.calc = gylm.SoapGtoCalculator(
             **self.args)
         self.channel_dim = self.args["nmax"]*self.args["nmax"]*(self.args["lmax"]+1)
-        self.params().put("calc", self.calc)
-        self.params().put("channel_dim", self.channel_dim)
+        params.put("calc", self.calc)
+        params.put("channel_dim", self.channel_dim)
         self._map(inputs, stream)
     def _map(self, inputs, stream):
         configs = inputs["configs"]
@@ -90,7 +90,7 @@ class UniversalSoapBase(SoapBase):
     def check_available():
         return SoapBase.check_available() \
             and check_asap_available(__class__)
-    def _fit(self, inputs, stream):
+    def _fit(self, inputs, stream, params):
         types = self.args["types"] if self.args["types"] is not None \
             else inputs["meta"]["elements"]
         types_z = [ lookup[t].z for t in types ]
@@ -101,7 +101,7 @@ class UniversalSoapBase(SoapBase):
         self.pars = [ self.updateParams(par, inputs["meta"]) \
             for key, par in sorted(self.pars.items()) ]
         calcs = [ self.CalculatorClass(**par) for par in self.pars ]
-        self.params().put("calcs", calcs)
+        params.put("calcs", calcs)
         self._map(inputs, stream)
     def _map(self, inputs, stream):
         centres = inputs["centres"] if "centres" in inputs else None

@@ -53,7 +53,7 @@ class Delta(Transform):
     stream_samples = ("y",)
     def _map(self, inputs, stream):
         stream.put("y", None)
-    def _fit(self, inputs, stream):
+    def _fit(self, inputs, stream, params):
         delta = inputs["target"] - inputs["ref"]
         stream.put("y", delta)
 
@@ -101,7 +101,7 @@ class ReduceTypedMatrix(Transform):
         assert self.args["reduce_op"] in self.allow_ops # Only 'sum' and 'mean' allowed
         if self.args["reduce_by_type"]:
             assert "T" in self.inputs # Require input T if reduce_by_type = True
-    def _fit(self, inputs, stream):
+    def _fit(self, inputs, stream, params):
         if self.args["reduce_by_type"]:
             if self.args["types"] is not None:
                 self.types = self.args["types"]
@@ -109,7 +109,7 @@ class ReduceTypedMatrix(Transform):
                 self.types = inputs["meta"]["elements"]
             self.type_to_idx = { t: tidx for tidx, t in \
                 enumerate(self.types) }
-            self.params().put("types", self.types)
+            params.put("types", self.types)
         self._map(inputs, stream)
     def _map(self, inputs, stream):
         X_red = []
@@ -143,11 +143,11 @@ class WhitenMatrix(Transform):
     req_inputs = ("X",)
     allow_params = ("x_avg", "x_std")
     allow_stream = ("X",)
-    def _fit(self, inputs, stream):
+    def _fit(self, inputs, stream, params):
         x_avg = np.mean(inputs["X"], axis=0)
         x_std = np.std(inputs["X"], axis=0) + self.args["epsilon"]
-        self.params().put("x_avg", x_avg)
-        self.params().put("x_std", x_std)
+        params.put("x_avg", x_avg)
+        params.put("x_std", x_std)
         self._map(inputs, stream)
     def _map(self, inputs, stream):
         if self.args["centre"]:

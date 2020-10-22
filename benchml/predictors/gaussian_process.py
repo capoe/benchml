@@ -12,7 +12,7 @@ class GaussianProcess(Transform):
     req_inputs = ('K', 'y')
     allow_params = {'K_inv', 'w', 'y_mean', 'y_std', 'y', 'dy_sorted', 'dy_std', 'dy_mean'}
     allow_stream = {'y', 'dy', 'dy_rank', 'dy_zscore'}
-    def _fit(self, inputs, stream):
+    def _fit(self, inputs, stream, params):
         # Read
         y_mean = np.mean(inputs["y"])
         y_std = np.std(inputs["y"])
@@ -22,15 +22,15 @@ class GaussianProcess(Transform):
         K_inv = np.linalg.inv(K**self.args["power"] + self.args["alpha"]*np.identity(K.shape[0]))
         w = K_inv.dot(y_train)
         # Store
-        self.params().put("K_inv", K_inv)
-        self.params().put("w", w)
-        self.params().put("y_mean", y_mean)
-        self.params().put("y_std", y_std)
+        params.put("K_inv", K_inv)
+        params.put("w", w)
+        params.put("y_mean", y_mean)
+        params.put("y_std", y_std)
         y, dy, dr, dz = self._map(inputs, stream)
         if dy is not None:
-            self.params().put("dy_sorted", np.sort(dy))
-            self.params().put("dy_std", np.std(dy))
-            self.params().put("dy_mean", np.mean(dy))
+            params.put("dy_sorted", np.sort(dy))
+            params.put("dy_std", np.std(dy))
+            params.put("dy_mean", np.mean(dy))
     def _map(self, inputs, stream):
         p = self.args["power"]
         k = inputs["K"]
@@ -128,7 +128,7 @@ class ResidualGaussianProcess(Transform):
         y = rsd_gp.stream().get("y")
         self.params().put("res", residuals)
         self.params().put("res_model", rsd_gp)
-    def _fit(self, inputs, stream):
+    def _fit(self, inputs, stream, params):
         if self.args["fit_residuals"]:
             self.fitResiduals(inputs, stream)
         # Read
@@ -140,10 +140,10 @@ class ResidualGaussianProcess(Transform):
         K_inv = np.linalg.inv(K**self.args["power"] + self.args["alpha"]*np.identity(K.shape[0]))
         w = K_inv.dot(y_train)
         # Store
-        self.params().put("K_inv", K_inv)
-        self.params().put("w", w)
-        self.params().put("y_mean", y_mean)
-        self.params().put("y_std", y_std)
+        params.put("K_inv", K_inv)
+        params.put("w", w)
+        params.put("y_mean", y_mean)
+        params.put("y_std", y_std)
         self._map(inputs, stream)
     def _map(self, inputs, stream):
         p = self.args["power"]
