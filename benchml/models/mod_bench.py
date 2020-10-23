@@ -1,6 +1,9 @@
 import numpy as np
 from ..transforms import *
 
+whiten_hyper = [ False ] # NOTE: False = no whitening in ridge models
+regularization_range = np.logspace(-9, +7, 17)
+
 def compile_physchem(custom_fields=[], with_hyper=False, **kwargs):
     models = []
     for descriptor_set in ["basic", "core", "logp", "extended"]:
@@ -79,7 +82,7 @@ def compile_physchem(custom_fields=[], with_hyper=False, **kwargs):
                 ],
                 hyper=GridHyper(
                     Hyper({ "input_norm.force": [False, True] }),
-                    Hyper({ "predictor.alpha": np.logspace(-5,+5, 7), })),
+                    Hyper({ "predictor.alpha": np.logspace(-5,+5, 11), })),
                 broadcast={"meta": "input.meta"},
                 outputs={"y": "output.y"}),
         ])
@@ -126,7 +129,7 @@ def compile_ecfp(**kwargs):
                         inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}) 
                 ],
                 hyper=GridHyper(
-                    Hyper({ "predictor.alpha": np.logspace(-9,+7, 17), }),
+                    Hyper({ "predictor.alpha": regularization_range, }),
                     Hyper({ "predictor.power": [ 2. ] })),
                 broadcast={ "meta": "input.meta" },
                 outputs={ "y": "output.y" }
@@ -163,8 +166,9 @@ def compile_ecfp(**kwargs):
                         inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}) 
                 ],
                 hyper=GridHyper(
-                    Hyper({ "predictor.alpha": np.logspace(-9,+7, 17), }),
-                    Hyper({ "whiten.centre": [ False, True], "whiten.scale": [False, True] })),
+                    Hyper({ "predictor.alpha": regularization_range, }),
+                    Hyper({ "whiten.centre": [ False, True], "whiten.scale": [False, True] })
+                ),
                 outputs={"y": "output.y"}
             )
         ])
@@ -217,7 +221,7 @@ def compile_cm(*args, **kwargs):
                 ],
                 hyper=GridHyper(
                     Hyper({ "input_norm.force": [False, True] }),
-                    Hyper({ "predictor.alpha": np.logspace(-9,+7, 17), })),
+                    Hyper({ "predictor.alpha": regularization_range, })),
                 broadcast={"meta": "input.meta"},
                 outputs={ "y": "output.y" }),
             Module(
@@ -269,7 +273,7 @@ def compile_cm(*args, **kwargs):
                 ], 
                 hyper=GridHyper(
                     Hyper({ "input_norm.force": [False, True] }),
-                    Hyper({ "predictor.alpha": np.logspace(-9, +7, 17), })),
+                    Hyper({ "predictor.alpha": regularization_range, })),
                 broadcast={"meta": "input.meta"},
                 outputs={ "y": "output.y" })
         ])
@@ -325,9 +329,9 @@ def compile_acsf(adjust_to_species=["C", "N", "O"], *args, **kwargs):
                             inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}) 
                     ],
                     hyper=GridHyper(
-                        Hyper({ "whiten.centre": [False, True],
-                                "whiten.scale":  [False, True]}),
-                        Hyper({ "predictor.alpha": np.logspace(-9,+7, 17), })),
+                        Hyper({ "whiten.centre": whiten_hyper,  
+                                "whiten.scale":  whiten_hyper}),
+                        Hyper({ "predictor.alpha": regularization_range, })),
                     broadcast={"meta": "input.meta"},
                     outputs={ "y": "output.y" }),
                 Module(
@@ -377,7 +381,7 @@ def compile_acsf(adjust_to_species=["C", "N", "O"], *args, **kwargs):
                             inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}) 
                     ],
                     hyper=GridHyper(
-                        Hyper({ "predictor.alpha": np.logspace(-9, +7, 17), })),
+                        Hyper({ "predictor.alpha": regularization_range, })),
                     broadcast={"meta": "input.meta"},
                     outputs={ "y": "output.y" })
             ])
@@ -428,9 +432,9 @@ def compile_mbtr(**kwargs):
                             inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}) 
                     ],
                     hyper=GridHyper(
-                        Hyper({ "whiten.centre": [False, True],
-                                "whiten.scale":  [False, True]}),
-                        Hyper({ "predictor.alpha": np.logspace(-9,+7, 17), })),
+                        Hyper({ "whiten.centre": whiten_hyper,   
+                                "whiten.scale":  whiten_hyper}), 
+                        Hyper({ "predictor.alpha": regularization_range, })),
                     broadcast={"meta": "input.meta"},
                     outputs={ "y": "output.y" }),
                 Module(
@@ -479,7 +483,7 @@ def compile_mbtr(**kwargs):
                             inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}) 
                     ],
                     hyper=GridHyper(
-                        Hyper({ "predictor.alpha": np.logspace(-9, +7, 17), })),
+                        Hyper({ "predictor.alpha": regularization_range, })),
                     broadcast={"meta": "input.meta"},
                     outputs={ "y": "output.y" })
             ])
@@ -521,13 +525,8 @@ def compile_soap(*args, **kwargs):
         Hyper({"whiten.scale":  [ True ]}))         
     rr_int_hyper = GridHyper(
         Hyper({
-            "whiten.centre": [ False, True ],         
-            "whiten.scale":  [ False, True ]}))         
-    #print("HACK")
-    #rr_int_hyper = GridHyper(
-    #    Hyper({
-    #        "whiten.centre": [ False ],         
-    #        "whiten.scale":  [ False ]}))         
+            "whiten.centre": whiten_hyper,         
+            "whiten.scale":  whiten_hyper}))         
     rr_ext_settings = GridHyper(
         Hyper({"descriptor_atomic.normalize": [ False ] }),
         Hyper({"descriptor_atomic.mode": [ "minimal", "smart", "longrange" ] }),
@@ -539,13 +538,8 @@ def compile_soap(*args, **kwargs):
         Hyper({"whiten.scale":  [ False ]}))         
     rr_ext_hyper = GridHyper(
         Hyper({
-            "whiten.centre": [ False, True ],         
-            "whiten.scale":  [ False, True ]}))         
-    #print("HACK")
-    #rr_ext_hyper = GridHyper(
-    #    Hyper({
-    #        "whiten.centre": [ False ],         
-    #        "whiten.scale":  [ False ]}))         
+            "whiten.centre": whiten_hyper,         
+            "whiten.scale":  whiten_hyper}))         
     models = []
     for hidx, updates in enumerate(krr_int_settings):
         tag = "%s_%s" % (
@@ -690,8 +684,7 @@ def make_soap_rr(tag, extensive):
                 inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}) 
         ],
         hyper=GridHyper(
-            Hyper({ "predictor.alpha": np.logspace(-9, +7, 17), })),
-            #Hyper({ "predictor.alpha": np.logspace(-4, +7, 17), })), # HACK
+            Hyper({ "predictor.alpha": regularization_range, })),
         broadcast={"meta": "input.meta"},
         outputs={ "y": "output.y" })
 
@@ -721,8 +714,8 @@ def compile_gylm(*args, **kwargs):
         Hyper({"whiten.scale":  [ True ]}))         
     rr_int_hyper = GridHyper(
         Hyper({
-            "whiten.centre": [ False ],         
-            "whiten.scale":  [ False ]}))         
+            "whiten.centre": whiten_hyper,         
+            "whiten.scale":  whiten_hyper}))         
     rr_ext_settings = GridHyper(
         Hyper({"descriptor_atomic.normalize": [ False ] }),
         Hyper({"descriptor.reduce_op": [ "sum" ]}),    
@@ -732,8 +725,8 @@ def compile_gylm(*args, **kwargs):
         Hyper({"whiten.scale":  [ False ]}))         
     rr_ext_hyper = GridHyper(
         Hyper({
-            "whiten.centre": [ False ],         
-            "whiten.scale":  [ False ]}))         
+            "whiten.centre": whiten_hyper,         
+            "whiten.scale":  whiten_hyper}))         
     models = []
     for hidx, updates in enumerate(krr_int_settings):
         for minimal in [True, False]:
@@ -826,7 +819,7 @@ def make_gylm_rr(tag, minimal, extensive):
                 inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}) 
         ],
         hyper=GridHyper(
-            Hyper({ "predictor.alpha": np.logspace(-11, +5, 17), })),
+            Hyper({ "predictor.alpha": regularization_range, })),
         broadcast={"meta": "input.meta"},
         outputs={ "y": "output.y" }
     )
@@ -890,7 +883,7 @@ def make_gylm_krr(tag, minimal, extensive):
                 inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}) 
         ],
         hyper=GridHyper(
-            Hyper({ "predictor.alpha": np.logspace(-11,+5, 17), })
+            Hyper({ "predictor.alpha": regularization_range, })
         ),
         broadcast={ "meta": "input.meta" },
         outputs={ "y": "output.y" }
@@ -959,7 +952,7 @@ def make_pdf_krr(minimal):
                     inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}) 
             ],
             hyper=GridHyper(
-                Hyper({ "predictor.alpha": np.logspace(-9,+7, 17), })
+                Hyper({ "predictor.alpha": regularization_range, })
             ),
             broadcast={ "meta": "input.meta" },
             outputs={ "y": "output.y" }
@@ -1021,7 +1014,7 @@ def make_pdf_krr(minimal):
                     inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}) 
             ],
             hyper=GridHyper(
-                Hyper({ "predictor.alpha": np.logspace(-9,+7, 17), })
+                Hyper({ "predictor.alpha": regularization_range, })
             ),
             broadcast={ "meta": "input.meta" },
             outputs={ "y": "output.y" }
@@ -1085,9 +1078,9 @@ def make_pdf_rr(minimal):
                     inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}) 
             ],
             hyper=GridHyper(
-                Hyper({ "whiten.centre": [False, True],
-                        "whiten.scale":  [False, True]}),
-                Hyper({ "predictor.alpha": np.logspace(-11, +5, 17), })),
+                Hyper({ "whiten.centre": whiten_hyper,
+                        "whiten.scale":  whiten_hyper}),
+                Hyper({ "predictor.alpha": regularization_range, })),
             broadcast={"meta": "input.meta"},
             outputs={ "y": "output.y" }
         ),
@@ -1149,7 +1142,9 @@ def make_pdf_rr(minimal):
                     inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}) 
             ],
             hyper=GridHyper(
-                Hyper({ "predictor.alpha": np.logspace(-11, +5, 17), })),
+                Hyper({ "whiten.centre": whiten_hyper,
+                        "whiten.scale":  whiten_hyper}),
+                Hyper({ "predictor.alpha": regularization_range, })),
             broadcast={"meta": "input.meta"},
             outputs={ "y": "output.y" }
         )
