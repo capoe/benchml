@@ -82,7 +82,7 @@ def compile_physchem(custom_fields=[], with_hyper=False, **kwargs):
                 ],
                 hyper=GridHyper(
                     Hyper({ "input_norm.force": [False, True] }),
-                    Hyper({ "predictor.alpha": np.logspace(-5,+5, 11), })),
+                    Hyper({ "predictor.alpha": regularization_range, })),
                 broadcast={"meta": "input.meta"},
                 outputs={"y": "output.y"}),
         ])
@@ -633,7 +633,7 @@ def make_soap_krr(tag, extensive):
                 inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}) 
         ],
         hyper=GridHyper(
-            Hyper({ "predictor.alpha": np.logspace(-7, +7, 15), })),
+            Hyper({ "predictor.alpha": regularization_range, })),
         broadcast={"meta": "input.meta"},
         outputs={ "y": "output.y" })
 
@@ -876,7 +876,7 @@ def make_gylm_krr(tag, minimal, extensive):
                 }),
             KernelRidge(
                 tag="predictor",
-                args={"alpha": 1e-5, "power": 2},
+                args={"alpha": None, "power": 2},
                 inputs={"K": "kernel.K", "y": "input_norm.y"}),
             UndoDivideBySize(
                 tag="output",
@@ -945,7 +945,7 @@ def make_pdf_krr(minimal):
                     }),
                 KernelRidge(
                     tag="predictor",
-                    args={"alpha": 1e-5, "power": 2},
+                    args={"alpha": None, "power": 2},
                     inputs={"K": "kernel.K", "y": "input_norm.y"}),
                 UndoDivideBySize(
                     tag="output",
@@ -1007,7 +1007,7 @@ def make_pdf_krr(minimal):
                     }),
                 KernelRidge(
                     tag="predictor",
-                    args={"alpha": 1e-5, "power": 2},
+                    args={"alpha": None, "power": 2},
                     inputs={"K": "kernel.K", "y": "input_norm.y"}),
                 UndoDivideBySize(
                     tag="output",
