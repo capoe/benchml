@@ -48,6 +48,55 @@ class KernelSmoothMatch(Transform):
         K = self.evaluate(X1, X2, False)
         stream.put("K", K)
 
+class AttributeKernelSmoothMatchSVM(Transform):
+    req_inputs = ("configs", "X", "X_probe", "z_probe", "model")
+    default_args = {
+        "write_xyz": "attribution.xyz",
+        "gamma": "@kernel.gamma",
+        "epsilon": "@kernel.epsilon",
+        "base_kernel": "@kernel.base_kernel",
+        "base_power": "@kernel.base_power",
+        "power": "@predictor.power"
+    }
+    allow_stream = ("Z",)
+    verbose = True
+    def _map(self, inputs, stream):
+        configs = inputs["configs"]
+        model = inputs["model"]
+        X_probe = inputs["X_probe"]
+        X = inputs["X"]
+        z_probe = inputs["z_probe"]
+        if stream.parent is not None:
+            stream.put("Z", None)
+            return
+        Z = []
+        log << log.endl
+        for i in range(len(X_probe)):
+            log << "Attribute %d/%d" % (i+1, len(X_probe)) << log.endl
+            xi = X_probe[i]
+            k_attr = np.zeros((len(xi), len(X)))
+            for j in range(len(X)):
+                xj = X[j]
+                kij = eval(self.args["base_kernel"])**self.args["base_power"]
+                pij = np.zeros_like(kij)
+                gylm.smooth_match(pij, kij, kij.shape[0], kij.shape[1],
+                    self.args["gamma"], self.args["epsilon"], False)
+                k_attr[:,j] = np.sum(kij*pij, axis=1)
+            k = np.sum(k_attr, axis=0)
+            ksub = k[model.support_]
+            ksub_attr = k_attr[:,model.support_]
+            w = ksub**(self.args["power"]-1)*model.dual_coef_[0]
+            z_attr = model.intercept_/ksub_attr.shape[0] + ksub_attr.dot(w)
+            Z.append(z_attr)
+        if self.args["write_xyz"] != "":
+            assert configs is not None # Require configs input to produce xyz
+            from ..readwrite import write
+            import json
+            for cidx, config in enumerate(configs):
+                config.info["z_attr"] = list(Z[cidx].tolist())
+            write('attribution.xyz', configs)
+        stream.put("Z", np.array(Z))
+
 class GylmTransform(Transform):
     default_args = {
         "procs": 1,

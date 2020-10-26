@@ -14,8 +14,7 @@ def compile_physchem_class(custom_fields=[], with_hyper=False, **kwargs):
                         inputs={"configs": "input.configs"}),
                     PhyschemUser(tag="PhyschemUser",
                         args={
-                            "fields": custom_fields
-                        },
+                            "fields": custom_fields},
                         inputs={"configs": "input.configs"}),
                     Concatenate(tag="descriptor",
                         inputs={"X": [ "Physchem2D.X", "PhyschemUser.X" ]}),
@@ -24,13 +23,11 @@ def compile_physchem_class(custom_fields=[], with_hyper=False, **kwargs):
                         args={
                             "config_to_size": "lambda c: len(c)",
                             "skip_if_not_force": True,
-                            "force": None
-                        },
+                            "force": None},
                         inputs={
                             "configs": "input.configs",
                             "meta": "input.meta",
-                            "y": "input.y"
-                        }),
+                            "y": "input.y"}),
                     RandomForestClassifier(tag="predictor",
                         inputs={"X": "descriptor.X", "y": "input.y"}),
                     UndoDivideBySize(
@@ -62,12 +59,10 @@ def compile_ecfp_class():
                     tag="predictor",
                     args={
                         "C": None,
-                        "power": 2
-                    },
+                        "power": 2},
                     inputs={
                         "K": "kernel.K",
-                        "y": "input.y"
-                    }),
+                        "y": "input.y"}),
             ],
             hyper=GridHyper(
                 Hyper({ "predictor.C": np.logspace(-9,+7, 17), }),
@@ -76,9 +71,78 @@ def compile_ecfp_class():
             outputs={ "y": "predictor.z" }
         ),
     ]
+
+def compile_gylm_match_class(**kwargs):
+    return [
+        Module(
+            tag="bmol_gylm_match_class",
+            transforms=[
+                ExtXyzInput(tag="input"),
+                GylmAtomic(
+                    tag="descriptor",
+                    inputs={"configs": "input.configs"}),
+                KernelSmoothMatch(
+                    tag="kernel",
+                    inputs={"X": "descriptor.X"}),
+                SupportVectorClassifier(
+                    tag="predictor",
+                    args={
+                        "C": None,
+                        "power": 2},
+                    inputs={
+                        "K": "kernel.K",
+                        "y": "input.y"}),
+            ],
+            hyper=GridHyper(
+                Hyper({ "predictor.C": np.logspace(-9,+7, 17), }),
+                Hyper({ "predictor.power": [ 2. ] })),
+            broadcast={ "meta": "input.meta" },
+            outputs={ "y": "predictor.z" }
+        ),
+        Module(
+            tag="bmol_gylm_match_class_attr",
+            transforms=[
+                ExtXyzInput(tag="input"),
+                GylmAtomic(
+                    tag="descriptor",
+                    args={
+                        "heavy_only": True},
+                    inputs={"configs": "input.configs"}),
+                KernelSmoothMatch(
+                    tag="kernel",
+                    inputs={"X": "descriptor.X"}),
+                SupportVectorClassifier(
+                    tag="predictor",
+                    args={
+                        "C": None,
+                        "power": 2
+                    },
+                    inputs={
+                        "K": "kernel.K",
+                        "y": "input.y"}),
+                AttributeKernelSmoothMatchSVM(
+                    tag="attribute",
+                    args={
+                        "write_xyz": "attribution.xyz"},
+                    inputs={
+                        "configs": "input.configs",
+                        "X": "kernel._X",
+                        "X_probe": "descriptor.X",
+                        "z_probe": "predictor.z",
+                        "model": "predictor._model"})
+            ],
+            hyper=GridHyper(
+                Hyper({ "predictor.C": np.logspace(-9,+7, 17), }),
+                Hyper({ "predictor.power": [ 2. ] })),
+            broadcast={ "meta": "input.meta" },
+            outputs={ "y": "predictor.z", "y_attr": "attribute.Z" }
+        ),
+    ]
+
 def register_all():
     return {
         "bmol_physchem_class": compile_physchem_class,
-        "bmol_ecfp_class": compile_ecfp_class
+        "bmol_ecfp_class": compile_ecfp_class,
+        "bmol_gylm_match_class": compile_gylm_match_class
     }
 

@@ -7,7 +7,7 @@ import csv
 log = benchml.log
 log >> 'mkdir -p tmp'
 
-def prompt(mssg, options=[], default=None, convert=str):
+def prompt(mssg, options=[], default=None, check_allowed=lambda i,o: i in o, convert=str):
     prompt_str = "%-20s" % (mssg+":")
     if default is not None:
         def_str = "   default="
@@ -26,9 +26,8 @@ def prompt(mssg, options=[], default=None, convert=str):
         if s != "":
             try:
                 s = convert(s)
-                if len(options) > 0 and not s in options:
+                if len(options) > 0 and not check_allowed(s, options):
                     raise ValueError()
-
             except:
                 valid = False
         elif default is None:
@@ -58,8 +57,9 @@ def write_meta(configs, extxyz, meta_json):
     scaling = prompt("Estimate scaling", 
         options=["extensive", "intensive", "unknown"], default="unknown")
     metrics = prompt("Select metrics", 
-        options=["mae", "rmse", "mse", "rhop", "r2", "auc"], 
+        options=["mae", "rmse", "mse", "rhop", "r2", "auc", "rhor"], 
         default=["mae", "rmse", "rhop", "r2"] if (task == "regression") else ["auc"], 
+        check_allowed=lambda i,o: len(set(i).intersection(set(o))) == len(i),
         convert=lambda s: s.split())
     per_atom = False
     conv = prompt("Set conversion",

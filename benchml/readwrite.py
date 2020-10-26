@@ -194,8 +194,6 @@ def write(
         config_file,
         configs,
         allow_json=True):
-    if type(configs) != list:
-        configs = [ configs ]
     if ase.io is not None:
         return ase.io.write(config_file, configs)
     ofs = open(config_file, 'w')
