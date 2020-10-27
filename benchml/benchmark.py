@@ -48,7 +48,7 @@ def evaluate_model(dataset, model,
             if model.hyper is not None:
                 model.hyperfit(
                     stream=stream_train, 
-                    split_args=dataset["hypersplit"] if "hypersplit" in dataset \
+                    split_args=dataset["hypersplit"] if "hypersplit" in dataset.meta \
                         else {"method": "random", "n_splits": 5, "train_fraction": 0.75},
                     accu_args={"metric": dataset["metrics"][0]},
                     target="y",
