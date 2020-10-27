@@ -361,7 +361,7 @@ class Transform(object):
     def fit(self, stream, verbose=VERBOSE):
         if self._freeze:
             if verbose: log << "[302->Map]" << log.flush
-            return self.map(stream_tag, verbose=verbose)
+            return self.map(stream, verbose=verbose)
         stream = stream.handle.activate(self, stream.tag)
         self.resolveArgs()
         self.hashState()
