@@ -51,7 +51,7 @@ There are three types of transforms: input, map, and fit+map transforms. Which t
 
 Input transforms, such as ExtXyzInput, implement the .\_feed method that is called inside .open of a model (= pipeline):
 ```python
-stream = model.open(data) # < Internally this will call .feed(data) on all 
+stream = model.open(data) # < Internally this will call .feed on all 
                           #   transforms that implement the ._feed method.
 ```
 Below we show an example implementation for an input node (here: ExtXyzInput), where .feed is used to release "configs", "y" and "meta" into the data stream:
@@ -60,7 +60,7 @@ class ExtXyzInput(Transform):                 # < All transforms derive from <Tr
     allow_stream = {'configs', 'y', 'meta'}   # < Fields permitted in the stream object
     stream_copy = ("meta",)                   # < See section on class attributes
     stream_samples = ("configs", "y")         # < See section on class attributes
-    def _feed(self, data):
+    def _feed(self, data, stream):
         stream.put("configs", data)
         stream.put("y", data.y)
         stream.put("meta", data.meta)
@@ -101,11 +101,11 @@ class Ridge(Transform):
     req_inputs = ('X', 'y')
     allow_params = {'model'}
     allow_stream = {'y'}
-    def _fit(self, inputs, stream):
+    def _fit(self, inputs, stream, params):
         model = sklearn.linear_model.Ridge(**self.args)
         model.fit(X=inputs["X"], y=inputs["y"])
         yp = model.predict(inputs["X"])
-        self.params().put("model", model)
+        params.put("model", model)
         stream.put("y", yp)
     def _map(self, inputs, stream):
         y = self.params().get("model").predict(inputs["X"])
