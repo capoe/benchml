@@ -35,7 +35,7 @@ def compile_physchem(custom_fields=[], with_hyper=False, **kwargs):
                             "y": "input.y"
                         }),
                     RandomForestRegressor(tag="predictor",
-                        inputs={"X": "descriptor.X", "y": "input.y"}),
+                        inputs={"X": "descriptor.X", "y": "input_norm.y"}),
                     UndoDivideBySize(
                         tag="output",
                         inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}) 

@@ -29,7 +29,7 @@ def compile_physchem_class(custom_fields=[], with_hyper=False, **kwargs):
                             "meta": "input.meta",
                             "y": "input.y"}),
                     RandomForestClassifier(tag="predictor",
-                        inputs={"X": "descriptor.X", "y": "input.y"}),
+                        inputs={"X": "descriptor.X", "y": "input_norm.y"}),
                     UndoDivideBySize(
                         tag="output",
                         inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}) 

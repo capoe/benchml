@@ -158,6 +158,37 @@ class WhitenMatrix(Transform):
             X_w = X_w/self.params().get("x_std")
         stream.put("X", X_w)
 
+class SubsampleMatrix(bml.Transform):
+    default_args = {
+        "info_key": None,
+    }
+    allow_stream = {"X",}
+    def _map(self, inputs, stream):
+        raise NotImplementedError() # TODO Generalize
+        X = inputs["X"]
+        configs = inputs["configs"]
+        X_out = []
+        for i in range(len(configs)):
+            assert len(X[i]) == len(configs[i].symbols)
+            sel = int(configs[i].info[self.args["info_key"]])
+            X_out.append(X[i][sel])
+        X_out = np.array(X_out)
+        stream.put("X", X_out)
+
+class RankNorm(Transform):
+    allow_params = {"z",}
+    allow_stream = {"z",}
+    def _fit(self, inputs, stream, params):
+        z = inputs["z"]
+        z_ranked = np.sort(z)
+        params.put("z", z_ranked)
+        self._map(inputs, stream)
+    def _map(self, inputs, stream):
+        ranked = np.searchsorted(
+            self.params().get("z"), 
+            inputs["z"])/len(self.params().get("z"))
+        stream.put("z", ranked)
+
 class DoDivideBySize(Transform):
     default_args = {
         "config_to_size": "lambda c: len(c)",

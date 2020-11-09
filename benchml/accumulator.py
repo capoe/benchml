@@ -24,6 +24,12 @@ def metric_rhor(yp, yt):
 def metric_auc(yp, yt):
     return sklearn.metrics.roc_auc_score(yt,yp)
 
+def metric_acc(yp, yt):
+    return 1.-np.sum(np.heaviside(np.abs(yp-yt)-0.5, 0.0))/len(yt)
+
+def metric_mcc(yp, yt):
+    return sklearn.metrics.matthews_corrcoef(yt,yp)
+
 def metric_r2(yp, yt):
     return sklearn.metrics.r2_score(yt, yp)
 
@@ -41,6 +47,8 @@ class Accumulator(object):
         "rhop": metric_rhop,
         "rhor": metric_rhor,
         "auc":  metric_auc,
+        "acc": metric_acc,
+        "mcc": metric_mcc,
         "r2": metric_r2,
         "sup": metric_sup,
         "bal": metric_bal,
@@ -52,6 +60,8 @@ class Accumulator(object):
         "rhop": 'largest',
         "rhor": 'largest',
         "auc":  'largest',
+        "acc": 'largest',
+        "mcc": 'largest',
         "r2": 'largest',
         "sup": 'smallest',
         "bal": 'smallest'
@@ -101,10 +111,14 @@ class Accumulator(object):
                 yp_null, yt_null))
         z = np.sort(np.array(z))
         return z
-    def evaluateAll(self, metrics=None, bootstrap=0, log=None):
+    def evaluateAll(self, metrics=None, bootstrap=0, log=None, match=None):
         if metrics is None: metrics = self.metrics
         res = {}
-        for channel in sorted(self.yp_map):
+        if match is None:
+            channels_iter = sorted(self.yp_map)
+        else:
+            channels_iter = filter(lambda cd: cd.startswith(match), sorted(self.yp_map))
+        for channel in channels_iter:
             res[channel] = {}
             vs = []
             dvs = []
