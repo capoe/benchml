@@ -3,6 +3,7 @@ for processing data
 """
 
 import numpy as np
+from sklearn import linear_model
 
 from asaplib.fit.getscore import get_score
 from asaplib.fit import LC_SCOREBOARD
@@ -103,11 +104,11 @@ def fit_hybrid_lc(by_model, all_model_list, alpha=0.1, sc_name='RMSE', verbose=F
     
     lc_scores = LC_SCOREBOARD([])
         
-    clf = linear_model.Ridge(alpha,max_iter=10000, fit_intercept=False)
+    clf = linear_model.Ridge(alpha, max_iter=10000, fit_intercept=False)
     
-    for train_frac in by_model['bmol_soap_minimal_cross_int_krr'].keys():
-        n_repeats = by_model['bmol_soap_minimal_cross_int_krr'][train_frac]['n_repeats']
-        n_train = int(len(by_model['bmol_soap_minimal_cross_int_krr'][train_frac]['train'])/n_repeats)
+    for train_frac in by_model[all_model_list[0]].keys():
+        n_repeats = by_model[all_model_list[0]][train_frac]['n_repeats']
+        n_train = int(len(by_model[all_model_list[0]][train_frac]['train'])/n_repeats)
         for replica in range(n_repeats):
             for i, model_now in enumerate(all_model_list):
                 # all the original test set
@@ -118,10 +119,10 @@ def fit_hybrid_lc(by_model, all_model_list, alpha=0.1, sc_name='RMSE', verbose=F
                 validation_tmp_0 , test_tmp_0 = all_tmp_0[:n_validation,:], all_tmp_0[n_validation:,:]  #train_test_split(all_tmp_0, test_size=1.-validation_ratio)
         
                 if i==0:
-                    hybrid_X = np.zeros((len(validation_tmp_0[:,1]),len(all_model_keys)))
+                    hybrid_X = np.zeros((len(validation_tmp_0[:,1]),len(all_model_list)))
                     hybrid_y = validation_tmp_0[:,2]
             
-                    hybrid_X_test = np.zeros((len(test_tmp_0[:,1]),len(all_model_keys)))
+                    hybrid_X_test = np.zeros((len(test_tmp_0[:,1]),len(all_model_list)))
                     hybrid_y_test = test_tmp_0[:,2]
             
                 hybrid_X[:,i] = validation_tmp_0[:,1]
@@ -132,7 +133,7 @@ def fit_hybrid_lc(by_model, all_model_list, alpha=0.1, sc_name='RMSE', verbose=F
                 print("# replica ", replica)
             hybrid_y_pred = hybrid_y * 0.0
             hybrid_y_pred_test = hybrid_y_test * 0.0
-            for i, model_now in enumerate(all_model_keys):
+            for i, model_now in enumerate(all_model_list):
                 if clf.coef_[i] > 0.1:
                     if verbose: print(model_now, clf.coef_[i])
                 hybrid_y_pred += clf.coef_[i]*hybrid_X[:,i]
