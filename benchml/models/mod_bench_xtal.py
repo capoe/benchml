@@ -83,7 +83,7 @@ def compile_esm(*args, **kwargs):
     for permutation in ["sorted_l2", "eigenspectrum"]:
         models.extend([
             Module(
-                tag="bxtal_cm_%s_rr" % permutation,
+                tag="bxtal_esm_%s_rr" % permutation,
                 transforms=[
                     ExtXyzInput(tag="input"),
                     DscribeEwaldSumMatrix(
@@ -129,7 +129,7 @@ def compile_esm(*args, **kwargs):
                 broadcast={"meta": "input.meta"},
                 outputs={ "y": "output.y" }),
             Module(
-                tag="bxtal_cm_%s_krr" % permutation,
+                tag="bxtal_esm_%s_krr" % permutation,
                 transforms=[
                     ExtXyzInput(tag="input"),
                     DscribeEwaldSumMatrix(
