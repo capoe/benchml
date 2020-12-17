@@ -158,7 +158,7 @@ class WhitenMatrix(Transform):
             X_w = X_w/self.params().get("x_std")
         stream.put("X", X_w)
 
-class SubsampleMatrix(bml.Transform):
+class SubsampleMatrix(Transform):
     default_args = {
         "info_key": None,
     }

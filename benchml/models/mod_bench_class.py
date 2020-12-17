@@ -100,6 +100,34 @@ def compile_gylm_match_class(**kwargs):
             outputs={ "y": "predictor.z" }
         ),
         Module(
+            tag="bmol_gylm_match_class_norm",
+            transforms=[
+                ExtXyzInput(tag="input"),
+                GylmAtomic(
+                    tag="descriptor",
+                    args={"heavy_only": True},
+                    inputs={"configs": "input.configs"}),
+                KernelSmoothMatch(
+                    tag="kernel",
+                    inputs={"X": "descriptor.X"}),
+                SupportVectorClassifier(
+                    tag="predictor",
+                    args={
+                        "C": None,
+                        "power": 2},
+                    inputs={
+                        "K": "kernel.K",
+                        "y": "input.y"}),
+                RankNorm(
+                    tag="ranker",
+                    inputs={"z": "predictor.z"})
+            ],
+            hyper=GridHyper(
+                Hyper({ "predictor.C": np.logspace(-9,+7, 17), }),
+                Hyper({ "predictor.power": [ 2. ] })),
+            broadcast={ "meta": "input.meta" },
+            outputs={ "y": "ranker.z" }),
+        Module(
             tag="bmol_gylm_match_class_attr",
             transforms=[
                 ExtXyzInput(tag="input"),

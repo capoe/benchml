@@ -1,6 +1,7 @@
 from . import mod_basic
 from . import mod_dscribe
 from . import mod_bench
+from . import mod_bench_xtal
 from . import mod_bench_class
 from . import mod_logd
 from . import mod_logd_ai
@@ -11,6 +12,7 @@ for register in [
         mod_basic.register_all,
         mod_dscribe.register_all,
         mod_bench.register_all,
+        mod_bench_xtal.register_all,
         mod_bench_class.register_all,
         mod_logd.register_all,
         mod_logd_ai.register_all,

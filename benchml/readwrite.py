@@ -26,20 +26,66 @@ def configure(use_ase):
         disable_ase()
 
 class ExtendedXyz(object):
-    def __init__(self, pos=[], symbols=[]):
+    def __init__(self, 
+            pos=[], 
+            symbols=[], 
+            cell=None, 
+            positions=None): # For compatibility with ASE
         self.info = {}
-        self.cell = None
-        self.pbc = np.array([False, False, False])
+        self.cell = cell
+        self.pbc = self.set_pbc()
         self.atoms = []
-        self.positions = pos
+        self.positions = pos if positions is None else positions
         self.symbols = symbols
         self.heavy = None
     def __len__(self):
         return len(self.symbols)
-    def set_pbc(self, booleans):
-        self.pbc = np.array(booleans)
+    def set_pbc(self, booleans=None):
+        if booleans is not None:
+            self.pbc = np.array(booleans)
+        elif self.cell is not None:
+            self.pbc = np.array([True, True, True])
+        else:
+            self.pbc = np.array([False, False, False])
+        return self.pbc
     def get_positions(self):
         return self.positions
+    def get_cell(self):
+        if self.cell is None and "Lattice" in self.info:
+            self.cell = np.array(list(
+                map(float, self.info["Lattice"].split()))).reshape((3,3))
+            self.set_pbc()
+        return self.cell
+    def padToCutoff(self, r_cut):
+        cell = np.array(self.get_cell())
+        if cell is None: return self
+        # Calculate # replicates
+        u, v, w = cell[0], cell[1], cell[2]
+        a = np.cross(v, w, axis=0)
+        b = np.cross(w, u, axis=0)
+        c = np.cross(u, v, axis=0)
+        ua = np.dot(u, a) / np.dot(a,a) * a
+        vb = np.dot(v, b) / np.dot(b,b) * b
+        wc = np.dot(w, c) / np.dot(c,c) * c
+        proj = np.linalg.norm(np.array([ua, vb, wc]), axis=1)
+        nkl = np.ceil(r_cut/proj).astype('int')
+        # Replicate
+        n_atoms = len(self)
+        n_images = np.product(2*nkl + 1) 
+        positions_padded = np.tile(self.positions, (n_images, 1))
+        offset = 0
+        for i in np.append(np.arange(0, nkl[0]+1), np.arange(-nkl[0], 0)):
+            for j in np.append(np.arange(0, nkl[1]+1), np.arange(-nkl[1], 0)):
+                for k in np.append(np.arange(0, nkl[2]+1), np.arange(-nkl[2], 0)):
+                    ijk = np.array([i,j,k])
+                    positions_padded[offset:offset+n_atoms] += np.sum((cell.T*ijk).T, axis=0)
+                    offset += n_atoms
+        symbols_padded = np.tile(np.array(self.symbols), n_images)
+        config_padded = self.__class__(
+            positions=positions_padded,
+            symbols=symbols_padded,
+            cell=nkl*cell)
+        return config_padded
     def get_chemical_symbols(self):
         return self.symbols
     def get_atomic_numbers(self):
@@ -58,6 +104,7 @@ class ExtendedXyz(object):
             self.positions.append(new_atom.pos)
             self.symbols.append(new_atom.name)
         self.positions = np.array(self.positions)
+        self.get_cell()
         return
     def create_atom(self, ln):
         ln = ln.split()
