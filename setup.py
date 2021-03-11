@@ -16,7 +16,7 @@ def get_scripts():
 if __name__ == "__main__":
     setup(
         name="BenchML",
-        version="0.0.0",
+        version="0.1.0",
         url="https://github.com/capoe/benchml",
         description="Chemical ML workbench",
         long_description=get_description(),
