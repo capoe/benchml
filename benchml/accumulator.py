@@ -129,9 +129,9 @@ class Accumulator(object):
                 vs.append(v)
                 dvs.append(dv)
             if log:
-                log << "%-50s : " % (
-                    str(channel)[0:24]+".."+str(channel)[-24:] if \
-                        len(str(channel)) > 50 else str(channel)) << log.flush
+                log << "  %-14s " % (
+                    str(channel)[0:6]+".."+str(channel)[-6:] if \
+                        len(str(channel)) > 14 else str(channel)) << log.flush
                 for v, metric in zip(vs, metrics):
                     log << "%s=%+1.4e +- %+1.4e" % (
                         metric, v, dv) << log.flush

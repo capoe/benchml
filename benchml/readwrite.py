@@ -25,6 +25,49 @@ def configure(use_ase):
     else:
         disable_ase()
 
+class ExtendedTxt(object):
+    def __init__(self, arrays={}, meta={}):
+        self.arrays = arrays
+        self.meta = meta
+    def save(self, extt_file):
+        write_extt(extt_file, self.arrays, self.meta)
+    def load(self, extt_file):
+        self.arrays, self.meta = read_extt(extt_file)
+    def clone(self):
+        return ExtendedTxt(
+            arrays={ a: np.copy(arr) for a, arr in self.arrays.items() },
+            meta=copy.deepcopy(self.meta))
+    def __getitem__(self, key):
+        return self.arrays[key]
+
+def write_extt(extt_file, arrays, meta={}):
+    if type(arrays) is dict:
+        with open(extt_file, 'w') as f:
+            for k, v in arrays.items():
+                f.write('%s:%s ' % (k, str(v.shape).replace(" ","")))
+            f.write('\n')
+            f.write(json.dumps(meta))
+            f.write('\n')
+            for k, v in arrays.items(): # order is guaranteed to match loop above
+                np.savetxt(f, v)
+            f.close()
+    else:
+        arrays.save(extt_file)
+    return
+
+def read_extt(extt_file):
+    with open(extt_file) as f:
+        tuples = [ item.split(":") \
+            for item in f.readline().strip().split() ]
+        array_rows = { t[0]: int(t[1].replace("(","").split(",")[0]) \
+            for t in tuples }
+        meta_str = f.readline().strip()
+        meta = json.loads(meta_str)
+        arrays = {}
+        for array_name, n_rows in array_rows.items():
+            arrays[array_name] = np.loadtxt(f, max_rows=n_rows)
+    return ExtendedTxt(arrays=arrays, meta=meta)
+
 class ExtendedXyz(object):
     def __init__(self, 
             pos=[], 
@@ -219,7 +262,7 @@ def read_ase(config_file, index):
         patch_ase_config(configs[midx])
     return configs
 
-def read(
+def read_xyz(
         config_file,
         index=':'):
     if ase.io is not None:
@@ -237,7 +280,7 @@ def read(
         else: break
     return configs
 
-def write(
+def write_xyz(
         config_file,
         configs,
         allow_json=True):
@@ -281,3 +324,22 @@ def load(archfile, method=None, **kwargs):
         return pickle.load(open(archfile, 'rb'))
     else:
         return method.load(archfile, **kwargs)
+
+read_formats = {
+    ".extt": read_extt,
+    ".xyz": read_xyz
+}
+
+write_formats = {
+    ".extt": write_extt,
+    ".xyz": write_xyz
+}
+
+def read(input_file, *args, **kwargs):
+    base, ext = os.path.splitext(input_file)
+    return read_formats[ext](input_file, *args, **kwargs)
+
+def write(output_file, *args, **kwargs):
+    base, ext = os.path.splitext(output_file)
+    return write_formats[ext](output_file, *args, **kwargs)
+

@@ -6,3 +6,5 @@ from .plugin_asap import *
 from .plugin_dscribe import *
 from .plugin_physchem import *
 from .plugin_cx import *
+from .plugin_nphil import *
+

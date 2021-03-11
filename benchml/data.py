@@ -91,6 +91,28 @@ class Dataset(object):
     def __iter__(self):
         return self.configs.__iter__()
 
+class ExttDataset(object):
+    def __init__(self, extt, meta=None): 
+        self.meta = extt.meta if meta is None else meta
+        self.arrays = extt.arrays
+    def __getitem__(self, key):
+        if np.issubdtype(type(key), np.integer):
+            return self.X[key]
+        elif type(key) in {list, np.ndarray}:
+            return XyDataset(
+                X=self.X[key],
+                y=self.y[key],
+                meta=self.meta)
+        elif type(key) is str:
+            return self.meta[key]
+        else: raise TypeError("Invalid type in __getitem__: %s" % type(key))
+    def __len__(self):
+        return len(self.arrays[list(self.arrays.keys())[0]])
+    def __str__(self):
+        return self.info()
+    def __contains__(self, key):
+        return key in self.meta
+
 class XyDataset(object):
     def __init__(self, X, y, name="?", **kwargs):
         self.X = X
@@ -122,6 +144,23 @@ class XyDataset(object):
 
 def compile(root="./data", filter_fct=lambda meta: True):
     return BenchmarkData(root, filter_fct=filter_fct)
+
+def load_xyz_dataset(filename, meta={}):
+    configs = read(filename)
+    return Dataset(configs=configs, meta=meta)
+
+def load_extt_dataset(filename, meta=None):
+    extt = read(filename)
+    return ExttDataset(extt=extt, meta=meta)
+
+load_formats = {
+    ".extt": load_extt_dataset,
+    ".xyz": load_xyz_dataset
+}
+
+def load_dataset(filename, *args, **kwargs):
+    base, ext = os.path.splitext(filename)
+    return load_formats[ext](filename)
 
 if __name__ == "__main__":
     bench = compile()

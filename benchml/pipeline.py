@@ -174,6 +174,17 @@ class Params(object):
         self.storage[key] = value
 
 class Transform(object):
+    """Transforms constitute the nodes of a pipeline. 
+    Each transforms implements at least one of three methods through which it acts on the data stream: map, fit, and feed.
+
+    Args:
+        tag (str, optional): Address of the transform via which its outputs can be referenced.
+            Default: self.__class__.__name__
+        args (dict, optional): Dictionary of transform parameters.
+            Default: {}
+        inputs (dict, optional): Dictionary specifying input streams
+            Default: {}
+    """
     default_args = {}
     req_args = tuple()
     req_inputs = tuple()
@@ -428,6 +439,16 @@ class Transform(object):
                 log << log.my << " ]" << log.endl
 
 class Module(Transform):
+    """
+    A module encapsulates an ML pipeline. It consists of 
+    a sequence of interdependent transforms.
+
+    Args:
+        tag (str): Module name (optional)
+        broadcast (dict): Inputs to be broadcast to all nodes (optional)
+        transforms (list): List of BenchML transforms
+        hyper (object): Hyper-optimization controller
+    """
     def __init__(self,
             tag="module",
             broadcast={},
@@ -525,6 +546,9 @@ class Module(Transform):
             stream.handle.activate(tf, stream.tag)
     # Precompute, map, fit
     def precompute(self, stream, verbose=VERBOSE):
+        """Precomputes the outputs of those transforms that are declared with precompute=True.
+        The precomputation (necessarily) includes all upstream nodes in the dependency chain.
+        """
         precomps = list(filter(lambda tf: tf.precompute, self.transforms))
         precomps_deps = set(
             [ p.tag for p in precomps ] + \

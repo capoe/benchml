@@ -4,6 +4,15 @@ from .logger import log
 import numpy as np
 import inspect
 
+class ExttInput(Transform):
+    allow_stream = {'X', 'Y', 'meta'}
+    stream_copy = {'meta',}
+    stream_samples = {'X', 'Y'}
+    def _feed(self, data, stream):
+        stream.put("X", data.arrays["X"])
+        stream.put("Y", data.arrays["Y"])
+        stream.put("meta", data.meta)
+
 class ExtXyzInput(Transform):
     allow_stream = {'configs', 'y', 'meta'}
     stream_copy = ("meta",)

@@ -1,6 +1,18 @@
 from ..logger import Mock
 
 try:
+    import nphil
+    nphil.silent(True)
+except ImportError:
+    nphil = None
+
+def check_nphil_available(obj, require=False):
+    if nphil is None:
+        if require: raise ImportError("%s requires nphil" % obj.__name__)
+        return False
+    return True
+
+try:
     import gylm
 except ImportError:
     gylm = Mock()
