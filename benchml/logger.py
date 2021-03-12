@@ -316,6 +316,14 @@ class ShellInterface(object):
         self.flush = OS_LINE_CHAR('')
         self.back = OS_LINE_CHAR('\r')
         self.trail = ' '
+        # LOGGING LEVEL
+        self.default = LOGLEVEL("info")
+        self.error = LOGLEVEL("error")
+        self.warn =  LOGLEVEL("warn")
+        self.info =  LOGLEVEL("info")
+        self.debug = LOGLEVEL("debug")
+        self.loglevel = LOGLEVEL("info")
+        self.mssglevel = LOGLEVEL("info")
         # CURRENT STYLE SELECTION
         self.sel_color = None
         self.sel_justify = None
@@ -360,16 +368,25 @@ class ShellInterface(object):
             sys.stdout = sys.__stdout__
         else: pass
         return
+    def setLevel(self, name):
+        self.loglevel = LOGLEVEL(name)
     # PRINTER METHODS
     def __lshift__(self, mssg):
         if type(mssg) == OS_LINE_CHAR:
-            # <LOG MESSAGE HERE>
-            sys.stdout.write(str(mssg))
-            sys.stdout.flush()
+            if self.mssglevel <= self.loglevel:
+                # <FLUSH MESSAGE HERE>
+                sys.stdout.write(str(mssg))
+                sys.stdout.flush()
             self.sel_color = None
+            self.mssglevel = self.default
             return self
         elif type(mssg) == OS_COLOR:
             self.sel_color = str(mssg)
+            return self
+        elif type(mssg) == LOGLEVEL:
+            self.mssglevel = mssg
+            return self
+        if self.mssglevel > self.loglevel:
             return self
         mssg = str(mssg)
         if self.sel_justify != None:
@@ -509,6 +526,23 @@ class OS_COLOR(object):
         self.colstr = colstr
     def __str__(self):
         return self.colstr
+
+class LOGLEVEL(object):
+    levels = {
+        "error": 0,
+        "warn": 1,
+        "info": 2,
+        "debug": 3
+    }
+    def __init__(self, name):
+        self.name = name
+        self.rank = self.levels[name]
+    def __ge__(self, other):
+        return self.rank >= other.rank
+    def __gt__(self, other):
+        return self.rank > other.rank
+    def __le__(self, other):
+        return self.rank <= other.rank
 
 class OS_LINE_CHAR(object):
     def __init__(self, char):
