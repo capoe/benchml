@@ -3,6 +3,10 @@ from .logger import log
 import itertools
 import copy
 import numpy as np
+try:
+    from bayes_opt import BayesianOptimization
+except ImportError:
+    bayes_opt = None
 
 class Hyper(object):
     def __init__(self, instructions):
@@ -78,6 +82,8 @@ class GridHyper(object):
 
 class BayesianHyper(object):
     def __init__(self, *hypers, convert={}, seed=0, init_points=5, n_iter=10):
+        if bayes_opt is None:
+            raise ImportError("bayesian-optimization missing, try 'pip install bayesian-optimization'")
         self.hypers = hypers
         self.convert = convert
         self.arrays = []
@@ -136,7 +142,6 @@ class BayesianHyper(object):
             return module.hyperEval(stream, kwargs,
                 split_args, accu_args, target, target_ref)*(-1. if \
                     Accumulator.select(accu_args['metric']) == 'smallest' else +1.)
-        from bayes_opt import BayesianOptimization
         optimizer = BayesianOptimization(
             f=f, pbounds=bounds, random_state=self.seed)
         optimizer.maximize(

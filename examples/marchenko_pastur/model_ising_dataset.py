@@ -66,5 +66,5 @@ if __name__ == "__main__":
             accu.append("train", output_train["y"], stream_train.resolve("input.Y"))
             accu.append("test", output_test["y"], stream_test.resolve("input.Y"))
         log << log.endl
-        res = accu.evaluateAll(log=bml.log)
+        res = accu.evaluateAll(log=bml.log, bootstrap=100)
         

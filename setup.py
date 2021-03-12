@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 def get_description():
-    return "Benchmarking and pipelining for chemical machine learning"
+    return "ML pipelining and benchmarking suite geared towards the physical sciences"
 
 def get_scripts():
     return [
@@ -16,9 +16,9 @@ def get_scripts():
 if __name__ == "__main__":
     setup(
         name="BenchML",
-        version="0.1.0",
+        version="0.1.1",
         url="https://github.com/capoe/benchml",
-        description="Chemical ML workbench",
+        description="Machine-learning and pipelining suite",
         long_description=get_description(),
         packages=find_packages(),
         scripts=get_scripts(),
@@ -28,9 +28,13 @@ if __name__ == "__main__":
         ext_modules=[],
         license="Apache License 2.0",
         classifiers=[
-            # TODO
+            "Development Status :: 3 - Alpha",
+            "Intended Audience :: Science/Research",
+            "Topic :: Scientific/Engineering :: Physics",
+            "Topic :: Scientific/Engineering :: Chemistry",
+            "Topic :: Scientific/Engineering :: Artificial Intelligence"
         ],
-        keywords="chemical machine learning pipelining benchmarking",
+        keywords="chemical physicochemical atomistic machine learning pipelining benchmarking",
         python_requires=">=3.7",
     )
 

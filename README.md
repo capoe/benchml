@@ -2,15 +2,27 @@
     <img src="https://github.com/capoe/benchml/raw/master/web/bml.png" width="250px"></img>
 </div>
 
+# Description
+BenchML is a machine-learning (ML) suite for rapid development and deployment of ML models. 
+The library is geared towards physical/chemical datasets and prediction settings. It implements
+transforms and provides plugins for a variety of atomistic and molecular descriptors, 
+data filtering and feature generation routines, regressors and classifiers, etc. The pipelines
+can be efficiently optimized using grid-based or Bayesian protocols that minimise recomputation 
+by dependency hashing.
+
 # Installation
-To install from source, clone the repository, create a new conda environment and configure your PYTHONPATH using bin/BENCHMLRC:
+For a minimal installation without plugins, simply
+```bash
+pip install benchml
+```
+
+For a complete installation, create a (new) conda environment from env.yml. E.g.,
 ```bash
 git clone https://github.com/capoe/benchml.git
 cd benchml
 conda env create python=3.7 -n py3benchml -f env.yml
 conda activate py3benchml
-./configure.py
-source bin/BENCHMLRC
+pip install benchml # (or: pip install . for latest version)
 ```
 
 # BenchML pipelines
