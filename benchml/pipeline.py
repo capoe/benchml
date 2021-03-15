@@ -104,6 +104,8 @@ class Stream(object):
                 key, self.tf.tag))
     def items(self):
         return self.storage.items()
+    def keys(self):
+        return self.storage.keys()
     def put(self, key, value, force=False):
         if not force and not key in self.tf.allow_stream:
             raise ValueError("Stream '%s' not allowed in transform '%s'" % (
@@ -167,6 +169,8 @@ class Params(object):
         return self.storage[key]
     def items(self):
         return self.storage.items()
+    def clone(self):
+        return copy.deepcopy(self)
     def put(self, key, value, force=False):
         if not force and not key in self.tf.allow_params:
             raise ValueError("Param '%s' not allowed in transform '%s'" % (
@@ -201,7 +205,7 @@ class Transform(object):
     help_params = {}
     def check_available():
         return True
-    def __init__(self, **kwargs):
+    def __init__(self, detached=False, **kwargs):
         self.tag = kwargs.pop("tag", self.__class__.__name__)
         self.module = None
         self._is_setup = False
@@ -213,6 +217,7 @@ class Transform(object):
         self.args_links = self.parseArgsLinks()
         self.inputs = kwargs["inputs"] if "inputs" in kwargs else {}
         self.outputs = kwargs["outputs"] if "outputs" in kwargs else {}
+        self.detached = True if self.inputs is None else detached
         self.checkRequire()
         # Param sets
         self.map_params = {}
@@ -270,6 +275,9 @@ class Transform(object):
         self.deps = None
     def updateDependencies(self):
         if self.deps is not None: return self.deps
+        if self.inputs is None: 
+            self.deps = {}
+            return self.deps
         deps = deps_from_inputs(self.inputs)
         if self.tag in deps: deps.remove(self.tag)
         deps_parents = set()
@@ -279,6 +287,9 @@ class Transform(object):
         if self.tag in deps: deps.remove(self.tag)
         self.deps = deps
         return deps
+    def updateInputs(self, ext):
+        if self.inputs is None: return
+        self.inputs.update(ext)
     def getHash(self):
         return self.hash_total
     def hashChanged(self):
@@ -303,6 +314,7 @@ class Transform(object):
                 raise KeyError("Missing argument: <%s> requires '%s'" % (
                     self.__class__.__name__, arg))
     def requireInputs(self, *inputs):
+        if self.detached: return
         for inp in inputs:
             if not inp in self.inputs:
                 raise KeyError("Missing input: <%s> requires '%s'" % (
@@ -330,8 +342,14 @@ class Transform(object):
         res = {}
         for key, addr in self.inputs.items():
             if type(addr) is str:
-                tf, k = tuple(addr.split("."))
-                if k.startswith("_"):
+                tf_k = addr.strip().split(".")
+                if len(tf_k) > 1:
+                    tf, k = tuple(tf_k)
+                else:
+                    tf, k = tf_k[0], None
+                if k is None:
+                    res[key] = self.module.map_transforms[tf]
+                elif k.startswith("_"):
                     res[key] = self.module.map_transforms[tf].params().get(k[1:])
                 else:
                     res[key] = stream.resolve(addr)
@@ -352,6 +370,9 @@ class Transform(object):
     def feed(self, stream, data, verbose=VERBOSE):
         self.resolveArgs()
         self.hashState()
+        if self.detached:
+            stream.version(self.getHash())
+            return
         self.setup()
         self._feed(data, stream)
         stream.version(self.getHash())
@@ -359,6 +380,9 @@ class Transform(object):
         stream = stream.handle.activate(self, stream.tag)
         self.resolveArgs()
         self.hashState()
+        if self.detached:
+            stream.version(self.getHash())
+            return
         inputs = self.resolveInputs(stream)
         if self.precompute and stream.get("version") == self.getHash():
             if verbose: log << "[ hash matches, use cache ]" << log.flush
@@ -376,6 +400,9 @@ class Transform(object):
         stream = stream.handle.activate(self, stream.tag)
         self.resolveArgs()
         self.hashState()
+        if self.detached:
+            stream.version(self.getHash())
+            return
         inputs = self.resolveInputs(stream)
         if self.precompute and stream.get("version") == self.getHash():
             if verbose: log << "[ hash matches, use cache ]" << log.flush
@@ -479,7 +506,7 @@ class Module(Transform):
     def __getitem__(self, tag):
         return self.map_transforms[tag]
     def append(self, transform):
-        transform.inputs.update(self.broadcast)
+        transform.updateInputs(self.broadcast)
         self.transforms.append(transform)
         if transform.tag in self.map_transforms:
             raise ValueError("Transformation with name '%s' already exists" % (

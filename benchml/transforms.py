@@ -137,6 +137,8 @@ from .kernels import *
 from .predictors import *
 from .matrix import *
 from .filters import *
+from .ensemble import *
+from .conformal import *
 
 def transform_info(tf, log, verbose=True):
     if verbose:

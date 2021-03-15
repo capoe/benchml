@@ -30,7 +30,7 @@ def build_simple_nphil():
             bml.transforms.CleanMatrix(
                 tag="clean",
                 args={
-                    "axis": 1, 
+                    "axis": 0, 
                     "std_threshold": 1e-10},
                 inputs={"X":"input.X"}),
             bml.transforms.MarchenkoPasturFilter(

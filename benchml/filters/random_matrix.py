@@ -63,11 +63,11 @@ def pca_compute(X, norm_div_std=True, norm_sub_mean=True, ddof=1, eps=1e-10):
 class CleanMatrix(Transform):
     req_inputs = {"X",}
     allow_stream = {"X",}
-    allow_params = {"slice","n_dims"}
+    allow_params = {"slice","rank"}
     stream_samples = {"X",}
     default_args = {
         "std_threshold": 1e-10,
-        "axis": 1
+        "axis": 0
     }
     def _fit(self, inputs, stream, params):
         X = inputs["X"]
@@ -78,11 +78,11 @@ class CleanMatrix(Transform):
         log << log.debug << "CleanMatrix: Removed %d columns" % (
             X.shape[self.args["axis"]] - len(slice)) << log.endl
         params.put("slice", slice)
-        params.put("n_dims", len(X.shape))
+        params.put("rank", len(X.shape))
         self._map(inputs, stream)
     def _map(self, inputs, stream):
-        s = [ slice(None) ]*self.params().get("n_dims")
-        s[self.args["axis"]] = self.params().get("slice")
+        s = [ slice(None) ]*self.params().get("rank")
+        s[int(not self.args["axis"])] = self.params().get("slice")
         stream.put("X", inputs["X"][tuple(s)])
 
 class MarchenkoPasturFilter(Transform):
