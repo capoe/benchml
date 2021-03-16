@@ -251,7 +251,7 @@ def gylm_evaluate_mp(
     t1 = time.time()
     if log:
         log << "[MP: Finished in %fs]" % (t1-t0) << log.flush
-    X = np.array(X)
+    X = np.array(X, dtype='object')
     return X
 
 def gylm_evaluate(
@@ -284,7 +284,7 @@ def gylm_evaluate(
     t1 = time.time()
     if log:
         log << "[Finished in %fs]" % (t1-t0) << log.flush
-    X = np.array(X)
+    X = np.array(X, dtype='object')
     return X
 
 class GylmReduceConvolve(Transform):

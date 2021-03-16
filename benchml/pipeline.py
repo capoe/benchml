@@ -211,6 +211,8 @@ class Transform(object):
         self._is_setup = False
         self._freeze = False
         self._deployed = False
+        if "precompute" in kwargs:
+            self.precompute = kwargs["precompute"]
         # Default args, inputs, outputs
         self.args = copy.deepcopy(self.default_args)
         self.args.update(kwargs.pop("args", {}))

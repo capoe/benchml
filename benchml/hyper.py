@@ -12,6 +12,12 @@ class Hyper(object):
     def __init__(self, instructions):
         self.instr = instructions
         self.n_states = len(self.instr[list(self.instr.keys())[0]])
+    def random(self):
+        s = np.random.randint(0, self.n_states)
+        updates = {}
+        for addr, val in self.instr.items():
+            updates[addr] = val[s]
+        return updates
     def __iter__(self):
         for s in range(self.n_states):
             updates = {}
@@ -32,11 +38,16 @@ class GridHyper(object):
             merged = {}
             for upd in updates: merged.update(upd)
             return merged
-        update_cache = []
         for hyperidx, updates in enumerate(
                 itertools.product(*tuple(self.hypers))):
             updates = merge(*updates)
             yield updates
+    def random(self):
+        def merge(*updates):
+            merged = {}
+            for upd in updates: merged.update(upd)
+            return merged
+        return merge(*[ h.random() for h in self.hypers ])
     def optimize(self, module, stream,
             split_args,
             accu_args,

@@ -160,7 +160,7 @@ load_formats = {
 
 def load_dataset(filename, *args, **kwargs):
     base, ext = os.path.splitext(filename)
-    return load_formats[ext](filename)
+    return load_formats[ext](filename, *args, **kwargs)
 
 if __name__ == "__main__":
     bench = compile()
