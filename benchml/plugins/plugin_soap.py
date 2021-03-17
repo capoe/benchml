@@ -15,6 +15,7 @@ class SoapBase(Transform):
         "sigma": 1.0,
         "types": None,
         "crossover": True,
+        "heavy_only": False,
         "periodic": None,
         "power": True,
         "normalize": False }
@@ -36,13 +37,14 @@ class SoapBase(Transform):
         for cidx, config in enumerate(configs):
             if log and log.verbose: log << log.back << \
                 "%d/%d" % (cidx+1, len(configs)) << log.flush
-            if centres is None:
-                # heavy, types_centres, pos_centres = config.getHeavy() # HACK
-                pos_centres = None
-                types_centres = config.symbols
-            else:
+            if centres is not None:
                 pos_centres = centres[cidx]
                 types_centres = None
+            elif self.heavy_only:
+                heavy, types_centres, pos_centres = config.getHeavy()
+            else:
+                pos_centres = None
+                types_centres = config.symbols
             x = np.concatenate(
                 [ self.evaluateSingle(dcalc, config, pos_centres) \
                     for dcalc in calcs ], axis=1)
@@ -54,6 +56,8 @@ class SoapBase(Transform):
         X = np.array(X)
         T = np.array(T)
         return T, X
+    def _setup(self):
+        self.heavy_only = self.args.pop("heavy_only", False)
     def _fit(self, inputs, stream, params):
         if self.args["types"] is None:
             self.args["types"] = inputs["meta"]["elements"]

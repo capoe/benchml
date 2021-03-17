@@ -80,6 +80,9 @@ def compile_gylm_match_class(**kwargs):
                 ExtXyzInput(tag="input"),
                 GylmAtomic(
                     tag="descriptor",
+                    args={
+                        "heavy_only": True
+                    },
                     inputs={"configs": "input.configs"}),
                 KernelSmoothMatch(
                     tag="kernel",
@@ -95,7 +98,7 @@ def compile_gylm_match_class(**kwargs):
             ],
             hyper=GridHyper(
                 Hyper({ "predictor.C": np.logspace(-9,+7, 17), }),
-                Hyper({ "predictor.power": [ 2. ] })),
+                Hyper({ "predictor.power": [ 1., 2., 3., 4. ] })),
             broadcast={ "meta": "input.meta" },
             outputs={ "y": "predictor.z" }
         ),
@@ -124,7 +127,7 @@ def compile_gylm_match_class(**kwargs):
             ],
             hyper=GridHyper(
                 Hyper({ "predictor.C": np.logspace(-9,+7, 17), }),
-                Hyper({ "predictor.power": [ 2. ] })),
+                Hyper({ "predictor.power": [ 1., 2., 3., 4. ] })),
             broadcast={ "meta": "input.meta" },
             outputs={ "y": "ranker.z" }),
         Module(

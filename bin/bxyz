@@ -11,7 +11,7 @@ def csv_to_xyz(csv_file, args, xyz_file=""):
     reader = csv.DictReader(open(csv_file))
     data = [ row for row in reader ]
     smiles = [ row[args.smiles] for row in data ]
-    if args.no_gen3d:
+    if not args.gen3d:
         configs = list(smiles_to_pseudo_xyz(smiles))
     else:
         configs = smiles_to_xyz(smiles, args.corina, args.babel)
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     # CSV <> XYZ conversion
     log.AddArg("from_csv", str, default="")
     log.AddArg("to_csv", str, default="")
-    log.AddArg("no_gen3d", "toggle", default=True)
+    log.AddArg("gen3d", "toggle", default=False)
     log.AddArg("smiles", str, default="SMILES")
     log.AddArg("corina", str, default='/software/corina/bin/corina')
     log.AddArg("babel", str, default='/software/babel/bin/babel')

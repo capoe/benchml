@@ -6,7 +6,7 @@ import numpy as np
 try:
     from bayes_opt import BayesianOptimization
 except ImportError:
-    bayes_opt = None
+    BayesianOptimization = None
 
 class Hyper(object):
     def __init__(self, instructions):
@@ -93,7 +93,7 @@ class GridHyper(object):
 
 class BayesianHyper(object):
     def __init__(self, *hypers, convert={}, seed=0, init_points=5, n_iter=10):
-        if bayes_opt is None:
+        if BayesianOptimization is None:
             raise ImportError("bayesian-optimization missing, try 'pip install bayesian-optimization'")
         self.hypers = hypers
         self.convert = convert
