@@ -131,13 +131,13 @@ class RandomForestClassifier(SklearnTransform):
         model = sklearn.ensemble.RandomForestClassifier(**self.args)
         model.fit(inputs["X"], inputs["y"])
         y_pred = model.predict(inputs["X"])
-        z_pred = model.predict_proba(inputs["X"])[:,0]
+        z_pred = model.predict_proba(inputs["X"])[:,1]
         params.put("model", model)
         stream.put("y", y_pred)
         stream.put("z", z_pred)
     def _map(self, inputs, stream):
         y_pred = self.params().get("model").predict(inputs["X"])
-        z_pred = self.params().get("model").predict_proba(inputs["X"])[:,0]
+        z_pred = self.params().get("model").predict_proba(inputs["X"])[:,1]
         stream.put("y", y_pred)
         stream.put("z", z_pred)
 

@@ -1,5 +1,4 @@
 import benchml as bml
-import nphil
 import scipy.stats
 import sklearn.metrics
 import numpy as np
@@ -30,10 +29,18 @@ def build_marchenko_conformal():
             bml.transforms.EnsembleRegressor(
                 tag="ensemble",
                 detached=True,
-                args={"size": 10},
+                args={
+                    "size": 10,
+                    "forward_inputs": {"X":"X", "y":"y"}, # = default
+                    "input_type": "descriptor"
+                },
                 inputs={"base_transform": "linear"}),
             bml.transforms.ConformalRegressor(
                 tag="predictor",
+                args={
+                    "forward_inputs": {"X":"X", "y":"y"}, # = default
+                    "input_type": "descriptor"            # = default
+                },
                 inputs={
                     "X": "descriptor.X", 
                     "y": "input.Y", 
@@ -53,7 +60,11 @@ def build_simple_ensemble():
                 args={}),
             bml.transforms.EnsembleRegressor(
                 tag="predictor",
-                args={"size": 10},
+                args={
+                    "size": 10,
+                    "forward_inputs": {"X":"X", "y":"y"}, # = default
+                    "input_type": "descriptor"
+                },
                 inputs={
                     "X": "input.X", 
                     "y": "input.Y", 

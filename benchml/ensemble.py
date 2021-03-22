@@ -2,25 +2,39 @@ import numpy as np
 from .pipeline import Transform, Params
 from .logger import log
 
-class EnsembleRegressor(Transform):
+class EnsembleBase(Transform):
     default_args = {
         "size": 100,
         "bootstrap_samples": True,
         "bootstrap_features": False,
-        "feature_fraction": 0.1
+        "feature_fraction": 0.1,
+        "forward_inputs": {"X": "X", "y": "y"},
+        "input_type": "descriptor"
+    }
+    slice_funcs_fit = {
+        "kernel": "lambda X, s: X[s][:,s]",
+        "descriptor": "lambda X, s: X[s]"
+    }
+    slice_funcs_map = {
+        "kernel": "lambda X, s: X[:,s]",
+        "descriptor": "None"
     }
     req_inputs = {"X","y","base_transform"}
     allow_stream = {"y", "dy"}
     allow_params = {"samples", "features", "params"}
+
+class EnsembleRegressor(EnsembleBase):
     def fitSingle(self, base, stream, X, y):
         params_s = Params(tag="", tf=base)
+        fwd = self.args["forward_inputs"]
+        slice_func_fit = eval(self.slice_funcs_fit[self.args["input_type"]])
         sel_samples = None
         sel_features = None
         Xs = X
         ys = y
         if self.args["bootstrap_samples"]:
             sel_samples = np.random.randint(0, X.shape[0], size=(X.shape[0],))
-            Xs = Xs[sel_samples]
+            Xs = slice_func_fit(Xs, sel_samples)
             ys = ys[sel_samples]
         if self.args["bootstrap_features"]:
             n_feature_sel = int(Xs.shape[1]*self.args["feature_fraction"])
@@ -29,7 +43,7 @@ class EnsembleRegressor(Transform):
             sel_features = sel_features[0:n_feature_sel]
             sel_features = sorted(sel_features)
             Xs = Xs[:,sel_features]
-        base._fit({"X": Xs, "y": ys}, stream, params_s)
+        base._fit({fwd["X"]: Xs, fwd["y"]: ys}, stream, params_s)
         return params_s, sel_samples, sel_features
     def _fit(self, inputs, stream, params):
         base_trafo = inputs["base_transform"]
@@ -52,15 +66,19 @@ class EnsembleRegressor(Transform):
     def _map(self, inputs, stream):
         Y = []
         base = inputs["base_transform"]
-        for f, pars in zip(
+        fwd = self.args["forward_inputs"]
+        slice_func_map = eval(self.slice_funcs_map[self.args["input_type"]])
+        for f, s, pars in zip(
                 self.params().get("features"), 
+                self.params().get("samples"),
                 self.params().get("params")):
-            Xs = inputs["X"]
             base.active_params = pars
+            Xs = inputs["X"]
             if f is not None:
-                base._map({"X": Xs[:,f]}, stream)
-            else:
-                base._map({"X": Xs}, stream)
+                Xs = Xs[:,f]
+            if slice_func_map is not None:
+                Xs = slice_func_map(Xs, s)
+            base._map({fwd["X"]: Xs}, stream)
             Y.append(stream.get("y"))
         Y = np.array(Y)
         y = np.mean(Y, axis=0)
