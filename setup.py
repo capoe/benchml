@@ -7,8 +7,8 @@ def get_scripts():
     return [
         "./bin/bbatch",
         "./bin/binfo",
+        "./bin/binput",
         "./bin/bmark",
-        "./bin/bxyz",
         "./bin/bml",
         "./bin/bmeta"
     ]

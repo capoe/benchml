@@ -167,13 +167,13 @@ def transform_info(tf, log, verbose=True):
         log << log.endl
         log << "  Precompute:           " << bool(tf.precompute) << log.endl
     else:
-        log << "%-25s" % ("<"+tf.__name__+">")
+        log << "%-35s" % ("<"+tf.__name__+">")
         argstr = ",".join(tf.req_args)
         inputstr = ",".join(tf.req_inputs)
         streamstr = ",".join(tf.allow_stream)
         available = tf.check_available()
-        log << "requires:   args=%-15s inputs=%-15s   outputs:  %-15s   available: %s" % (
-            argstr, inputstr, streamstr, available)
+        log << "requires:   args=%-15s inputs=%-30s   outputs:  %-25s   %s" % (
+            argstr, inputstr, streamstr, "[installed]" if available else "[missing]")
         log << log.endl
 
 def get_bases_recursive(obj):
@@ -183,6 +183,14 @@ def get_bases_recursive(obj):
         sub = sub + get_bases_recursive(b)
     bases = bases + sub
     return bases
+
+def get_all():
+    import sys
+    for name, obj in inspect.getmembers(sys.modules[__name__]):
+        if inspect.isclass(obj):
+            if Transform in get_bases_recursive(obj):
+                if obj is Module: continue
+                yield obj
 
 def list_all(verbose=False):
     import sys

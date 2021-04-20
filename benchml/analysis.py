@@ -52,7 +52,7 @@ def analyse_section(split_this, benchmark_section, return_ordered=False):
     for i in range(len(metrics)):
         log << "| %-18s" % metrics[i] << log.flush
     log << log.endl
-    log << "   " << "-"*(20+5+21*len(metrics)) << log.endl
+    log << "   " << "-"*(20+5+11+21*len(metrics)) << log.endl
     for o in order:
         log << "    %-30s %5.2f" % (models[o], rank[o]) << log.flush
         for i in range(len(metrics)):
@@ -81,6 +81,7 @@ def analyse(benchmark):
         if not record["dataset"] in sections:
             sections[record["dataset"]] = []
         sections[record["dataset"]].append(record)
+    output = []
     for section_name, benchmark_section in sorted(sections.items()):
         log << log.mg << "Section:" << section_name << log.endl
         splits_section = sorted(list(set(
@@ -91,5 +92,6 @@ def analyse(benchmark):
             if split_this["perf"] == "train": continue
             log << log.mg << "  Split:" << split_this << log.endl
             ranking = analyse_section(split_this, benchmark_section)
-            yield {**split_this, **ranking}
+            output.append({**split_this, **ranking})
+    return output
 

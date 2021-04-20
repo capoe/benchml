@@ -9,7 +9,7 @@ def compile_physchem(custom_fields=[], with_hyper=False, **kwargs):
     for descriptor_set in ["basic", "core", "logp", "extended"]:
         models.extend([
             Module(
-                tag="bmol_physchem_%s_rf" % descriptor_set,
+                tag="bmol_physchem_%s_rfr" % descriptor_set,
                 transforms=[
                     ExtXyzInput(tag="input"),
                     Physchem2D(tag="Physchem2D",

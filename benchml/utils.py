@@ -1,6 +1,7 @@
 import numpy as np
 import copy
 import json
+import time
 from .logger import log
 
 try_smiles_key = [
@@ -48,4 +49,26 @@ class LineExpansion(object):
         else: raise ValueError(self.type)
         vals_expand = (vals_expand.T/(np.sum(vals_expand, axis=1)+self.epsilon)).T
         return vals_expand 
+
+class StagedTimer(object):
+    def __init__(self):
+        self.stages = []
+        self.times = {}
+        self.current_idx = -1
+        self.t_in = None
+        self.t_out = None
+    def time(self, stage):
+        self.stages.append(stage)
+        self.current_idx += 1
+        return self
+    def __enter__(self):
+        self.t_in = time.time()
+        return self.stages[self.current_idx]
+    def __exit__(self, *args, **kwargs):
+        self.t_out = time.time()
+        self.times[self.stages[self.current_idx]] = self.t_out - self.t_in
+    def report(self, log):
+        log << "    " << " ".join(
+            list(map(lambda s: "dt(%s)=%1.4fs" % (s, self.times[s]), 
+            self.stages))) << log.endl
 

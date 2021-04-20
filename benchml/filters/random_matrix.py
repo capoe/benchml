@@ -89,7 +89,14 @@ class MarchenkoPasturFilter(Transform):
     req_inputs = {"X",}
     allow_stream = {"X",}
     allow_params = {"V_upper", "L_upper", "x_mean", "x_std"}
+    default_args = {
+        "monomials": [1,2]
+    }
     stream_samples = {"X",}
+    def _setup(self):
+        if len(self.args["monomials"]) < 1:
+            raise ValueError(self.__class__.__name__ + \
+                ": arg 'monomials' must be non-empty list")
     def _fit(self, inputs, stream, params):
         X = inputs["X"]
         X_trafo, X_norm, x_mean, x_std, S, L, V = pca_compute(X)
@@ -111,6 +118,6 @@ class MarchenkoPasturFilter(Transform):
         X = inputs["X"]
         X_proj = div0(X - self.params().get("x_mean"), self.params().get("x_std"))
         X_proj = X_proj.dot(self.params().get("V_upper"))
-        X_proj = np.concatenate([X_proj, X_proj**2], axis=1)
+        X_proj = np.concatenate([X_proj**p for p in self.args["monomials"]], axis=1)
         stream.put("X", X_proj)
 

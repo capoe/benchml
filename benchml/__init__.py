@@ -10,7 +10,9 @@ from . import models
 from . import pipeline
 from . import transforms
 from . import analysis
-from .pipeline import sopen, hupdate
+from . import splits
+from . import utils
+from .pipeline import stream, sopen, hupdate
 from .logger import log
 from .splits import Split
 from .accumulator import Accumulator

@@ -92,6 +92,8 @@ class Stream(object):
             self.sliceStorage()
     def __len__(self):
         return len(self.data) if (self.data is not None) else len(self.slice)
+    def __getitem__(self, addr):
+        return self.resolve(addr)
     def version(self, hash):
         self.storage["version"] = hash
     def has(self, key):
@@ -437,7 +439,12 @@ class Transform(object):
     def showHelpMessage(self):
         log << log.mb << " Node %-30s [tag='%s']" % (
             self.__class__.__name__, self.tag) << log.endl
-        log << "  Implemented in %s" % inspect.getfile(self.__class__) << log.endl
+        def truncate_path(f):
+            p = f.split("/")
+            i = p.index("benchml")
+            return "/".join(p[i:])
+        log << "  Implemented in %s" % truncate_path(
+            inspect.getfile(self.__class__)) << log.endl
         for arg in self.args:
             req = arg in self.req_args
             info = self.help_args[arg] if arg in self.help_args \
@@ -455,11 +462,11 @@ class Transform(object):
                 str(info[0]), str(req),
                 "help=%s" % info[1] if info[1] != "" else "") << log.endl
             if type(val) is list:
-                log << "   val=[" << log.endl
+                log << "   val=[ " << log.flush
                 for idx, v in enumerate(val):
-                    log << "    %-15s" % str(v) << log.flush
+                    log << "%s" % str(v) << log.flush
                     if (idx+1) != len(val) and (idx+1) % 5 == 0: log << log.endl
-                log << "    ]" << log.endl
+                log << " ]" << log.endl
             if type(allow) is list and len(allow) > 0:
                 log << log.my << "   allow=[" << log.endl
                 for idx, a in enumerate(allow):
@@ -736,8 +743,7 @@ class Module(Transform):
     def showHelpMessage(self):
         avail = self.check_available()
         log << (log.mg if avail else log.mr) << \
-            "Help message for module '%s' (is available=%s)" % (
-            self.tag, avail) << log.endl
+            "Help message for module '%s'" % (self.tag) << log.endl
         for tf in self.transforms:
             tf.showHelpMessage()
         if self.hyper is not None:
@@ -797,6 +803,7 @@ class sopen(object):
         return self.root
     def __exit__(self, *args):
         self.module.close(self.root)
+stream = sopen
 
 class hupdate(object):
     def __init__(self, module, updates, verbose=False):

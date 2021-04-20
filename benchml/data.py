@@ -112,6 +112,11 @@ class ExttDataset(object):
         return self.info()
     def __contains__(self, key):
         return key in self.meta
+    def info(self):
+        s = "ExttDataset with %d arrays: " % (len(self.arrays))
+        for name, x in self.arrays.items():
+            s += "Array[%s%s] " % (name, repr(x.shape))
+        return s
 
 class XyDataset(object):
     def __init__(self, X, y, name="?", **kwargs):
