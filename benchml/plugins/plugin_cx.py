@@ -8,7 +8,7 @@ def get_smiles(c):
 
 class CxCalcTransform(Transform):
     default_args = {
-        "cxcalc": "/software/chemaxon/MarvinBeans/bin/cxcalc",
+        "cxcalc": "/path/to/cxcalc",
         "cmd": "logp --method consensus",
         "tmpdir": "tmp",
         "reshape_as_matrix": False,

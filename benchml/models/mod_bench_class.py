@@ -70,6 +70,100 @@ def compile_ecfp_class():
             broadcast={ "meta": "input.meta" },
             outputs={ "y": "predictor.z" }
         ),
+        Module(
+            tag="bmol_ecfp_lr_class",
+            transforms=[
+                ExtXyzInput(tag="input"),
+                MorganFP(
+                    tag="descriptor",
+                    args={"length": 4096, "radius": 2, "normalize": True},
+                    inputs={"configs": "input.configs"}),
+                LogisticRegression(
+                    tag="predictor",
+                    args={
+                        "C": None
+                    },
+                    inputs={
+                        "X": "descriptor.X",
+                        "y": "input.y"}),
+            ],
+            hyper=GridHyper(
+                Hyper({ "descriptor.length": [ 4096 ] }),
+                Hyper({ "descriptor.radius": [ 2 ] }),
+                Hyper({ "descriptor.normalize": [ False ] }),
+                Hyper({ "predictor.C": np.logspace(-7,+4, 12), }),
+            ),
+            broadcast={ "meta": "input.meta" },
+            outputs={ "y": "predictor.z" }
+        ),
+        Module(
+            tag="bmol_ecfp_rf_class",
+            transforms=[
+                ExtXyzInput(tag="input"),
+                MorganFP(
+                    tag="descriptor",
+                    args={"length": 4096, "radius": 2, "normalize": True},
+                    inputs={"configs": "input.configs"}),
+                RandomForestClassifier(
+                    tag="predictor",
+                    args={
+                        "n_estimators": 20
+                    },
+                    inputs={
+                        "X": "descriptor.X", 
+                        "y": "input.y"
+                    }),
+            ],
+            hyper=GridHyper(
+                Hyper({ "descriptor.length": [ 2048, 4096 ] }),
+                Hyper({ "descriptor.radius": [ 2, 3 ] }),
+                Hyper({ "descriptor.normalize": [ False, True ] })
+            ),
+            broadcast={ "meta": "input.meta" },
+            outputs={ "y": "predictor.z" }
+        ),
+        Module(
+            tag="bmol_ecfp_mplr_class",
+            transforms=[
+                ExtXyzInput(tag="input"),
+                MorganFP(
+                    tag="descriptor",
+                    args={
+                        "length": 1024, 
+                        "radius": 2, 
+                        "normalize": True
+                    },
+                    inputs={
+                        "configs": "input.configs"
+                    }),
+                CleanMatrix(
+                    tag="clean",
+                    args={
+                        "axis": 0, 
+                        "std_threshold": 1e-10},
+                    inputs={"X": "descriptor.X"}),
+                MarchenkoPasturFilter(
+                    tag="descriptor_mp",
+                    args={},
+                    inputs={"X":"clean.X"}),
+                LogisticRegression(
+                    tag="predictor",
+                    args={
+                        "C": None
+                    },
+                    inputs={
+                        "X": "descriptor_mp.X",
+                        "y": "input.y"}),
+            ],
+            hyper=GridHyper(
+                Hyper({ "descriptor.length": [ 1024, 2048, 4096 ] }),
+                Hyper({ "descriptor.radius": [ 2 ] }),
+                Hyper({ "descriptor.normalize": [ False ] }),
+                Hyper({ "predictor.C": np.logspace(-7,+4, 12), }),
+            ),
+            broadcast={ "meta": "input.meta" },
+            outputs={ "y": "predictor.z" }
+        ),
     ]
 
 def compile_gylm_match_class(**kwargs):

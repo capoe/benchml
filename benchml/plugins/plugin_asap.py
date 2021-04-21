@@ -77,3 +77,27 @@ class AsapXyz(AsapTransform):
     def _map(self, inputs):
         return
 
+class SparseKRR(AsapTransform):
+    # TODO
+    pass
+
+class SparseSVM(AsapTransform):
+    # TODO
+    pass
+
+class KernelDensity(AsapTransform):
+    # TODO
+    pass
+
+class SparseKPCA(AsapTransform):
+    # TODO
+    pass
+
+class DimReduce(AsapTransform):
+    # TODO
+    pass
+
+class D2K(AsapTransform):
+    # TODO
+    pass
+

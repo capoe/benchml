@@ -77,6 +77,8 @@ class Accumulator(object):
         self.metrics = metrics
         if jsonfile is not None: self.load(jsonfile)
         return
+    def __getitem__(self, key):
+        return np.array(self.yp_map[key]), np.array(self.yt_map[key])
     def append(self, channel, yp, yt):
         if not channel in self.yp_map:
             self.yp_map[channel] = []

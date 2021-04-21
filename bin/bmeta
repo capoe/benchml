@@ -74,7 +74,7 @@ def write_meta(configs, extxyz, meta_json):
     elements = sorted(list(set(elements).union(set(elements_add))))
     has_smiles = True if ("smiles" in fields or "SMILES" in fields) else False
     periodic = True if ("cell" in fields or "lattice" in fields) else False
-    datasets = [ extxyz ]
+    datasets = extxyz
     name = prompt("Enter name",
         default=extxyz)
     comment = prompt("Enter comment",
@@ -112,10 +112,12 @@ def write_meta(configs, extxyz, meta_json):
 
 if __name__ == "__main__":
     log.Connect()
-    log.AddArg("extxyz", str)
+    log.AddArg("extxyz", (list,str))
     log.AddArg("meta", str)
     args = log.Parse()
 
-    configs = benchml.read(args.extxyz)
+    configs = []
+    for f in args.extxyz:
+        configs.extend(benchml.read(f))
     write_meta(configs, args.extxyz, args.meta)
     

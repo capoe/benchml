@@ -93,6 +93,7 @@ class MarchenkoPasturFilter(Transform):
         "monomials": [1,2]
     }
     stream_samples = {"X",}
+    precompute = True
     def _setup(self):
         if len(self.args["monomials"]) < 1:
             raise ValueError(self.__class__.__name__ + \

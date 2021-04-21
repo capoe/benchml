@@ -90,7 +90,10 @@ def analyse(benchmark):
         splits_section = sorted(splits_section, key=lambda s: s["train:test"][0])
         for split_this in splits_section:
             if split_this["perf"] == "train": continue
-            log << log.mg << "  Split:" << split_this << log.endl
+            log << log.mg << "  Split:" 
+            for key in ["split", "perf", "train:test"]:
+                log << "%s=%s" % (key, str(split_this[key])) 
+            log << log.endl
             ranking = analyse_section(split_this, benchmark_section)
             output.append({**split_this, **ranking})
     return output

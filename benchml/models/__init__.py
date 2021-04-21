@@ -43,6 +43,9 @@ def compile(groups, **kwargs):
             for model in collections[group](**kwargs) ]
     return selected
 
+def get(re):
+    return compile_and_filter(filter_collections=[".*"], filter_models=[re])
+
 def compile_and_filter(filter_collections=[".*"], filter_models=[".*"]):
     log << "Compile & filter models" << log.endl
     filter_models = [ re.compile(f) for f in filter_models ]

@@ -36,7 +36,7 @@ def build_simple_nphil():
             bml.transforms.MarchenkoPasturFilter(
                 tag="descriptor",
                 args={},
-                inputs={"X":"input.X"}),
+                inputs={"X":"clean.X"}),
             bml.transforms.LinearRegression(
                 tag="predictor",
                 args={},

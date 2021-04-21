@@ -2,6 +2,21 @@ from .pipeline import Module, Macro, Transform
 from .logger import log
 import numpy as np
 
+class Reshape(Transform):
+    default_args = {
+        "shape": [-1,1],
+        "calc_shape": None
+    }
+    req_args = { "shape", }
+    req_inputs = { "X", }
+    allow_stream = { 'X', }
+    def _map(self, inputs, stream):
+        if self.args["shape"] is not None:
+            to_shape = lambda X: X.reshape(self.args["shape"])
+        else:
+            to_shape = eval(self.args["calc_shape"])
+        stream.put("X", to_shape(inputs["X"]))
+        
 class Concatenate(Transform):
     req_inputs = ('X',)
     allow_stream = {'X',}

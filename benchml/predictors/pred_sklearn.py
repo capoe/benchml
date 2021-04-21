@@ -228,3 +228,59 @@ class SupportVectorClassifier(SklearnTransform):
         stream.put("y", y)
         stream.put("z", z)
 
+class LogisticRegression(SklearnTransform):
+    default_args = dict(
+        penalty='l2',
+        dual=False,
+        tol=0.0001,
+        C=1.0,
+        fit_intercept=True,
+        intercept_scaling=1,
+        class_weight=None,
+        random_state=None,
+        solver='lbfgs',
+        max_iter=100,
+        multi_class='auto',
+        verbose=0,
+        warm_start=False,
+        n_jobs=None,
+        l1_ratio=None
+    )
+    req_inputs = {'X', 'y'}
+    allow_params = {'model'}
+    allow_stream = {'y', 'z'}
+    def _fit(self, inputs, stream, params):
+        model = sklearn.linear_model.LogisticRegression(**self.args)
+        model.fit(X=inputs["X"], y=inputs["y"])
+        yp = model.predict(inputs["X"])
+        params.put("model", model)
+        self._map(inputs, stream)
+    def _map(self, inputs, stream):
+        y = self.params().get("model").predict(inputs["X"])
+        z = self.params().get("model").decision_function(inputs["X"])
+        stream.put("y", y)
+        stream.put("z", z)
+
+class ElasticNet(SklearnTransform):
+    # TODO
+    pass
+
+class OrthogonalMatchingPursuit(SklearnTransform):
+    # TODO
+    pass
+
+class Lasso(SklearnTransform):
+    # TODO
+    pass
+
+class KNeighborsRegressor(SklearnTransform):
+    # TODO
+    pass
+
+class KNeighborsClassifier(SklearnTransform):
+    # TODO
+    pass
+
+class AdaBoost(SklearnTransform):
+    # TODO
+    pass

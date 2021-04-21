@@ -80,6 +80,24 @@ class RankNorm(Transform):
             inputs["z"])/len(self.params().get("z"))
         stream.put("z", ranked)
 
+class SliceMatrix(Transform):
+    allow_params = {"slice",}
+    allow_stream = {"X",}
+    default_args = { "axis": None }
+    req_inputs = {"slice", "X"}
+    def _fit(self, inputs, stream, params):
+        if self.args["axis"] is None:
+            slice = inputs["slice"]
+        elif isinstance(self.args["axis"], int):
+            slice = [ slice(None) for r in len(inputs["X"].shape) ]
+            slice[self.args["axis"]] = inputs["slice"]
+        else: raise ValueError("SliceMatrix arg 'slice' expects None or int")
+        params.put("slice", slice)
+        return self._map(inputs, stream)
+    def _map(self, inputs, stream):
+        s = self.params().get("slice")
+        stream.put("X", X[s])
+
 class DoDivideBySize(Transform):
     default_args = {
         "config_to_size": "lambda c: len(c)",

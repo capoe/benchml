@@ -254,9 +254,9 @@ def compile_logd(custom_fields=[], **kwargs):
                     inputs={"configs": "input.configs"}),
                 Delta(
                     inputs={"target": "input.y", "ref": "cx_alt.X"}),
-                CxCalcTransform(tag="cx",
-                    args={"reshape_as_matrix": True},
-                    inputs={"configs": "input.configs"}),
+                Reshape(tag="cx",
+                    args={"shape": [-1,1]},
+                    inputs={"X": "cx_alt.X"}),
                 KernelGaussian(
                     tag="kern_gaussian",
                     inputs={"X": "cx.X"}),

@@ -108,6 +108,7 @@ split_generators = {
   "loo": SplitLOO,
   "mc": SplitMC,
   "json": SplitJson,
+  "kfold": SplitKfold,
   "random": SplitMC,
   "sequential": SplitSequentialMC,
 }
