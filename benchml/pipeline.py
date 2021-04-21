@@ -550,7 +550,7 @@ class Module(Transform):
         if clear_stream:
             stream.handle.clear()
         param_streams = { tf.params().tag for tf in self.transforms \
-            if tf.params() is not None }
+            if (tf.params() is not None and not tf.detached) }
         if check and len(param_streams) > 1:
             log << log.mr << "WARNING Model parametrized using more " \
              "than one stream (did you perhaps use .precompute?)" << log.endl

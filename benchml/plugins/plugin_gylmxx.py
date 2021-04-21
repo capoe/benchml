@@ -51,7 +51,7 @@ class KernelSmoothMatch(Transform):
 class AttributeKernelSmoothMatchSVM(Transform):
     req_inputs = ("configs", "X", "X_probe", "z_probe", "model")
     default_args = {
-        "write_xyz": "attribution.xyz",
+        "write_xyz": "",
         "gamma": "@kernel.gamma",
         "epsilon": "@kernel.epsilon",
         "base_kernel": "@kernel.base_kernel",
@@ -94,8 +94,8 @@ class AttributeKernelSmoothMatchSVM(Transform):
             import json
             for cidx, config in enumerate(configs):
                 config.info["z_attr"] = list(Z[cidx].tolist())
-            write('attribution.xyz', configs)
-        stream.put("Z", np.array(Z))
+            write(self.args["write_xyz"], configs)
+        stream.put("Z", np.array(Z, dtype=object))
 
 class GylmTransform(Transform):
     default_args = {
