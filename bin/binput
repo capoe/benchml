@@ -72,14 +72,14 @@ def validate_args(args):
 
 if __name__ == "__main__":
     log.Connect()
-    log.AddArg("input", str, default="")
-    log.AddArg("filter", str, default="")
-    log.AddArg("output", str, default="")
+    log.AddArg("input", str, default="", help="Input structure file")
+    log.AddArg("filter", str, default="", help="Lambda filter expression")
+    log.AddArg("output", str, default="", help="Output structure file")
     # CSV <> XYZ conversion
-    log.AddArg("from_csv", str, default="")
-    log.AddArg("to_csv", str, default="")
-    log.AddArg("gen3d", "toggle", default=False)
-    log.AddArg("smiles_from", str, default="SMILES")
+    log.AddArg("from_csv", str, default="", help="Input csv file")
+    log.AddArg("to_csv", str, default="", help="Output csv file")
+    log.AddArg("gen3d", "toggle", default=False, help="Generate 3D coords")
+    log.AddArg("smiles_from", str, default="SMILES", help="Key from which to read smiles")
     log.AddArg("corina", str, default='/software/corina/bin/corina')
     log.AddArg("babel", str, default='/software/babel/bin/babel')
     args = validate_args(log.Parse())

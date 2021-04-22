@@ -222,7 +222,6 @@ class Transform(object):
         self.inputs = kwargs["inputs"] if "inputs" in kwargs else {}
         self.outputs = kwargs["outputs"] if "outputs" in kwargs else {}
         self.detached = True if self.inputs is None else detached
-        self.checkRequire()
         # Param sets
         self.map_params = {}
         self.active_params = None
@@ -233,7 +232,10 @@ class Transform(object):
         self.hash_deps = None
         self.hash_total = None
         self.hash_prev = None
+    def detach(self, **args):
+        return Standalone(self.__class__, **args)
     def attach(self, module):
+        self.checkRequire()
         self.module = module
     def ready(self):
         return self._is_setup
@@ -791,6 +793,21 @@ class Macro(object):
             tf.parseArgsLinks()
             tf.tag = self.tag+"/"+tf.tag
             yield tf
+
+class Standalone(object):
+    def __init__(self, TransformClass, **kwargs):
+        self.base = TransformClass(detached=True, args=kwargs)
+    def fit(self, **kwargs):
+        stream = Stream(handle=None, tag="", tf=self.base)
+        params = self.base.openParams("")
+        return self.base._fit(kwargs, stream, params)
+    def map(self, **kwargs):
+        stream = Stream(handle=None, tag="", tf=self.base)
+        self.base._map(kwargs, stream)
+        stream.storage.pop("version")
+        return stream.storage
+    def params(self):
+        return self.base.params()
 
 class sopen(object):
     def __init__(self, module, data, verbose=False):
