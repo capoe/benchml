@@ -94,6 +94,16 @@ def compile_logd_ai(*args, **kwargs):
                     }
                 ),
                 Hyper({ "GaussianProcess.power": [ 2. ] })
+                #Hyper({ "desc.radius": [ 2 ] }),
+                #Hyper({ "GaussianProcess.alpha": [ 0.1 ], }),
+                #Hyper({ "kern_gaussian.scale": [ 2. ] }),
+                #Hyper(
+                #    { 
+                #      "add_k.coeffs": [ [0.25,0.75] ],
+                #      "add_k_self.coeffs": [ [0.25,0.75] ] 
+                #    }
+                #),
+                #Hyper({ "GaussianProcess.power": [ 2. ] })
             ),
             broadcast={ "meta": "input.meta" },
             outputs={ 

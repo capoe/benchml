@@ -1,6 +1,5 @@
 import json
 import benchml as bml
-import nphil
 import scipy.stats
 import sklearn.metrics
 import numpy as np
@@ -153,15 +152,17 @@ if __name__ == "__main__":
             "task": "regression", 
             "scaling": "non-additive",
             "metrics": ["mse", "mae"]})
-    n_hyper_settings = 1000
+    n_hyper_settings = 10
     for model, hloop in zip(build_models(), build_hloops()):
         dump = []
         for i in range(n_hyper_settings):
+            log << log.mg << "Hyperloop" << i << log.endl
             hargs = hloop.random()
             metrics = evaluate_single(dataset, model, hargs)
             dump.append({"m": metrics, "h": hargs})
         json.dump(
             dump, 
-            open(model.tag+"_metrics.json", "w"), 
+            open(model.tag+"_metrics_brief.json", "w"), 
             indent=1, 
             sort_keys=True)
+

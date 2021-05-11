@@ -50,13 +50,26 @@ class SplitKfold(SplitBase):
     def __init__(self, dset, **kwargs):
         SplitBase.__init__(self, dset)
         self.n_reps = kwargs["k"]
-        self.length = len(dset)
-        self.stride = len(dset)//self.n_reps + (1 if len(dset) % self.n_reps > 0 else 0)
+        self.length = dset if (type(dset) is int) else len(dset)
+        self.stride = self.length//self.n_reps + (1 if self.length  % self.n_reps > 0 else 0)
     def next(self):
         info = "%s_i%03d" % (self.tag, self.step)
         idcs_train = list(np.arange(0, self.step*self.stride)) + list(np.arange((self.step+1)*self.stride, self.length))
         idcs_test = list(np.arange(self.step*self.stride, min(self.length, (self.step+1)*self.stride)))
         return info, idcs_train, idcs_test
+
+class SplitChronological(SplitBase):
+    tag = "chrono"
+    def __init__(self, dset, **kwargs):
+        SplitBase.__init__(self, dset)
+        self.f = kwargs["train_fraction"]
+        if not isinstance(self.f, list): self.f = [ self.f ]
+        self.n_reps = len(self.f)
+    def next(self):
+        info = "%s_i%03d" % (self.tag, self.step)
+        idcs = np.arange(self.n_samples)
+        t = int(self.n_samples*self.f[self.step])
+        return info, idcs[0:t], idcs[t:]
 
 class SplitMC(SplitBase):
     tag = "random"
@@ -100,6 +113,24 @@ class SplitSequentialMC(SplitBase):
         idcs_train = np.sort(idcs[0:n_train])
         idcs_test = np.sort(idcs[n_train:])
         return info, idcs_train, idcs_test
+
+class SplitLambda(SplitBase):
+    tag = "lambda"
+    def __init__(self, dset, **kwargs):
+        SplitBase.__init__(self, dset)
+        self.lambda_funcs = kwargs["lambdas"]
+        self.n_reps = len(self.lambda_funcs)
+        self.dset = dset
+        self.rng = np.random.RandomState(SEED)
+    def next(self):
+        info = "%s_i%03d" % (self.tag, self.step)
+        train = []
+        test = []
+        func = eval(self.lambda_funcs[self.step])
+        for i in range(len(self.dset)):
+            if func(self.dset.data[i]): train.append(i)
+            else: test.append(i)
+        return info, train, test
             
 def Split(dset, **kwargs):
     return split_generators[kwargs["method"]](dset, **kwargs)
@@ -108,6 +139,8 @@ split_generators = {
   "loo": SplitLOO,
   "mc": SplitMC,
   "json": SplitJson,
+  "lambda": SplitLambda,
+  "chrono": SplitChronological,
   "kfold": SplitKfold,
   "random": SplitMC,
   "sequential": SplitSequentialMC,

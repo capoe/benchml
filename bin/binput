@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/tmp_mnt/filer1/unix/cpoelking/nomad/ccdc_rev/venv/bin/python
 import numpy as np
 import json
 import pandas as pd
@@ -10,7 +10,7 @@ def csv_to_xyz(csv_file, args, xyz_file=""):
     log << log.mg << "Converting csv to extxyz format" << log.endl
     reader = csv.DictReader(open(csv_file))
     data = [ row for row in reader ]
-    smiles = [ row[args.smiles] for row in data ]
+    smiles = [ row[args.smiles_from ] for row in data ]
     if not args.gen3d:
         configs = list(smiles_to_pseudo_xyz(smiles))
     else:

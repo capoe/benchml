@@ -36,9 +36,9 @@ class XyInput(Transform):
         stream.put("y", data.y)
 
 class Add(Transform):
-    req_args = ('coeffs',)
-    req_inputs = ('X',)
-    allow_stream = {'y'}
+    req_args = {'coeffs',}
+    req_inputs = {'X',}
+    allow_stream = {'y',}
     def _map(self, inputs, stream):
         coeffs = self.args["coeffs"]
         assert len(coeffs) == len(inputs["X"])
@@ -67,6 +67,7 @@ class Delta(Transform):
         stream.put("y", delta)
 
 class RankNorm(Transform):
+    req_inputs = {'z',}
     allow_params = {"z",}
     allow_stream = {"z",}
     def _fit(self, inputs, stream, params):

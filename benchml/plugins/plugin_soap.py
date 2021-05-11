@@ -53,8 +53,8 @@ class SoapBase(Transform):
         t1 = time.time()
         if log and log.verbose:
             log << "[Finished in %fs]" % (t1-t0) << log.flush
-        X = np.array(X)
-        T = np.array(T)
+        X = np.array(X, dtype='object')
+        T = np.array(T, dtype='object')
         return T, X
     def _setup(self):
         self.heavy_only = self.args.pop("heavy_only", False)

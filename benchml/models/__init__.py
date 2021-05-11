@@ -44,10 +44,15 @@ def compile(groups, **kwargs):
     return selected
 
 def get(re):
-    return compile_and_filter(filter_collections=[".*"], filter_models=[re])
+    if isinstance(re, str):
+        re = [ re ]
+    return compile_and_filter(filter_collections=[".*"], filter_models=re)
 
-def compile_and_filter(filter_collections=[".*"], filter_models=[".*"]):
-    log << "Compile & filter models" << log.endl
+def compile_and_filter(
+        filter_collections=[".*"], 
+        filter_models=[".*"],
+        verbose=False):
+    if verbose: log << "Compile & filter models" << log.endl
     filter_models = [ re.compile(f) for f in filter_models ]
     filter_collections = [ re.compile(c) for c in filter_collections ]
     check_added = set()
@@ -69,6 +74,6 @@ def compile_and_filter(filter_collections=[".*"], filter_models=[".*"]):
                 else:
                     log << log.mr << " - '%s/%s' skipped (duplicate)" % (group, m.tag) << log.endl
             elif not avail:
-                log << log.my << " - Exclude '%s/%s' (not available)" % (group, m.tag) << log.endl
+                if verbose: log << log.my << " - Exclude '%s/%s' (not available)" % (group, m.tag) << log.endl
     return filtered_models 
 

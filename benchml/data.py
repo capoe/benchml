@@ -70,7 +70,7 @@ class Dataset(object):
                     for s in self.configs ]))
         return
     def info(self):
-        return "{name:50s}  #configs={size:<5d}  task={task:8s}  metrics={metrics:s}   std={std:1.2e}".format(
+        return "{name:30s}  #configs={size:<5d}  task={task:8s}  metrics={metrics:s}   std={std:1.2e}".format(
             name=self.meta["name"], size=len(self.configs),
             task=self.meta["task"], metrics=",".join(self.meta["metrics"]),
             std=np.std(self.y))

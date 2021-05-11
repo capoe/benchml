@@ -84,7 +84,7 @@ class GridHyper(object):
             if log:
                 log << colour << "|   %-5d   |  %+1.2e  |" % (hyperidx+1, metric) + "|".join(map(
                     lambda f: (" %+1.2e " % float(updates[f])) \
-                        if (updates[f] is not None and type(updates[f]) is not list) \
+                        if (updates[f] is not None and (not type(updates[f]) in {str, list})) \
                             else "  [ ... ]  ", fields))+"|" << log.endl
         update_cache = sorted(update_cache, key=lambda cache: cache["metric"])
         best = update_cache[0] if (Accumulator.select(**accu_args) == "smallest") \
