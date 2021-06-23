@@ -9,8 +9,8 @@ class ExttInput(Transform):
     stream_copy = {'meta',}
     stream_samples = {'X', 'Y'}
     def _feed(self, data, stream):
-        stream.put("X", data.arrays["X"])
-        stream.put("Y", data.arrays["Y"])
+        for key, v in data.arrays.items():
+            stream.put(key, v, force=True)
         stream.put("meta", data.meta)
 
 class ExtXyzInput(Transform):
@@ -55,6 +55,15 @@ class Mult(Transform):
         for i in range(len(inputs["X"])):
             y = y*inputs["X"][i]
         stream.put("y", y)
+
+class Exp(Transform):
+    req_inputs = {'X',}
+    default_args = {
+        "coeff": +1
+    }
+    allow_stream = {'X',}
+    def _map(self, inputs, stream):
+        stream.put("X", np.exp(self.args["coeff"]*inputs["X"]))
 
 class Delta(Transform):
     allow_stream = {'y'}

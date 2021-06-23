@@ -51,7 +51,7 @@ class SplitKfold(SplitBase):
         SplitBase.__init__(self, dset)
         self.n_reps = kwargs["k"]
         self.length = dset if (type(dset) is int) else len(dset)
-        self.stride = self.length//self.n_reps + (1 if self.length  % self.n_reps > 0 else 0)
+        self.stride = self.length//self.n_reps + (1 if ((self.length % self.n_reps) > 0) else 0)
     def next(self):
         info = "%s_i%03d" % (self.tag, self.step)
         idcs_train = list(np.arange(0, self.step*self.stride)) + list(np.arange((self.step+1)*self.stride, self.length))
@@ -131,7 +131,25 @@ class SplitLambda(SplitBase):
             if func(self.dset.data[i]): train.append(i)
             else: test.append(i)
         return info, train, test
-            
+
+class SplitGrouped(SplitBase):
+    tag = "grouped"
+    def __init__(self, dset, **kwargs):
+        SplitBase.__init__(self, dset)
+        self.index = kwargs["group_index"]
+        if isinstance(self.index, list):
+            self.index = np.array(self.index)
+        self.groups = list(sorted(list(set(self.index.tolist()))))
+        self.n_reps = len(self.groups)
+    def next(self):
+        info = "%s_i%03d" % (self.tag, self.step)
+        train = []
+        test = []
+        g = self.groups[self.step]
+        train = np.where(self.index != g)[0]
+        test = np.where(self.index == g)[0]
+        return info, train, test
+
 def Split(dset, **kwargs):
     return split_generators[kwargs["method"]](dset, **kwargs)
 
@@ -143,5 +161,6 @@ split_generators = {
   "chrono": SplitChronological,
   "kfold": SplitKfold,
   "random": SplitMC,
+  "grouped": SplitGrouped,
   "sequential": SplitSequentialMC,
 }

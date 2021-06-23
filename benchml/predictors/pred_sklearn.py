@@ -56,6 +56,114 @@ class Ridge(SklearnTransform):
         y = self.params().get("y_std")*y + self.params().get("y_mean")
         stream.put("y", y)
 
+class RidgeClassifier(SklearnTransform):
+    default_args = { 'alpha': 1., 'class_weight': 'balanced' }
+    req_inputs = ('X', 'y')
+    allow_params = {'model',}
+    allow_stream = {'y', 'z'}
+    def _fit(self, inputs, stream, params):
+        y_train = inputs["y"]
+        model = sklearn.linear_model.RidgeClassifier(**self.args)
+        model.fit(X=inputs["X"], y=y_train)
+        y = model.predict(inputs["X"])
+        z = model.decision_function(inputs["X"])
+        params.put("model", model)
+        stream.put("y", y)
+        stream.put("z", z)
+    def _map(self, inputs, stream):
+        model = self.params().get("model")
+        y = model.predict(inputs["X"])
+        z = model.decision_function(inputs["X"])
+        stream.put("y", y)
+        stream.put("z", z)
+
+class ElasticNetClassifier(SklearnTransform):
+    default_args = dict(
+        alpha=1.0,
+        l1_ratio=0.5
+    )
+    req_inputs = {'X', 'y'}
+    allow_params = {'model'}
+    allow_stream = {'y', 'z'}
+    def _fit(self, inputs, stream, params):
+        y = inputs["y"]
+        i0 = np.where(np.abs(y - 0.) < 1e-3)[0]
+        i1 = np.where(np.abs(y - 1.) < 1e-3)[0]
+        n0 = len(i0)
+        n1 = len(i1)
+        assert (n0+n1) == len(y)
+        w0 = float(n1)/(n0+n1)
+        w1 = 1. - w0
+        w = np.ones_like(y)
+        w[i0] = w0
+        w[i1] = w1
+        model = sklearn.linear_model.ElasticNet(**self.args)
+        model.fit(X=inputs["X"], y=y, sample_weight=w)
+        z = model.predict(inputs["X"])
+        params.put("model", model)
+        self._map(inputs, stream)
+    def _map(self, inputs, stream):
+        z = self.params().get("model").predict(inputs["X"])
+        y = np.zeros_like(z)
+        y[np.where(z > 0.)] = 1.
+        stream.put("y", y)
+        stream.put("z", y)
+
+class ElasticNetClassifier(Transform):
+    default_args = dict(
+        alpha=1.0,
+        l1_ratio=0.5
+    )
+    req_inputs = {'X', 'y'}
+    allow_params = {'model'}
+    allow_stream = {'y', 'z'}
+    def _fit(self, inputs, stream, params):
+        y = inputs["y"]
+        y_spin = 2*(y - 0.5)
+        i0 = np.where(np.abs(y - 0.) < 1e-3)[0]
+        i1 = np.where(np.abs(y - 1.) < 1e-3)[0]
+        n0 = len(i0)
+        n1 = len(i1)
+        assert (n0+n1) == len(y)
+        w0 = float(n1)/(n0+n1)
+        w1 = 1. - w0
+        w = 1.*np.ones_like(y)
+        w[i0] = w0
+        w[i1] = w1
+        model = sklearn.linear_model.ElasticNet(**self.args)
+        model.fit(X=inputs["X"], y=y_spin, sample_weight=w)
+        z = model.predict(inputs["X"])
+        params.put("model", model)
+        self._map(inputs, stream)
+    def _map(self, inputs, stream):
+        z = self.params().get("model").predict(inputs["X"])
+        y = np.zeros_like(z)
+        y[np.where(z > 0.)] = 1.
+        stream.put("y", y)
+        stream.put("z", y)
+
+class OMPClassifier(Transform):
+    default_args = dict(
+        n_nonzero_coefs=5,
+    )
+    req_inputs = {'X', 'y'}
+    allow_params = {'model'}
+    allow_stream = {'y', 'z'}
+    def _fit(self, inputs, stream, params):
+        y = inputs["y"]
+        y_spin = 2*(y - 0.5)
+        model = sklearn.linear_model.OrthogonalMatchingPursuit(**self.args)
+        model.fit(X=inputs["X"], y=y_spin)
+        z = model.predict(inputs["X"])
+        params.put("model", model)
+        self._map(inputs, stream)
+    def _map(self, inputs, stream):
+        z = self.params().get("model").predict(inputs["X"])
+        y = np.zeros_like(z)
+        y[np.where(z > 0.)] = 1.
+        stream.put("y", y)
+        stream.put("z", y)
+
 class GradientBoosting(SklearnTransform):
     allow_stream = {"y"}
     allow_params = {"model"}
@@ -262,8 +370,53 @@ class LogisticRegression(SklearnTransform):
         stream.put("z", z)
 
 class ElasticNet(SklearnTransform):
-    # TODO
-    pass
+    default_args = dict(
+        alpha=1.0,
+        l1_ratio=0.5
+    )
+    req_inputs = {'X', 'y'}
+    allow_params = {'model'}
+    allow_stream = {'y', 'z'}
+    def _fit(self, inputs, stream, params):
+        model = sklearn.linear_model.ElasticNet(**self.args)
+        model.fit(X=inputs["X"], y=inputs["y"])
+        yp = model.predict(inputs["X"])
+        params.put("model", model)
+        self._map(inputs, stream)
+    def _map(self, inputs, stream):
+        y = self.params().get("model").predict(inputs["X"])
+        stream.put("y", y)
+        stream.put("z", y)
+
+class KernelMatern(Transform):
+    default_args = {
+        'length_scale': 1.,
+        'nu': 1.5
+    }
+    req_inputs = ('X',)
+    allow_params = {'X'}
+    allow_stream = {'K', 'K_self'}
+    stream_kernel = ('K',)
+    stream_samples = ('K_self',)
+    precompute = True
+    def evaluate(self, x1, x2=None, diagonal_only=False):
+        kern = sklearn.gaussian_process.kernels.Matern(**self.args)
+        if x2 is None: x2 = x1
+        if diagonal_only:
+            return kern.diag(x1)
+        else:
+            return kern(x1, x2)
+    def _fit(self, inputs, stream, params):
+        K = self.evaluate(inputs["X"])
+        params.put("X", np.copy(inputs["X"]))
+        stream.put("K", K)
+        stream.put("K_self", K.diagonal())
+    def _map(self, inputs, stream):
+        K = self.evaluate(inputs["X"], self.params().get("X"))
+        stream.put("K", K)
+        K_self = self.evaluate(inputs["X"], inputs["X"], 
+            diagonal_only=True)
+        stream.put("K_self", K_self)
 
 class OrthogonalMatchingPursuit(SklearnTransform):
     # TODO

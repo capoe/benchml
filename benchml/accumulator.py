@@ -30,6 +30,12 @@ def metric_acc(yp, yt):
 def metric_mcc(yp, yt):
     return sklearn.metrics.matthews_corrcoef(yt,yp)
 
+def metric_prec(yp, yt):
+    return sklearn.metrics.precision_score(yt,yp)
+
+def metric_rec(yp, yt):
+    return sklearn.metrics.recall_score(yt,yp)
+
 def metric_r2(yp, yt):
     return sklearn.metrics.r2_score(yt, yp)
 
@@ -49,6 +55,8 @@ class Accumulator(object):
         "auc":  metric_auc,
         "acc": metric_acc,
         "mcc": metric_mcc,
+        "rec": metric_rec,
+        "prec": metric_prec,
         "r2": metric_r2,
         "sup": metric_sup,
         "bal": metric_bal,
@@ -62,6 +70,8 @@ class Accumulator(object):
         "auc":  'largest',
         "acc": 'largest',
         "mcc": 'largest',
+        "rec": 'largest',
+        "prec": 'largest',
         "r2": 'largest',
         "sup": 'smallest',
         "bal": 'smallest'

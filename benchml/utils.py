@@ -62,6 +62,18 @@ class StagedTimer(object):
             list(map(lambda s: "dt(%s)=%1.4fs" % (s, self.times[s]), 
             self.stages))) << log.endl
 
+class OneHot(object):
+    def __init__(self, cats):
+        self.cats = cats
+        self.index = { c: i for i, c in enumerate(cats) }
+    def dim(self):
+        return len(self.cats)
+    def map(self, cats):
+        x = np.zeros((len(cats), len(self.cats)))
+        for i, c in enumerate(cats):
+            x[i, self.index[c]] = 1
+        return x
+
 try_smiles_key = [
     "smiles",
     "SMILES",

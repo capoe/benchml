@@ -10,22 +10,16 @@ class NonlinearFeatureFilter(Transform):
         "unit_min_exp": 0.5,
         "unit_max_exp": 3.0,
         "correlation_measure": "moment",
-        "rank_coeff": 0.5
+        "rank_coeff": 0.5,
+        "n_top": 1
     }
-    req_inputs = {"X","Y","meta"}
+    req_inputs = {"X","Y",}
     allow_stream = {"X",}
     allow_params = {"fgraph","ranked","variables"}
     def check_available():
         return check_nphil_available(__class__)
-    def _fit(self, inputs, stream, params):
-        X = np.copy(inputs["X"])
-        Y = np.copy(inputs["Y"])
-        if len(Y.shape) > 1 and Y.shape[1] > 1:
-            raise NotImplementedError(
-                "NonlinearFeatureFilter requires single-column"+\
-                " vector Y, but got multi-column matrix")
-        variables = inputs["meta"]["variables"]
-        fgraph = nphil.generate.generate_graph(
+    def generateGraph(self, variables):
+        return nphil.generate.generate_graph(
             variables=variables,
             uop_list=self.args["uops"],
             bop_list=self.args["bops"],
@@ -33,6 +27,18 @@ class NonlinearFeatureFilter(Transform):
             unit_max_exp=self.args["unit_max_exp"],
             correlation_measure=self.args["correlation_measure"],
             rank_coeff=self.args["rank_coeff"])
+    def _fit(self, inputs, stream, params):
+        X = np.copy(inputs["X"])
+        Y = np.copy(inputs["Y"])
+        if len(Y.shape) > 1 and Y.shape[1] > 1:
+            raise NotImplementedError(
+                "NonlinearFeatureFilter requires single-column"+\
+                " vector Y, but got multi-column matrix")
+        if "meta" in inputs and "variables" in inputs["meta"]:
+            variables = inputs["meta"]["variables"]
+        else:
+            variables = nphil.generate.infer_variable_properties(X)
+        fgraph = self.generateGraph(variables)
         covs = np.zeros((len(fgraph),), dtype=X.dtype)
         X_out = np.zeros((len(X),len(fgraph)), dtype=X.dtype)
         Y = Y.reshape((-1,1))
@@ -51,8 +57,12 @@ class NonlinearFeatureFilter(Transform):
     def _map(self, inputs, stream):
         X = np.copy(inputs["X"])
         fgraph = self.params().get("fgraph")
+        if fgraph is None: # Might have be none'd to allow serialization
+            fgraph = self.generateGraph(variables)
+            self.params().put("fgraph", fgraph)
         ranked = self.params().get("ranked")
         X_out = np.zeros((len(X),len(fgraph)), dtype=X.dtype)
         fgraph.apply(X, X_out, len(X))
-        stream.put("X", X_out[:,ranked[0]].reshape((-1,1)))
+        X_out = X_out[:,ranked[0:self.args["n_top"]]]
+        stream.put("X", X_out)
         

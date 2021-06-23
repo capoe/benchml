@@ -171,6 +171,8 @@ class Params(object):
         return self.storage[key]
     def items(self):
         return self.storage.items()
+    def keys(self):
+        return list(sorted(self.storage.keys()))
     def clone(self):
         return copy.deepcopy(self)
     def put(self, key, value, force=False):

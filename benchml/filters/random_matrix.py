@@ -75,8 +75,8 @@ class CleanMatrix(Transform):
             > self.args["std_threshold"])[0]
         if not len(slice):
             raise RuntimeError("CleanMatrix: Returned empty array")
-        log << log.debug << "CleanMatrix: Removed %d columns" % (
-            X.shape[self.args["axis"]] - len(slice)) << log.endl
+        log << log.debug << "CleanMatrix: Removed %d/%d columns" % (
+            len(slice), X.shape[self.args["axis"]]) << log.endl
         params.put("slice", slice)
         params.put("rank", len(X.shape))
         self._map(inputs, stream)
