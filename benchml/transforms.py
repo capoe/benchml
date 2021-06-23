@@ -116,6 +116,7 @@ class DoDivideBySize(Transform):
     }
     req_inputs = ("y", "configs", "meta")
     allow_stream = ("y", "sizes")
+    allow_params = ("divide_by_size",)
     def checkDoDivide(self, inputs):
         do_divide_by_size = False
         if self.args["force"]:
@@ -131,7 +132,7 @@ class DoDivideBySize(Transform):
         else:
             raise ValueError("Scaling should be one of additive|non-additive|unknown")
         return do_divide_by_size
-    def _map(self, inputs, stream):
+    def _fit(self, inputs, stream, params):
         do_div = self.checkDoDivide(inputs)
         y_in = inputs["y"]
         if not do_div:
@@ -146,7 +147,22 @@ class DoDivideBySize(Transform):
             sizes = np.array(list(map(s_fct, configs)))
             assert np.min(sizes) > 0 # DoDivideBySize: sample size <= 0 not allowed
             y_out = y_in/sizes
+        params.put("divide_by_size", do_div)
         stream.put("y", y_out)
+        stream.put("sizes", sizes)
+    def _map(self, inputs, stream):
+        do_div = self.params().get("divide_by_size")
+        configs = inputs["configs"]
+        if not do_div:
+            sizes = np.ones((len(configs),))
+        else:
+            if type(self.args["config_to_size"]) is str:
+                s_fct = eval(self.args["config_to_size"])
+            else:
+                s_fct = self.args["config_to_size"]
+            sizes = np.array(list(map(s_fct, configs)))
+            assert np.min(sizes) > 0 # DoDivideBySize: sample size <= 0 not allowed
+        stream.put("y", None)
         stream.put("sizes", sizes)
 
 class UndoDivideBySize(Transform):
