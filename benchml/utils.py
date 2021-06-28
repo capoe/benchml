@@ -113,21 +113,22 @@ def smiles_to_extxyz(
         config = readwrite.read('%s/tmp.xyz' % tmpfolder).pop()
         return config
 
-def smiles_to_pseudo_xyz(smiles):
+def smiles_to_pseudo_extxyz(smiles):
     configs = []
     valid = []
     for idx, smi in enumerate(smiles):
-        mol = chem.MolFromSmiles(smi)
-        mol = chem.AddHs(mol)
-        if mol is None:
-            pass
-        else:
-            symbols = [ a.GetSymbol() for a in mol.GetAtoms() ]
-            pos = np.zeros((len(symbols),3))
-            config = readwrite.ExtendedXyz(pos=pos, symbols=symbols)
-            config.info["lmat"] = 1.*chem.GetAdjacencyMatrix(mol)
-            configs.append(config)
-            valid.append(idx)
+        try: 
+            mol = chem.MolFromSmiles(smi)
+            mol = chem.AddHs(mol)
+        except :
+            print(f"Smiles problem in idx {idx} ,smiles string {smi}")
+            continue 
+        symbols = [ a.GetSymbol() for a in mol.GetAtoms() ]
+        pos = np.zeros((len(symbols),3))
+        config = readwrite.ExtendedXyz(pos=pos, symbols=symbols)
+        config.info["lmat"] = 1.*chem.GetAdjacencyMatrix(mol)
+        configs.append(config)
+        valid.append(idx)
     return configs
 
 def dataframe_to_extxyz(
@@ -144,9 +145,9 @@ def dataframe_to_extxyz(
     log.debug = False
     try:
         for r, row in data.iterrows():
-            log << log.back << "Convert row" << r << log.flush
+            log << log.back << "Convert row" << r << log.flush 
             config = smiles_to_extxyz(
-                smiles=row["smiles"], 
+                smiles=[row[smiles_from]], 
                 gen3d=gen3d,
                 tmpfolder=tmpfolder, 
                 corina=corina, 
