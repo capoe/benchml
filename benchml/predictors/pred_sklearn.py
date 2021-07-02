@@ -419,8 +419,26 @@ class KernelMatern(Transform):
         stream.put("K_self", K_self)
 
 class OrthogonalMatchingPursuit(SklearnTransform):
-    # TODO
-    pass
+    default_args = dict(
+       n_nonzero_coefs=None,
+       tol=None,
+       fit_intercept=True,
+       normalize=True,
+       precompute="auto"
+    )
+    req_inputs = {'X', 'y'}
+    allow_params = {'model'}
+    allow_stream = {'y', 'z'} 
+    def _fit(self, inputs, stream, params):
+        model = sklearn.linear_model.OrthogonalMatchingPursuit(**self.args)
+        model.fit(X=inputs["X"], y=inputs["y"])
+        yp = model.predict(inputs["X"])
+        params.put("model", model)
+        self._map(inputs, stream)
+    def _map(self, inputs, stream):
+        y = self.params().get("model").predict(inputs["X"])
+        stream.put("y", y)
+        stream.put("z", y)
 
 class Lasso(SklearnTransform):
     # TODO
