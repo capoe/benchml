@@ -265,14 +265,14 @@ class KernelRidge(SklearnTransform):
         y_train = (inputs["y"]-y_mean)/y_std
         model = sklearn.kernel_ridge.KernelRidge(
             kernel='precomputed', alpha=self.args["alpha"])
-        model.fit(inputs["K"]**self.power, y_train)
-        y_pred = model.predict(inputs["K"]**self.power)*y_std + y_mean
+        model.fit(inputs["K"]**self.args["power"], y_train)
+        y_pred = model.predict(inputs["K"]**self.args["power"])*y_std + y_mean
         params.put("model", model)
         params.put("y_mean", y_mean)
         params.put("y_std", y_std)
         stream.put("y", y_pred)
     def _map(self, inputs, stream):
-        y = self.params().get("model").predict(inputs["K"]**self.power)
+        y = self.params().get("model").predict(inputs["K"]**self.args["power"])
         y = y*self.params().get("y_std") + self.params().get("y_mean")
         stream.put("y", y)
 

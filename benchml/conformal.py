@@ -23,7 +23,7 @@ class ConformalBase(Transform):
         "descriptor": "lambda X, s, r: X[s]"
     }
     req_inputs = {'X','y','base_transform'}
-    allow_stream = {'y','dy','z','p'}
+    allow_stream = {'y','dy','z','p','dy_noncalibrated'}
     allow_params = {'params', 'alpha'}
 
 class ConformalRegressor(ConformalBase):
@@ -82,6 +82,7 @@ class ConformalRegressor(ConformalBase):
         dy = stream.get("dy")
         dy_calibrated = stream.get("dy")*self.params().get("alpha")
         stream.put("dy", dy_calibrated)
+        stream.put("dy_noncalibrated", dy)
 
 class ConformalClassifier(ConformalBase):
     default_args = {
