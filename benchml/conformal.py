@@ -1,7 +1,11 @@
 import numpy as np
+from scipy.optimize import curve_fit
 from .pipeline import Transform, Params
 from .splits import Split
 from .logger import log
+
+def fsigmoid(x, a, b):
+    return 1.0 / (1.0 + np.exp(-a*(x-b)))
 
 class ConformalBase(Transform):
     default_args = {
@@ -23,8 +27,8 @@ class ConformalBase(Transform):
         "descriptor": "lambda X, s, r: X[s]"
     }
     req_inputs = {'X','y','base_transform'}
-    allow_stream = {'y','dy','z','p','dy_noncalibrated'}
-    allow_params = {'params', 'alpha'}
+    allow_stream = {'y','dy','z','p','dy_noncalibrated', 'p_noncalibrated'}
+    allow_params = {'params', 'alpha', 'scores', 'sigmoid_a', 'sigmoid_b' }
 
 class ConformalRegressor(ConformalBase):
     default_args = {
@@ -66,6 +70,7 @@ class ConformalRegressor(ConformalBase):
         dY_pred = np.concatenate(dY_pred)
         scores = np.abs(Y-Y_pred)/(dY_pred+self.args["epsilon"])
         scores = np.sort(scores)
+        params.put("scores", scores)
         alpha = np.percentile(scores, list(map(lambda c: 100*c, self.args["confidence"])))
         # Refit on entire dataset
         params_cal = Params(tag="", tf=base)
@@ -80,7 +85,7 @@ class ConformalRegressor(ConformalBase):
         base.active_params = self.params().get("params")
         base._map({**inputs, **inputs_base}, stream)
         dy = stream.get("dy")
-        dy_calibrated = stream.get("dy")*self.params().get("alpha")
+        dy_calibrated = dy*self.params().get("alpha")
         stream.put("dy", dy_calibrated)
         stream.put("dy_noncalibrated", dy)
 
@@ -88,6 +93,7 @@ class ConformalClassifier(ConformalBase):
     default_args = {
         "epsilon": 1e-10,
         "class_threshold": 0.5,
+        "sigmoid_fit": False,
         **ConformalBase.default_args
     }
     def calibrate(self, scores):
@@ -102,6 +108,7 @@ class ConformalClassifier(ConformalBase):
     def _fit(self, inputs, stream, params):
         base = inputs["base_transform"]
         base._setup()
+        # TODO: check that the base transform doesn't have input defined
         inputs_base = base.resolveInputs(stream)
         fwd = self.args["forward_inputs"]
         inputs_fwd = { fwd[k]: v for k,v in inputs.items() if k in fwd }
@@ -129,6 +136,12 @@ class ConformalClassifier(ConformalBase):
             Z_pred.append(stream.get("z"))
         Y = np.concatenate(Y)
         Z_pred = np.concatenate(Z_pred)
+        # use sigmoid to allow for maximum separation
+        if self.args["sigmoid_fit"]:
+              popt,pcov=curve_fit(fsigmoid, Z_pred, Y, method='dogbox')
+              self.params().put("sigmoid_a", popt[0])
+              self.params().put("sigmoid_b", popt[1])
+              Z_pred=fsigmoid(Z_pred,popt[0],popt[1])
         # Evaluate non-conformity
         neg = np.where(Y < self.args["class_threshold"])
         pos = np.where(Y >= self.args["class_threshold"])
@@ -145,12 +158,20 @@ class ConformalClassifier(ConformalBase):
         params.put("params", params_cal)
         self._map(inputs, stream)
     def _map(self, inputs, stream):
+        # TODO: check that the base transform doesn't have input defined
         base = inputs["base_transform"]
         inputs_base = base.resolveInputs(stream)
         fwd = self.args["forward_inputs"]
         inputs_fwd = { fwd[k]: v for k,v in inputs.items() if k in fwd }
         base.active_params = self.params().get("params")
         base._map({**inputs_fwd, **inputs_base}, stream)
-        probs = self.calibrate(stream.get("z"))
+        if self.args["sigmoid_fit"]:
+              a=self.params().get("sigmoid_a")
+              b=self.params().get("sigmoid_b")
+              Z_pred=fsigmoid(stream.get("z"),a,b)
+        else:
+              Z_pred=stream.get("z")
+        stream.put("p_noncalibrated", Z_pred)
+        probs = self.calibrate(Z_pred)
         stream.put("p", probs)
 
