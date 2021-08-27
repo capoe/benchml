@@ -5,6 +5,7 @@ import os
 import pickle
 import types
 from . import ptable
+from . import utils
 from .logger import log, Mock
 ase = Mock()
 ase.io = None
@@ -309,14 +310,18 @@ def write_xyz(
     ofs.close()
     return
 
-def save(archfile, obj, method=None, **kwargs):
+def save(archfile, obj, method=None, embed_git_hash=False, **kwargs):
     if method is None:
         if type(archfile) is not str:
             assert type(obj) is str # Invalid function call to benchml.save
             archfile, obj = obj, archfile
+        if embed_git_hash:
+            obj={'git_hash':utils.git_hash(),'bml_object':obj}
         with open(archfile, 'wb') as f:
             f.write(pickle.dumps(obj))
     else:
+        if embed_git_hash:
+            obj={'git_hash':utils.git_hash(),'bml_object':obj}
         method.save(archfile, obj, **kwargs)
 
 def load(archfile, method=None, **kwargs):

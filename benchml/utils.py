@@ -5,6 +5,9 @@ import time
 import os
 from . import readwrite
 from .logger import log
+import os
+import subprocess
+
 
 class LineExpansion(object):
     def __init__(self, interval, periodic, n_bins, sigma, type):
@@ -160,3 +163,13 @@ def dataframe_to_extxyz(
         return []
     return configs, errors
 
+def git_hash():
+    moduledir = os.path.dirname(__file__)
+    command=['git', 'rev-parse', '--short','HEAD']
+    o=subprocess.run(command,cwd=moduledir,capture_output=True)
+    try:
+       o.check_returncode()
+       git_hash=o.stdout.decode().strip()
+    except subprocess.CalledProcessError:
+       git_hash='git_hash_not_available'
+    return git_hash
