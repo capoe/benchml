@@ -24,6 +24,12 @@ def metric_rhor(yp, yt):
 def metric_auc(yp, yt):
     return sklearn.metrics.roc_auc_score(yt,yp)
 
+def metric_auc_ovr(yp, yt):
+    return sklearn.metrics.roc_auc_score(yt,yp,multi_class='ovr')
+
+def metric_auc_ovo(yp, yt):
+    return sklearn.metrics.roc_auc_score(yt,ypi,multi_class='ovo')
+
 def metric_acc(yp, yt):
     return 1.-np.sum(np.heaviside(np.abs(yp-yt)-0.5, 0.0))/len(yt)
 
@@ -53,6 +59,8 @@ class Accumulator(object):
         "rhop": metric_rhop,
         "rhor": metric_rhor,
         "auc":  metric_auc,
+        "auc_ovo":  metric_auc_ovo,
+        "auc_ovr":  metric_auc_ovr,
         "acc": metric_acc,
         "mcc": metric_mcc,
         "rec": metric_rec,
@@ -68,6 +76,8 @@ class Accumulator(object):
         "rhop": 'largest',
         "rhor": 'largest',
         "auc":  'largest',
+        "auc_ovo":  'largest',
+        "auc_ovr":  'largest',
         "acc": 'largest',
         "mcc": 'largest',
         "rec": 'largest',
