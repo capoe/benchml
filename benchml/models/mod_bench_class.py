@@ -18,27 +18,13 @@ def compile_physchem_class(custom_fields=[], with_hyper=False, **kwargs):
                         inputs={"configs": "input.configs"}),
                     Concatenate(tag="descriptor",
                         inputs={"X": [ "Physchem2D.X", "PhyschemUser.X" ]}),
-                    DoDivideBySize(
-                        tag="input_norm",
-                        args={
-                            "config_to_size": "lambda c: len(c)",
-                            "skip_if_not_force": True,
-                            "force": None},
-                        inputs={
-                            "configs": "input.configs",
-                            "meta": "input.meta",
-                            "y": "input.y"}),
                     RandomForestClassifier(tag="predictor",
-                        inputs={"X": "descriptor.X", "y": "input_norm.y"}),
-                    UndoDivideBySize(
-                        tag="output",
-                        inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}) 
+                        inputs={"X": "descriptor.X", "y": "input.y"}),
                 ],
                 hyper=GridHyper(
-                    Hyper({ "input_norm.force": [False, True] }),
                     Hyper({"predictor.max_depth": [None]})),
                 broadcast={"meta": "input.meta"},
-                outputs={"y": "output.z"}),
+                outputs={"y": "predictor.z"}),
         ])
     return models
 

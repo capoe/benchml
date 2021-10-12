@@ -3,10 +3,10 @@ import copy
 import json
 import time
 import os
-from . import readwrite
-from .logger import log
-import os
 import subprocess
+
+from . import readwrite
+from .logger import log, Args
 
 
 class LineExpansion(object):

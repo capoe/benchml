@@ -49,7 +49,6 @@ class ConformalRegressor(ConformalBase):
         dY_pred = []
         # Cross-calibrate
         for info, train, calibrate in Split(len(inputs["y"]), **self.args["split"]):
-            log << log.debug << "Conformal fit %s" % info << log.endl
             params_cal = Params(tag="", tf=base)
             base.active_params = params_cal
             base._fit({
@@ -119,7 +118,6 @@ class ConformalClassifier(ConformalBase):
         # Cross-calibrate
         for info, train, calibrate in Split(
                 len(inputs["y"]), **self.args["split"]):
-            log << log.debug << "Conformal fit %s" % info << log.endl
             params_cal = Params(tag="", tf=base)
             base.active_params = params_cal
             base._fit({
@@ -134,6 +132,7 @@ class ConformalClassifier(ConformalBase):
                 stream)
             Y.append(inputs["y"][calibrate])
             Z_pred.append(stream.get("z"))
+            log << log.debug << f"  [{self.tag}]: calibration split {info}" << log.endl
         Y = np.concatenate(Y)
         Z_pred = np.concatenate(Z_pred)
         # use sigmoid to allow for maximum separation
