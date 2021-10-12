@@ -265,14 +265,14 @@ class KernelRidge(SklearnTransform):
         y_train = (inputs["y"]-y_mean)/y_std
         model = sklearn.kernel_ridge.KernelRidge(
             kernel='precomputed', alpha=self.args["alpha"])
-        model.fit(inputs["K"]**self.power, y_train)
-        y_pred = model.predict(inputs["K"]**self.power)*y_std + y_mean
+        model.fit(inputs["K"]**self.args["power"], y_train)
+        y_pred = model.predict(inputs["K"]**self.args["power"])*y_std + y_mean
         params.put("model", model)
         params.put("y_mean", y_mean)
         params.put("y_std", y_std)
         stream.put("y", y_pred)
     def _map(self, inputs, stream):
-        y = self.params().get("model").predict(inputs["K"]**self.power)
+        y = self.params().get("model").predict(inputs["K"]**self.args["power"])
         y = y*self.params().get("y_std") + self.params().get("y_mean")
         stream.put("y", y)
 
@@ -311,10 +311,11 @@ class SupportVectorClassifier(SklearnTransform):
         C=1.,
         power=2,
         kernel='precomputed',
+        probability=False,
         class_weight=None)
     req_inputs = {"K", "y"}
-    allow_params = {'model',}
-    allow_stream = {"y", "z"}
+    allow_params = {'model'}
+    allow_stream = {"y", "z", "p"}
     def _setup(self):
         self.power = self.args["power"]
     def _fit(self, inputs, stream, params):
@@ -322,6 +323,7 @@ class SupportVectorClassifier(SklearnTransform):
         model = sklearn.svm.SVC(
             kernel=self.args["kernel"],
             C=self.args["C"], 
+            probability=self.args["probability"],
             class_weight=self.args["class_weight"])
         model.fit(Kp, inputs["y"])
         y_pred = model.predict(Kp)
@@ -329,12 +331,19 @@ class SupportVectorClassifier(SklearnTransform):
         params.put("model", model)
         stream.put("y", y_pred)
         stream.put("z", z_pred)
+        if self.args["probability"]:
+           p_pred = model.predict_proba(Kp)
+           stream.put("p", p_pred)
+
     def _map(self, inputs, stream):
         Kp = inputs["K"]**self.power
         y = self.params().get("model").predict(Kp)
         z = self.params().get("model").decision_function(Kp)
         stream.put("y", y)
         stream.put("z", z)
+        if self.args["probability"]:
+           p_pred = self.params().get("model").predict_proba(Kp)
+           stream.put("p", p_pred)
 
 class LogisticRegression(SklearnTransform):
     default_args = dict(
@@ -419,8 +428,26 @@ class KernelMatern(Transform):
         stream.put("K_self", K_self)
 
 class OrthogonalMatchingPursuit(SklearnTransform):
-    # TODO
-    pass
+    default_args = dict(
+       n_nonzero_coefs=None,
+       tol=None,
+       fit_intercept=True,
+       normalize=True,
+       precompute="auto"
+    )
+    req_inputs = {'X', 'y'}
+    allow_params = {'model'}
+    allow_stream = {'y', 'z'} 
+    def _fit(self, inputs, stream, params):
+        model = sklearn.linear_model.OrthogonalMatchingPursuit(**self.args)
+        model.fit(X=inputs["X"], y=inputs["y"])
+        yp = model.predict(inputs["X"])
+        params.put("model", model)
+        self._map(inputs, stream)
+    def _map(self, inputs, stream):
+        y = self.params().get("model").predict(inputs["X"])
+        stream.put("y", y)
+        stream.put("z", y)
 
 class Lasso(SklearnTransform):
     # TODO
