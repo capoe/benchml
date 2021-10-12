@@ -4,7 +4,7 @@ import json
 import time
 import os
 from . import readwrite
-from .logger import log
+from .logger import log, Args
 
 class LineExpansion(object):
     def __init__(self, interval, periodic, n_bins, sigma, type):

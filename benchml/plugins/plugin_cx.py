@@ -28,12 +28,16 @@ class CxCalcTransform(Transform):
         batch_size = self.args["batch_size"]
         n_batches = len(smiles)//batch_size + (1 if len(smiles) % batch_size != 0 else 0)
         for batch in range(n_batches):
+            log << "Batch" << (batch+1) << "/" << n_batches << log.endl
             smiles_batch = smiles[batch*batch_size:(batch+1)*batch_size]
             compiled = '{cxcalc} {cmd} {smiles}'.format(
                 cxcalc=self.args["cxcalc"],
                 cmd=self.args["cmd"],
                 smiles=" ".join(smiles_batch))
-            res = log >> log.catch >> compiled
+            try:
+                res = log >> log.catch >> compiled
+            except KeyboardInterrupt:
+                break
             res = res.split("\n")
             header = res.pop(0)
             assert header.startswith('id')
