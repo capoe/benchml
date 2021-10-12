@@ -23,6 +23,7 @@ cd benchml
 conda env create python=3.7 -n py3benchml -f env.yml
 conda activate py3benchml
 pip install benchml # (or: pip install . for latest version)
+pip install nphil
 ```
 
 # BenchML pipelines
