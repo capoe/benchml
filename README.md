@@ -20,7 +20,7 @@ For a complete installation, create a (new) conda environment from env.yml. E.g.
 ```bash
 git clone https://github.com/capoe/benchml.git
 cd benchml
-conda env create python=3.7 -n py3benchml -f env.yml
+conda env create -n py3benchml -f env.yml
 conda activate py3benchml
 pip install benchml # (or: pip install . for latest version)
 pip install nphil
