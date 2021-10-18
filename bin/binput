@@ -1,7 +1,6 @@
 #!/tmp_mnt/filer1/unix/cpoelking/nomad/ccdc_rev/venv/bin/python
 import numpy as np
 import json
-import pandas as pd
 import benchml
 import csv
 log = benchml.log
