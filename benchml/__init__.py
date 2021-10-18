@@ -20,3 +20,4 @@ from .readwrite import read, write, load, save
 from .transforms import Transform
 from .data import load_dataset
 
+__version__ = "0.1.2"
