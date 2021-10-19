@@ -165,14 +165,14 @@ class BayesianHyper(object):
             bound = bounds.pop(arr)
             length = len(bound[0])
             self.array_lengths[arr] = length
-            for l in range(length):
-                bounds["%s[%d]" % (arr, l)] = [bound[0][l], bound[1][l]]
+            for al in range(length):
+                bounds["%s[%d]" % (arr, al)] = [bound[0][al], bound[1][al]]
         return bounds
 
     def joinArrays(self, updates):
         for arr in self.arrays:
             vals = np.array(
-                [updates.pop("%s[%d]" % (arr, l)) for l in range(self.array_lengths[arr])]
+                [updates.pop("%s[%d]" % (arr, al)) for al in range(self.array_lengths[arr])]
             )
             updates[arr] = vals
         return updates
