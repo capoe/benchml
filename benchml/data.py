@@ -1,18 +1,23 @@
 from __future__ import print_function
-import numpy as np
+
+import copy
 import json
 import os
-import copy
+
+import numpy as np
+
 from .readwrite import read
+
 
 class BenchmarkData(object):
     def __init__(self, root, filter_fct=lambda meta: True):
-        self.paths = map(lambda sdf: sdf[0], filter(
-            lambda subdir_dirs_files: "meta.json" in subdir_dirs_files[2],
-                os.walk(root)))
-        self.dataits = map(lambda path: DatasetIterator(
-            path, filter_fct=filter_fct), self.paths)
+        self.paths = map(
+            lambda sdf: sdf[0],
+            filter(lambda subdir_dirs_files: "meta.json" in subdir_dirs_files[2], os.walk(root)),
+        )
+        self.dataits = map(lambda path: DatasetIterator(path, filter_fct=filter_fct), self.paths)
         self.data = []
+
     def __iter__(self):
         self.data = []
         for datait in self.dataits:
@@ -20,8 +25,10 @@ class BenchmarkData(object):
                 self.data.append(dataset)
                 yield dataset
         return
+
     def __len__(self):
         return len(self.data)
+
 
 class DatasetIterator(object):
     def __init__(self, path=None, filter_fct=lambda meta: True, meta_json=None):
@@ -33,18 +40,19 @@ class DatasetIterator(object):
             self.meta = json.load(open(meta_json))
         self.filter = filter_fct
         return
+
     def __iter__(self):
         for target, target_info in self.meta["targets"].items():
             for didx, dataset in enumerate(self.meta["datasets"]):
                 meta_this = copy.deepcopy(self.meta)
                 meta_this.pop("datasets")
-                meta_this["name"] = "{0}:{1}:{2}".format(
-                        self.meta["name"], target, dataset)
+                meta_this["name"] = "{0}:{1}:{2}".format(self.meta["name"], target, dataset)
                 meta_this["target"] = target
                 meta_this.update(target_info)
                 if self.filter(meta_this):
                     yield Dataset(os.path.join(self.path, dataset), meta_this)
         return
+
 
 class Dataset(object):
     target_converter = {
@@ -53,6 +61,7 @@ class Dataset(object):
         "log10": "lambda y: np.log10(y)",
         "plog": "lambda y: -np.log10(y)",
     }
+
     def __init__(self, ext_xyz=None, meta=None, configs=None):
         self.configs = configs
         if ext_xyz is not None:
@@ -66,57 +75,69 @@ class Dataset(object):
         self.convert = self.target_converter[self.meta.pop("convert", "")]
         if meta is not None and "target" in meta:
             self.y = eval(self.convert)(
-                np.array([ float(s.info[meta["target"]]) \
-                    for s in self.configs ]))
+                np.array([float(s.info[meta["target"]]) for s in self.configs])
+            )
         return
+
     def info(self):
         return "{name:30s}  #configs={size:<5d}  task={task:8s}  metrics={metrics:s}   std={std:1.2e}".format(
-            name=self.meta["name"], size=len(self.configs),
-            task=self.meta["task"], metrics=",".join(self.meta["metrics"]),
-            std=np.std(self.y))
+            name=self.meta["name"],
+            size=len(self.configs),
+            task=self.meta["task"],
+            metrics=",".join(self.meta["metrics"]),
+            std=np.std(self.y),
+        )
+
     def __getitem__(self, key):
         if np.issubdtype(type(key), np.integer):
             return self.configs[key]
         elif type(key) in {list, np.ndarray}:
-            return Dataset(
-                configs=[ self.configs[_] for _ in key ],
-                meta=self.meta)
+            return Dataset(configs=[self.configs[_] for _ in key], meta=self.meta)
         elif type(key) is str:
             return self.meta[key]
-        else: raise TypeError("Invalid type in __getitem__: %s" % type(key))
+        else:
+            raise TypeError("Invalid type in __getitem__: %s" % type(key))
+
     def __len__(self):
         return len(self.configs)
+
     def __str__(self):
         return self.info()
+
     def __iter__(self):
         return self.configs.__iter__()
 
+
 class ExttDataset(object):
-    def __init__(self, extt, meta=None): 
+    def __init__(self, extt, meta=None):
         self.meta = extt.meta if meta is None else meta
         self.arrays = extt.arrays
+
     def __getitem__(self, key):
         if np.issubdtype(type(key), np.integer):
             return self.X[key]
         elif type(key) in {list, np.ndarray}:
-            return XyDataset(
-                X=self.X[key],
-                y=self.y[key],
-                meta=self.meta)
+            return XyDataset(X=self.X[key], y=self.y[key], meta=self.meta)
         elif type(key) is str:
             return self.meta[key]
-        else: raise TypeError("Invalid type in __getitem__: %s" % type(key))
+        else:
+            raise TypeError("Invalid type in __getitem__: %s" % type(key))
+
     def __len__(self):
         return len(self.arrays[list(self.arrays.keys())[0]])
+
     def __str__(self):
         return self.info()
+
     def __contains__(self, key):
         return key in self.meta
+
     def info(self):
         s = "ExttDataset with %d arrays: " % (len(self.arrays))
         for name, x in self.arrays.items():
             s += "Array[%s%s] " % (name, repr(x.shape))
         return s
+
 
 class XyDataset(object):
     def __init__(self, X, y, name="?", **kwargs):
@@ -124,48 +145,56 @@ class XyDataset(object):
         self.y = y
         self.meta = kwargs
         self.meta["name"] = name
+
     def info(self):
         return "{name:50s}  #samples={size:<5d}  metrics={metrics:s}   std={std:1.2e}".format(
-            name=self.meta["name"], size=len(self),
+            name=self.meta["name"],
+            size=len(self),
             metrics=",".join(self.meta["metrics"]),
-            std=np.std(self.y))
+            std=np.std(self.y),
+        )
+
     def __getitem__(self, key):
         if np.issubdtype(type(key), np.integer):
             return self.X[key]
         elif type(key) in {list, np.ndarray}:
-            return XyDataset(
-                X=self.X[key],
-                y=self.y[key],
-                meta=self.meta)
+            return XyDataset(X=self.X[key], y=self.y[key], meta=self.meta)
         elif type(key) is str:
             return self.meta[key]
-        else: raise TypeError("Invalid type in __getitem__: %s" % type(key))
+        else:
+            raise TypeError("Invalid type in __getitem__: %s" % type(key))
+
     def __len__(self):
         return len(self.X)
+
     def __str__(self):
         return self.info()
+
     def __contains__(self, key):
         return key in self.meta
 
+
 def compile(root="./data", filter_fct=lambda meta: True):
     return BenchmarkData(root, filter_fct=filter_fct)
+
 
 def load_xyz_dataset(filename, meta={}):
     configs = read(filename)
     return Dataset(configs=configs, meta=meta)
 
+
 def load_extt_dataset(filename, meta=None):
     extt = read(filename)
     return ExttDataset(extt=extt, meta=meta)
 
-load_formats = {
-    ".extt": load_extt_dataset,
-    ".xyz": load_xyz_dataset
-}
+
+load_formats = {".extt": load_extt_dataset, ".xyz": load_xyz_dataset}
+
 
 def load_dataset(filename, *args, **kwargs):
     base, ext = os.path.splitext(filename)
     return load_formats[ext](filename, *args, **kwargs)
+
 
 if __name__ == "__main__":
     bench = compile()

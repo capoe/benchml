@@ -4,20 +4,13 @@
 
 """
 
-from . import data
-from . import benchmark
-from . import models
-from . import pipeline
-from . import transforms
-from . import analysis
-from . import splits
-from . import utils
-from .pipeline import stream, sopen, hupdate
-from .logger import log
-from .splits import Split
+from . import analysis, benchmark, data, models, pipeline, splits, transforms, utils
 from .accumulator import Accumulator
-from .readwrite import read, write, load, save
-from .transforms import Transform
 from .data import load_dataset
+from .logger import log
+from .pipeline import hupdate, sopen, stream
+from .readwrite import load, read, save, write
+from .splits import Split
+from .transforms import Transform
 
 __version__ = "0.1.2"

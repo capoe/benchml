@@ -1,10 +1,13 @@
-import benchml as bml
+import numpy as np
 import scipy.stats
 import sklearn.metrics
-import numpy as np
+
+import benchml as bml
+
 log = bml.log
 log.setLevel("info")
 bml.splits.synchronize(0)
+
 
 def build_marchenko_conformal():
     return bml.pipeline.Module(
@@ -12,67 +15,56 @@ def build_marchenko_conformal():
         transforms=[
             bml.transforms.ExttInput(tag="input"),
             bml.transforms.CleanMatrix(
-                tag="clean",
-                args={
-                    "axis": 0, 
-                    "std_threshold": 1e-10
-                },
-                inputs={"X":"input.X"}),
+                tag="clean", args={"axis": 0, "std_threshold": 1e-10}, inputs={"X": "input.X"}
+            ),
             bml.transforms.MarchenkoPasturFilter(
-                tag="descriptor",
-                args={},
-                inputs={"X":"input.X"}),
-            bml.transforms.LinearRegression(
-                tag="linear",
-                detached=True,
-                args={}),
+                tag="descriptor", args={}, inputs={"X": "input.X"}
+            ),
+            bml.transforms.LinearRegression(tag="linear", detached=True, args={}),
             bml.transforms.EnsembleRegressor(
                 tag="ensemble",
                 detached=True,
                 args={
                     "size": 10,
-                    "forward_inputs": {"X":"X", "y":"y"}, # = default
-                    "input_type": "descriptor"
+                    "forward_inputs": {"X": "X", "y": "y"},  # = default
+                    "input_type": "descriptor",
                 },
-                inputs={"base_transform": "linear"}),
+                inputs={"base_transform": "linear"},
+            ),
             bml.transforms.ConformalRegressor(
                 tag="predictor",
                 args={
-                    "forward_inputs": {"X":"X", "y":"y"}, # = default
-                    "input_type": "descriptor"            # = default
+                    "forward_inputs": {"X": "X", "y": "y"},  # = default
+                    "input_type": "descriptor",  # = default
                 },
-                inputs={
-                    "X": "descriptor.X", 
-                    "y": "input.Y", 
-                    "base_transform": "ensemble"
-                })
+                inputs={"X": "descriptor.X", "y": "input.Y", "base_transform": "ensemble"},
+            ),
         ],
         broadcast={},
-        outputs={"y": "predictor.y", "dy": "predictor.dy"})
+        outputs={"y": "predictor.y", "dy": "predictor.dy"},
+    )
+
 
 def build_simple_ensemble():
     return bml.pipeline.Module(
         tag="ExttLinearEnsemble",
         transforms=[
             bml.transforms.ExttInput(tag="input"),
-            bml.transforms.LinearRegression(
-                detached=True,
-                args={}),
+            bml.transforms.LinearRegression(detached=True, args={}),
             bml.transforms.EnsembleRegressor(
                 tag="predictor",
                 args={
                     "size": 10,
-                    "forward_inputs": {"X":"X", "y":"y"}, # = default
-                    "input_type": "descriptor"
+                    "forward_inputs": {"X": "X", "y": "y"},  # = default
+                    "input_type": "descriptor",
                 },
-                inputs={
-                    "X": "input.X", 
-                    "y": "input.Y", 
-                    "base_transform": "LinearRegression"
-                })
+                inputs={"X": "input.X", "y": "input.Y", "base_transform": "LinearRegression"},
+            ),
         ],
         broadcast={},
-        outputs={"y": "predictor.y", "dy": "predictor.dy"})
+        outputs={"y": "predictor.y", "dy": "predictor.dy"},
+    )
+
 
 def build_simple_linear():
     return bml.pipeline.Module(
@@ -80,21 +72,17 @@ def build_simple_linear():
         transforms=[
             bml.transforms.ExttInput(tag="input"),
             bml.transforms.LinearRegression(
-                tag="predictor",
-                args={},
-                inputs={
-                    "X": "input.X", 
-                    "y": "input.Y"})
+                tag="predictor", args={}, inputs={"X": "input.X", "y": "input.Y"}
+            ),
         ],
         broadcast={},
-        outputs={"y": "predictor.y"})
+        outputs={"y": "predictor.y"},
+    )
+
 
 def build_models():
-    return [
-        build_marchenko_conformal(),
-        build_simple_ensemble(),
-        build_simple_linear()
-    ]
+    return [build_marchenko_conformal(), build_simple_ensemble(), build_simple_linear()]
+
 
 if __name__ == "__main__":
     dataset = bml.load_dataset("data.extt")
@@ -105,7 +93,9 @@ if __name__ == "__main__":
         yt = []
         yp = []
         dyp = []
-        for idx, (stream_train, stream_test) in enumerate(stream.split(method="random", n_splits=10, train_fraction=0.9)):
+        for idx, (stream_train, stream_test) in enumerate(
+            stream.split(method="random", n_splits=10, train_fraction=0.9)
+        ):
             log << log.back << "  Split %3d" % idx << log.flush
             model.fit(stream_train)
             output_train = model.map(stream_train)
@@ -114,4 +104,3 @@ if __name__ == "__main__":
             accu.append("test", output_test["y"], stream_test.resolve("input.Y"))
         log << log.endl
         res = accu.evaluateAll(log=bml.log, bootstrap=0)
-

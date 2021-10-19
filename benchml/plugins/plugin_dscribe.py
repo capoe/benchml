@@ -1,8 +1,10 @@
-from ..pipeline import Transform, Macro
-from ..logger import log, Mock
-from ..ptable import lookup
 import numpy as np
+
+from ..logger import Mock, log
+from ..pipeline import Macro, Transform
+from ..ptable import lookup
 from .plugin_check import *
+
 
 class DscribeTransform(Transform):
     req_inputs = ("configs",)
@@ -13,8 +15,10 @@ class DscribeTransform(Transform):
     CalculatorClass = None
     verbose = True
     log = log
+
     def check_available():
         return check_dscribe_available(DscribeTransform)
+
     def _prepare(self, inputs):
         args = {}
         args.update(self.args)
@@ -24,25 +28,32 @@ class DscribeTransform(Transform):
             if "elements" in inputs["meta"]:
                 args["species"] = inputs["meta"]["elements"]
         return args
+
     def _fit(self, inputs, stream, params):
         args = self._prepare(inputs)
         calc = self.CalculatorClass(**args)
         params.put("calc", calc)
         self._map(inputs, stream)
+
     def _map(self, inputs, stream):
         calc = self.params().get("calc")
         X = []
         for cidx, config in enumerate(inputs["configs"]):
             x = calc.create(config)
             if DscribeTransform.verbose:
-                log << log.back << " %d/%d %-50s" % (
-                    cidx, len(inputs["configs"]), str(config.symbols)) \
-                    << x.shape << log.flush
+                (
+                    log
+                    << log.back
+                    << " %d/%d %-50s" % (cidx, len(inputs["configs"]), str(config.symbols))
+                    << x.shape
+                    << log.flush
+                )
             X.append(x)
         if DscribeTransform.verbose:
             log << log.endl
         X = np.array(X)
         stream.put("X", X)
+
 
 class DscribeCM(DscribeTransform):
     default_args = {
@@ -51,15 +62,18 @@ class DscribeCM(DscribeTransform):
         "sigma": None,
         "seed": None,
         "flatten": True,
-        "sparse": False }
+        "sparse": False,
+    }
     CalculatorClass = dd.CoulombMatrix
+
     def _prepare(self, inputs):
         args = {}
         args.update(self.args)
         if self.args["n_atoms_max"] is None:
-            n_max = 2*max([ len(c) for c in inputs["configs"] ])
+            n_max = 2 * max([len(c) for c in inputs["configs"]])
             args["n_atoms_max"] = n_max
         return args
+
 
 class DscribeACSF(DscribeTransform):
     default_args = {
@@ -70,8 +84,10 @@ class DscribeACSF(DscribeTransform):
         "g4_params": [[1, 1, 1], [1, 2, 1], [1, 1, -1], [1, 2, -1]],
         "g5_params": None,
         "periodic": False,
-        "sparse": False}
+        "sparse": False,
+    }
     CalculatorClass = dd.ACSF
+
 
 class UniversalDscribeACSF(DscribeTransform):
     default_args = {
@@ -83,34 +99,39 @@ class UniversalDscribeACSF(DscribeTransform):
         "species": None,
         "periodic": False,
         "n_select_g2": None,
-        "n_select_g4": None
+        "n_select_g4": None,
     }
     CalculatorClass = dd.ACSF
+
     def check_available():
-        return check_dscribe_available(UniversalDscribeACSF) \
-            and check_asap_available(UniversalDscribeACSF)
+        return check_dscribe_available(UniversalDscribeACSF) and check_asap_available(
+            UniversalDscribeACSF
+        )
+
     def _prepare(self, inputs):
         # Find "universal" hyperparameters for this set of elements
         if self.args["adjust_to_species"] is None:
-            types = self.args["species"] if self.args["species"] is not None \
+            types = (
+                self.args["species"]
+                if self.args["species"] is not None
                 else inputs["meta"]["elements"]
-        else:   
+            )
+        else:
             types = self.args["adjust_to_species"]
-        types_z = [ lookup[t].z for t in types ]
+        types_z = [lookup[t].z for t in types]
         paramsets = asaplib.hypers.gen_default_acsf_hyperparameters(
             Zs=types_z,
             scalerange=self.args["scalerange"],
             sharpness=self.args["sharpness"],
             verbose=self.args["verbose"],
-            cutoff=self.args["cutoff"])
-        assert len(paramsets) == 1 # No multiresolution ACSF implemented
+            cutoff=self.args["cutoff"],
+        )
+        assert len(paramsets) == 1  # No multiresolution ACSF implemented
         pars = paramsets[list(paramsets.keys())[0]]
         rcut = pars.pop("cutoff")
         _ = pars.pop("type")
         # Collect in args
-        args = {
-            "rcut": rcut,
-            **pars }
+        args = {"rcut": rcut, **pars}
         # Add boundary settings and named elements
         if "meta" in inputs:
             if "periodic" in inputs["meta"]:
@@ -122,19 +143,23 @@ class UniversalDscribeACSF(DscribeTransform):
             log << log.mr << "WARNING Using random subselection" << log.endl
             s2 = np.arange(len(args["g2_params"]))
             np.random.shuffle(s2)
-            s2 = s2[0:self.args["n_select_g2"]]
-            args["g2_params"] = [ args["g2_params"][_] for _ in s2 ]
+            s2 = s2[0 : self.args["n_select_g2"]]
+            args["g2_params"] = [args["g2_params"][_] for _ in s2]
         if self.args["n_select_g4"] is not None:
             log << log.mr << "WARNING Using random subselection" << log.endl
             s4 = np.arange(len(args["g4_params"]))
             np.random.shuffle(s4)
-            s4 = s4[0:self.args["n_select_g4"]]
-            args["g4_params"] = [ args["g4_params"][_] for _ in s4 ]
+            s4 = s4[0 : self.args["n_select_g4"]]
+            args["g4_params"] = [args["g4_params"][_] for _ in s4]
         for key, val in args.items():
-            log << "  Set %-15s = %s" % (
-                key, str(val) if type(val) is not list \
-                    else "[...%d items...]" % len(val)) << log.endl
+            (
+                log
+                << "  Set %-15s = %s"
+                % (key, str(val) if type(val) is not list else "[...%d items...]" % len(val))
+                << log.endl
+            )
         return args
+
 
 class DscribeMBTR(DscribeTransform):
     default_args = dict(
@@ -160,6 +185,7 @@ class DscribeMBTR(DscribeTransform):
     )
     CalculatorClass = dd.MBTR
 
+
 class DscribeLMBTR(DscribeTransform):
     default_args = dict(
         species=None,
@@ -176,42 +202,36 @@ class DscribeLMBTR(DscribeTransform):
         periodic=False,
         flatten=True,
         sparse=False,
-        normalization="l2_each"
+        normalization="l2_each",
     )
     CalculatorClass = dd.LMBTR
 
+
 class DscribeSineMatrix(DscribeTransform):
     default_args = dict(
-        n_atoms_max=None,
-        permutation="sorted_l2",
-        sigma=None,
-        sparse=False,
-        flatten=True,
-        seed=None
+        n_atoms_max=None, permutation="sorted_l2", sigma=None, sparse=False, flatten=True, seed=None
     )
     CalculatorClass = dd.SineMatrix
+
     def _prepare(self, inputs):
         args = {}
         args.update(self.args)
         if self.args["n_atoms_max"] is None:
-            n_max = 2*max([ len(c) for c in inputs["configs"] ])
+            n_max = 2 * max([len(c) for c in inputs["configs"]])
             args["n_atoms_max"] = n_max
         return args
 
+
 class DscribeEwaldSumMatrix(DscribeTransform):
     default_args = dict(
-        n_atoms_max=None,
-        permutation="sorted_l2",
-        sigma=None,
-        sparse=False,
-        flatten=True,
-        seed=None
+        n_atoms_max=None, permutation="sorted_l2", sigma=None, sparse=False, flatten=True, seed=None
     )
     CalculatorClass = dd.EwaldSumMatrix
+
     def _prepare(self, inputs):
         args = {}
         args.update(self.args)
         if self.args["n_atoms_max"] is None:
-            n_max = 2*max([ len(c) for c in inputs["configs"] ])
+            n_max = 2 * max([len(c) for c in inputs["configs"]])
             args["n_atoms_max"] = n_max
         return args
