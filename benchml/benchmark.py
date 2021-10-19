@@ -69,7 +69,7 @@ def evaluate_model(dataset, model, accu=None, log=log, verbose=False, detailed=T
             accu.append(test_id, output_test["y"], stream_test.resolve("input.y"))
             accu.append(train_id, output_train["y"], stream_train.resolve("input.y"))
             # Log hyper args and output
-            if not test_id in record["splits"]:
+            if test_id not in record["splits"]:
                 record["splits"].append(test_id)
                 record["splits"].append(train_id)
                 record["hypers"][train_id] = []

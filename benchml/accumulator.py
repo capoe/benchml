@@ -5,7 +5,7 @@ import scipy.stats
 
 try:
     import sklearn.metrics
-except:
+except ImportError:
     pass
 
 
@@ -38,7 +38,7 @@ def metric_auc_ovr(yp, yt):
 
 
 def metric_auc_ovo(yp, yt):
-    return sklearn.metrics.roc_auc_score(yt, ypi, multi_class="ovo")
+    return sklearn.metrics.roc_auc_score(yt, yp, multi_class="ovo")
 
 
 def metric_acc(yp, yt):
@@ -124,7 +124,7 @@ class Accumulator(object):
         return np.array(self.yp_map[key]), np.array(self.yt_map[key])
 
     def append(self, channel, yp, yt):
-        if not channel in self.yp_map:
+        if channel not in self.yp_map:
             self.yp_map[channel] = []
             self.yt_map[channel] = []
         self.yp_map[channel] = self.yp_map[channel] + list(yp)

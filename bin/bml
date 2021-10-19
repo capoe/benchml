@@ -63,7 +63,7 @@ def configure_models(models, *override_json_str):
                 # or class name of the target transform:
                 tf_tag, field = addr.split(".")
                 if tf_tag == tf.tag or tf_tag == tf.__class__.__name__:
-                    if not field in tf.args:
+                    if field not in tf.args:
                         raise KeyError(
                             "Invalid parameter field '%s' in transform '%s'" % (field, tf.tag)
                         )
@@ -143,6 +143,6 @@ if __name__ == "__main__":
     args = log.Parse()
     if args.use_ase:
         benchml.readwrite.configure(use_ase=args.use_ase)
-    if not args.mode in {"benchmark", "train", "map", "analyse"}:
+    if args.mode not in {"benchmark", "train", "map", "analyse"}:
         raise ValueError("Unknown mode '%s'" % args.mode)
     run(args)

@@ -128,7 +128,7 @@ class Stream(object):
         return self.storage.keys()
 
     def put(self, key, value, force=False):
-        if not force and not key in self.tf.allow_stream:
+        if not force and key not in self.tf.allow_stream:
             raise ValueError("Stream '%s' not allowed in transform '%s'" % (key, self.tf.tag))
         self.storage[key] = value
 
@@ -158,7 +158,7 @@ class Stream(object):
             yield s1, s2
 
     def sliceStorage(self, verbose=VERBOSE):
-        if self.parent.has("version") and self.parent.get("version") != None:
+        if self.parent.has("version") and self.parent.get("version") is not None:
             self.put("version", self.parent.get("version"), force=True)
             for key in self.parent.tf.stream_copy:
                 if not self.parent.has(key):
@@ -211,7 +211,7 @@ class Params(object):
         return copy.deepcopy(self)
 
     def put(self, key, value, force=False):
-        if not force and not key in self.tf.allow_params:
+        if not force and key not in self.tf.allow_params:
             raise ValueError("Param '%s' not allowed in transform '%s'" % (key, self.tf.tag))
         self.storage[key] = value
 
@@ -379,7 +379,7 @@ class Transform(object):
 
     def requireArgs(self, *args):
         for arg in args:
-            if not arg in self.args:
+            if arg not in self.args:
                 raise KeyError(
                     "Missing argument: <%s> requires '%s'" % (self.__class__.__name__, arg)
                 )
@@ -388,7 +388,7 @@ class Transform(object):
         if self.detached:
             return
         for inp in inputs:
-            if not inp in self.inputs:
+            if inp not in self.inputs:
                 raise KeyError("Missing input: <%s> requires '%s'" % (self.__class__.__name__, inp))
 
     def parseArgsLinks(self):
@@ -947,10 +947,10 @@ class Macro(object):
         self.inputs = inputs
         self.transforms = copy.deepcopy(self.__class__.transforms)
         for req in self.req_inputs:
-            if not req in self.inputs:
+            if req not in self.inputs:
                 raise KeyError("Macro '%s' requires input '%s'" % (self.__class__.__name__, req))
         for req in self.req_args:
-            if not req in self.args:
+            if req not in self.args:
                 raise KeyError("Macro '%s' requires arg '%s'" % (self.__class__.__name__, req))
 
     def __iter__(self):

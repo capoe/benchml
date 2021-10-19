@@ -20,12 +20,12 @@ def model_elementwise_error(model_now, select="test", compare="MSE", replica=Non
         y_raw = np.concatenate([y_test, y_train])
         y_all = y_raw[np.argsort(y_raw[:, 0])]
     elif select == "train":
-        if replica == None:
+        if replica is None:
             y_all = model_now["train"]
         else:
             y_all = model_now["train"][model_now["train"][:, -2] == replica]
     elif select == "test":
-        if replica == None:
+        if replica is None:
             y_all = model_now["test"]
         else:
             y_all = model_now["test"][model_now["test"][:, -2] == replica]

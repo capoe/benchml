@@ -31,7 +31,7 @@ def prompt(mssg, options=[], default=None, check_allowed=lambda i, o: i in o, co
                 s = convert(s)
                 if len(options) > 0 and not check_allowed(s, options):
                     raise ValueError()
-            except:
+            except Exception:
                 valid = False
         elif default is None:
             valid = False

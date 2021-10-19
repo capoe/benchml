@@ -336,7 +336,7 @@ class GaussianProcessRegressor(SklearnTransform):
         params.put("y_mean", y_mean)
         params.put("y_std", y_std)
         stream.put("y", y_pred)
-        stream.put("dy", dy)
+        stream.put("dy", dy_pred)
 
     def _map(self, inputs, stream):
         y, dy = self.params().get("model").predict(inputs["K"] ** self.power, return_std=True)

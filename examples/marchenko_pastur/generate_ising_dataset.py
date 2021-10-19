@@ -1,3 +1,5 @@
+import pickle
+
 import numpy as np
 
 import benchml as bml
@@ -13,6 +15,17 @@ default_config = {
     "B_scale": 0.0,
     "spawn": "random",
 }
+
+
+class State(object):
+    """
+    Mock object, needs to be finished or removed.
+
+    """
+
+    def __init__(self, ising_J, ising_B):
+        # TODO
+        pass
 
 
 class IsingModel(object):

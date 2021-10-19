@@ -142,7 +142,7 @@ def smiles_to_pseudo_extxyz(smiles):
         try:
             mol = chem.MolFromSmiles(smi)
             mol = chem.AddHs(mol)
-        except:
+        except Exception:
             print(f"Smiles problem in idx {idx} ,smiles string {smi}")
             continue
         symbols = [a.GetSymbol() for a in mol.GetAtoms()]

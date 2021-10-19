@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+import copy
 import json
 import os
 import pickle
@@ -244,13 +245,13 @@ def tokenize_extxyz_meta(fs, allow_json=True):
         if "." in value:
             try:
                 value = float(value)
-            except:
+            except Exception:
                 pass
         else:
             # Int?
             try:
                 value = int(value)
-            except:
+            except Exception:
                 pass
         info[kv[0]] = value
     return info

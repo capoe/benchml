@@ -1,4 +1,5 @@
 import numpy as np
+import scipy
 
 from ..logger import log
 from ..pipeline import Macro, Transform

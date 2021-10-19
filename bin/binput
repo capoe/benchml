@@ -60,7 +60,7 @@ def xyz_to_csv(xyz_file, csv_file):
         return
     fields = configs[0].info["csv_fieldnames"]
     for field in sorted(configs[0].info.keys()):
-        if not field in fields:
+        if field not in fields:
             fields.append(field)
     if "csv_fieldnames" in fields:
         fields.remove("csv_fieldnames")

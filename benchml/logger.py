@@ -67,7 +67,7 @@ def GenerateTreeDict(tree, element, path="", paths_rel_to=None):
         child_elements, childtag_element = GenerateTreeDict(tree, child, path)
         nodes = nodes + child_elements
         for key in childtag_element.keys():
-            if tag_node.has_key(key):
+            if key in tag_node:
                 if type(tag_node[key]) != list:
                     tag_node[key] = [tag_node[key], childtag_element[key]]
                 else:
@@ -85,7 +85,7 @@ def NamespaceFromDict(tree_dict):
         values[-1] = tree_dict[key]
         add_to_nspace = nspace
         for s, v in zip(sections, values):
-            if v == None:
+            if v is None:
                 if getattr(add_to_nspace, s, None):
                     add_to_nspace = getattr(add_to_nspace, s, None)
                 else:
@@ -140,7 +140,7 @@ class XmlNode(object):
 
     def SetNodeValue(self, new_value):
         self.value = new_value
-        if self.node != None:
+        if self.node is not None:
             self.node.firstChild.nodeValue = new_value
         return
 
@@ -236,12 +236,12 @@ class OptionsInterface(object):
         else:
             dest = name[2:]
         # Sort out <default> vs <required>
-        if default == None:
+        if default is None:
             required = True
         else:
             required = False
         # Construct default <help> it not given
-        if help == None:
+        if help is None:
             help = "[type=%s default=%s]" % (repr(type), repr(default))
         else:
             help = "%s [type=%s, default=%s]" % (
@@ -250,11 +250,11 @@ class OptionsInterface(object):
                 repr(default),
             )
         # Construct <nickname> if not given
-        if nickname == None:
+        if nickname is None:
             nickname = "-"
             for char in dest:
                 nickname += char
-                if not nickname in self.cmd_ln_nicknames:
+                if nickname not in self.cmd_ln_nicknames:
                     break
             if nickname in self.cmd_ln_nicknames:
                 raise ValueError("CLIO could not construct nickname from %s option" % name)
@@ -303,14 +303,14 @@ class OptionsInterface(object):
 
     # OPTIONS FILE PARSING
     def ConnectToOptionsFile(self, xmlfile):
-        if xmlfile == None or xmlfile == "":
+        if xmlfile is None or xmlfile == "":
             return
         self.xmlfile = xmlfile
         self.is_connected_to_xml = True
         return
 
     def ParseOptionsFileXml(self, xkey="options"):
-        if self.xmlfile == None:
+        if self.xmlfile is None:
             return
         self.tree = XmlTree(self.xmlfile, paths_rel_to=xkey)
         self.xdict = self.tree.tag_node
@@ -397,7 +397,7 @@ class ShellInterface(object):
         # c=color, j=justify, h=header, t=trim, u=upper-case
         if j:
             mssg = self.justify_dict[j] + mssg
-        if c != None:
+        if c is not None:
             mssg = self.color_dict[c] + mssg + self.color_dict["endcolor"]
         if h:
             mssg = self.os_generate_header(mssg, t)
@@ -410,7 +410,7 @@ class ShellInterface(object):
         return
 
     def DisconnectFromFile(self):
-        if self.logfile != None:
+        if self.logfile is not None:
             self.devfile = OS_EXE_DEV("")
             self.logfile = None
             sys.stdout = sys.__stdout__
@@ -440,10 +440,10 @@ class ShellInterface(object):
         if self.mssglevel > self.loglevel:
             return self
         mssg = str(mssg)
-        if self.sel_justify != None:
+        if self.sel_justify is not None:
             mssg = self.justify_dict[j] + mssg
         mssg += self.trail
-        if self.sel_color != None:
+        if self.sel_color is not None:
             mssg = self.color_dict[self.sel_color] + mssg + self.color_dict["endcolor"]
         if self.sel_header:
             mssg = self.os_generate_header(mssg, self.sel_trim)
@@ -455,10 +455,10 @@ class ShellInterface(object):
         # c=color, j=justify, h=header, t=trim, u=upper-case
         if j:
             mssg = OS_JUSTIFY_DICT[j] + mssg
-        if c != None:
+        if c is not None:
             mssg = OS_COLOR_DICT[c] + mssg + OS_COLOR_DICT["endcolor"]
         if h:
-            mssg = os_generate_header(mssg, t)
+            mssg = self.os_generate_header(mssg, t)
         return
 
     def os_print_config(self, c=None, j=None, h=False, t="=", tl=" "):

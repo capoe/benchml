@@ -79,7 +79,7 @@ def compile_and_filter(filter_collections=[".*"], filter_models=[".*"], verbose=
                     << log.endl
                 )
             elif matches:
-                if not m.tag in check_added:
+                if m.tag not in check_added:
                     log << " - Added '%s/%s'" % (group, m.tag) << log.endl
                     check_added.add(m.tag)
                     filtered_models.append(m)
