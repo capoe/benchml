@@ -441,7 +441,7 @@ class ShellInterface(object):
             return self
         mssg = str(mssg)
         if self.sel_justify is not None:
-            mssg = self.justify_dict[j] + mssg
+            mssg = self.justify_dict[self.sel_justify] + mssg
         mssg += self.trail
         if self.sel_color is not None:
             mssg = self.color_dict[self.sel_color] + mssg + self.color_dict["endcolor"]
@@ -454,9 +454,9 @@ class ShellInterface(object):
     def os_print(self, mssg, c=None, j=None, h=False, t="="):
         # c=color, j=justify, h=header, t=trim, u=upper-case
         if j:
-            mssg = OS_JUSTIFY_DICT[j] + mssg
+            mssg = self.justify_dict[j] + mssg
         if c is not None:
-            mssg = OS_COLOR_DICT[c] + mssg + OS_COLOR_DICT["endcolor"]
+            mssg = self.color_dict[c] + mssg + self.color_dict["endcolor"]
         if h:
             mssg = self.os_generate_header(mssg, t)
         return
