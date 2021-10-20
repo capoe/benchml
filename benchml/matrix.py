@@ -1,7 +1,7 @@
 import numpy as np
 
 from .logger import log
-from .pipeline import Macro, Module, Transform
+from .pipeline import Transform
 
 
 class Reshape(Transform):

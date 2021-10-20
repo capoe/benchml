@@ -4,7 +4,6 @@ import time
 
 from .accumulator import Accumulator
 from .logger import log
-from .splits import Split
 
 
 def parse(benchmark):

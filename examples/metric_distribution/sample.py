@@ -1,8 +1,6 @@
 import json
 
 import numpy as np
-import scipy.stats
-import sklearn.metrics
 
 import benchml as bml
 from benchml.transforms import *

@@ -1,7 +1,5 @@
-import numpy as np
-
 from ..logger import Mock
-from ..pipeline import Macro, Transform
+from ..pipeline import Transform
 
 try:
     import asaplib

@@ -1,7 +1,7 @@
 import numpy as np
 
-from ..logger import Mock, log
-from ..pipeline import Transform, sopen
+from ..logger import log
+from ..pipeline import Transform
 from ..readwrite import load
 from .plugin_check import *
 

@@ -2,7 +2,7 @@ import numpy as np
 import scipy
 
 from ..logger import log
-from ..pipeline import Macro, Transform
+from ..pipeline import Transform
 
 
 def dist_mp(x, gamma):

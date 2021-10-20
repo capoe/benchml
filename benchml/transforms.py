@@ -2,9 +2,8 @@ import inspect
 
 import numpy as np
 
-from .hyper import BayesianHyper, GridHyper, Hyper
 from .logger import log
-from .pipeline import Macro, Module, Transform
+from .pipeline import Module, Transform
 
 
 class ExttInput(Transform):

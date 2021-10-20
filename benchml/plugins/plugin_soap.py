@@ -1,11 +1,9 @@
-import multiprocessing as mp
 import time
 
 import numpy as np
 
-from ..kernels import KernelDot
-from ..logger import Mock, log
-from ..pipeline import Macro, Transform
+from ..logger import log
+from ..pipeline import Transform
 from ..ptable import lookup
 from .plugin_check import *
 

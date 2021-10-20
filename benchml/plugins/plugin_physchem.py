@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..pipeline import Macro, Transform
+from ..pipeline import Transform
 from ..utils import LineExpansion, get_smiles
 from .plugin_check import *
 

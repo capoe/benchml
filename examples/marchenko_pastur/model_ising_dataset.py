@@ -1,8 +1,3 @@
-import nphil
-import numpy as np
-import scipy.stats
-import sklearn.metrics
-
 import benchml as bml
 
 log = bml.log

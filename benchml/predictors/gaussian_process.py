@@ -1,7 +1,7 @@
 import numpy as np
 
 from ..logger import log
-from ..pipeline import Macro, Transform
+from ..pipeline import Transform
 
 
 class GaussianProcess(Transform):

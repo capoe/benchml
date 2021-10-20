@@ -1,7 +1,6 @@
 import copy
 import hashlib
 import inspect
-import itertools
 import json
 import time
 

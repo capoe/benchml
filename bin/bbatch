@@ -1,9 +1,6 @@
 #! /usr/bin/env python
-import glob
 import json
 import os
-
-import numpy as np
 
 import benchml
 

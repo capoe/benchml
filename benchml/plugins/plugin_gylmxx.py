@@ -3,9 +3,8 @@ import time
 
 import numpy as np
 
-from ..kernels import KernelDot
 from ..logger import log
-from ..pipeline import Macro, Transform
+from ..pipeline import Transform
 from .plugin_check import *
 
 
@@ -111,8 +110,6 @@ class AttributeKernelSmoothMatchSVM(Transform):
             Z.append(z_attr)
         if self.args["write_xyz"] != "":
             assert configs is not None  # Require configs input to produce xyz
-            import json
-
             from ..readwrite import write
 
             for cidx, config in enumerate(configs):

@@ -1,5 +1,3 @@
-import copy
-import json
 import os
 import subprocess
 import time
@@ -7,7 +5,7 @@ import time
 import numpy as np
 
 from . import readwrite
-from .logger import Args, log
+from .logger import log
 
 
 class LineExpansion(object):
