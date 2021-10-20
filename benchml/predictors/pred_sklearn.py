@@ -102,38 +102,6 @@ class ElasticNetClassifier(SklearnTransform):
 
     def _fit(self, inputs, stream, params):
         y = inputs["y"]
-        i0 = np.where(np.abs(y - 0.0) < 1e-3)[0]
-        i1 = np.where(np.abs(y - 1.0) < 1e-3)[0]
-        n0 = len(i0)
-        n1 = len(i1)
-        assert (n0 + n1) == len(y)
-        w0 = float(n1) / (n0 + n1)
-        w1 = 1.0 - w0
-        w = np.ones_like(y)
-        w[i0] = w0
-        w[i1] = w1
-        model = sklearn.linear_model.ElasticNet(**self.args)
-        model.fit(X=inputs["X"], y=y, sample_weight=w)
-        z = model.predict(inputs["X"])
-        params.put("model", model)
-        self._map(inputs, stream)
-
-    def _map(self, inputs, stream):
-        z = self.params().get("model").predict(inputs["X"])
-        y = np.zeros_like(z)
-        y[np.where(z > 0.0)] = 1.0
-        stream.put("y", y)
-        stream.put("z", y)
-
-
-class ElasticNetClassifier(Transform):
-    default_args = dict(alpha=1.0, l1_ratio=0.5)
-    req_inputs = {"X", "y"}
-    allow_params = {"model"}
-    allow_stream = {"y", "z"}
-
-    def _fit(self, inputs, stream, params):
-        y = inputs["y"]
         y_spin = 2 * (y - 0.5)
         i0 = np.where(np.abs(y - 0.0) < 1e-3)[0]
         i1 = np.where(np.abs(y - 1.0) < 1e-3)[0]
