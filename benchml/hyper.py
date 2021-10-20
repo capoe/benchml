@@ -4,7 +4,6 @@ import itertools
 import numpy as np
 
 from .accumulator import Accumulator
-from .logger import log
 
 try:
     from bayes_opt import BayesianOptimization
