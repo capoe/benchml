@@ -16,9 +16,12 @@ class Reshape(Transform):
         "X",
     }
 
+    def _default_reshape(self, X):
+        return X.reshape(self.args["shape"])
+
     def _map(self, inputs, stream):
         if self.args["shape"] is not None:
-            to_shape = lambda X: X.reshape(self.args["shape"])
+            to_shape = self._default_reshape
         else:
             to_shape = eval(self.args["calc_shape"])
         stream.put("X", to_shape(inputs["X"]))
