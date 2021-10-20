@@ -1,5 +1,6 @@
 import numpy as np
 
+from ..hyper import GridHyper, Hyper
 from ..transforms import *
 
 

@@ -1,5 +1,6 @@
 import numpy as np
 
+from ..hyper import BayesianHyper, Hyper
 from ..transforms import *
 
 
