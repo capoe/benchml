@@ -3,7 +3,8 @@ import json
 import numpy as np
 
 import benchml as bml
-from benchml.transforms import *
+import benchml.transforms as btf
+from benchml.hyper import GridHyper, Hyper
 
 log = bml.log
 log.setLevel("info")
@@ -18,11 +19,11 @@ def build_models():
 
 
 def build_gylm_krr():
-    return Module(
+    return btf.Module(
         tag="gylm_krr",
         transforms=[
-            ExtXyzInput(tag="input"),
-            GylmAtomic(
+            btf.ExtXyzInput(tag="input"),
+            btf.GylmAtomic(
                 tag="descriptor_atomic",
                 args={
                     "normalize": True,
@@ -41,7 +42,7 @@ def build_gylm_krr():
                 },
                 inputs={"configs": "input.configs"},
             ),
-            ReduceTypedMatrix(
+            btf.ReduceTypedMatrix(
                 tag="descriptor",
                 precompute=True,
                 args={
@@ -53,8 +54,8 @@ def build_gylm_krr():
                 },
                 inputs={"X": "descriptor_atomic.X", "T": None},
             ),
-            KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
-            DoDivideBySize(
+            btf.KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
+            btf.DoDivideBySize(
                 tag="input_norm",
                 args={
                     "config_to_size": "lambda c: len(c.getHeavy()[0])",
@@ -63,12 +64,12 @@ def build_gylm_krr():
                 },
                 inputs={"configs": "input.configs", "meta": "input.meta", "y": "input.y"},
             ),
-            KernelRidge(
+            btf.KernelRidge(
                 tag="predictor",
                 args={"alpha": None, "power": 4},
                 inputs={"K": "kernel.K", "y": "input_norm.y"},
             ),
-            UndoDivideBySize(
+            btf.UndoDivideBySize(
                 tag="output", inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}
             ),
         ],

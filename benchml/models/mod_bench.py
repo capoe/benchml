@@ -1,6 +1,7 @@
 import numpy as np
 
-from ..transforms import *
+import benchml.transforms as btf
+from benchml.hyper import GridHyper, Hyper
 
 whiten_hyper = [False]  # NOTE: False = no whitening in ridge models
 regularization_range = np.logspace(-9, +7, 17)
@@ -11,24 +12,24 @@ def compile_physchem(custom_fields=[], with_hyper=False, **kwargs):
     for descriptor_set in ["basic", "core", "logp", "extended"]:
         models.extend(
             [
-                Module(
+                btf.Module(
                     tag="bmol_physchem_%s_rfr" % descriptor_set,
                     transforms=[
-                        ExtXyzInput(tag="input"),
-                        Physchem2D(
+                        btf.ExtXyzInput(tag="input"),
+                        btf.Physchem2D(
                             tag="Physchem2D",
                             args={"select_predef": descriptor_set},
                             inputs={"configs": "input.configs"},
                         ),
-                        PhyschemUser(
+                        btf.PhyschemUser(
                             tag="PhyschemUser",
                             args={"fields": custom_fields},
                             inputs={"configs": "input.configs"},
                         ),
-                        Concatenate(
+                        btf.Concatenate(
                             tag="descriptor", inputs={"X": ["Physchem2D.X", "PhyschemUser.X"]}
                         ),
-                        DoDivideBySize(
+                        btf.DoDivideBySize(
                             tag="input_norm",
                             args={
                                 "config_to_size": "lambda c: len(c)",
@@ -41,10 +42,10 @@ def compile_physchem(custom_fields=[], with_hyper=False, **kwargs):
                                 "y": "input.y",
                             },
                         ),
-                        RandomForestRegressor(
+                        btf.RandomForestRegressor(
                             tag="predictor", inputs={"X": "descriptor.X", "y": "input_norm.y"}
                         ),
-                        UndoDivideBySize(
+                        btf.UndoDivideBySize(
                             tag="output", inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}
                         ),
                     ],
@@ -55,25 +56,25 @@ def compile_physchem(custom_fields=[], with_hyper=False, **kwargs):
                     broadcast={"meta": "input.meta"},
                     outputs={"y": "output.y"},
                 ),
-                Module(
+                btf.Module(
                     tag="bmol_physchem_%s_rr" % descriptor_set,
                     transforms=[
-                        ExtXyzInput(tag="input"),
-                        Physchem2D(
+                        btf.ExtXyzInput(tag="input"),
+                        btf.Physchem2D(
                             tag="Physchem2D",
                             args={"select_predef": descriptor_set},
                             inputs={"configs": "input.configs"},
                         ),
-                        PhyschemUser(
+                        btf.PhyschemUser(
                             tag="PhyschemUser",
                             args={"fields": custom_fields},
                             inputs={"configs": "input.configs"},
                         ),
-                        Concatenate(
+                        btf.Concatenate(
                             tag="descriptor", inputs={"X": ["Physchem2D.X", "PhyschemUser.X"]}
                         ),
-                        WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
-                        DoDivideBySize(
+                        btf.WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
+                        btf.DoDivideBySize(
                             tag="input_norm",
                             args={
                                 "config_to_size": "lambda c: len(c)",
@@ -86,12 +87,12 @@ def compile_physchem(custom_fields=[], with_hyper=False, **kwargs):
                                 "y": "input.y",
                             },
                         ),
-                        Ridge(
+                        btf.Ridge(
                             tag="predictor",
                             args={"alpha": None},
                             inputs={"X": "whiten.X", "y": "input_norm.y"},
                         ),
-                        UndoDivideBySize(
+                        btf.UndoDivideBySize(
                             tag="output", inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}
                         ),
                     ],
@@ -116,17 +117,17 @@ def compile_ecfp(**kwargs):
     for radius in [2, 3]:
         models.extend(
             [
-                Module(
+                btf.Module(
                     tag="bmol_ecfp%d_krr" % (2 * radius),
                     transforms=[
-                        ExtXyzInput(tag="input"),
-                        MorganFP(
+                        btf.ExtXyzInput(tag="input"),
+                        btf.MorganFP(
                             tag="descriptor",
                             args={"length": 4096, "radius": radius, "normalize": True},
                             inputs={"configs": "input.configs"},
                         ),
-                        KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
-                        DoDivideBySize(
+                        btf.KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
+                        btf.DoDivideBySize(
                             tag="input_norm",
                             args={
                                 "config_to_size": "lambda c: len(c)",
@@ -138,12 +139,12 @@ def compile_ecfp(**kwargs):
                                 "y": "input.y",
                             },
                         ),
-                        KernelRidge(
+                        btf.KernelRidge(
                             tag="predictor",
                             args={"alpha": None, "power": 2},
                             inputs={"K": "kernel.K", "y": "input_norm.y"},
                         ),
-                        UndoDivideBySize(
+                        btf.UndoDivideBySize(
                             tag="output", inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}
                         ),
                     ],
@@ -158,17 +159,17 @@ def compile_ecfp(**kwargs):
                     broadcast={"meta": "input.meta"},
                     outputs={"y": "output.y"},
                 ),
-                Module(
+                btf.Module(
                     tag="bmol_ecfp%d_rr" % (2 * radius),
                     transforms=[
-                        ExtXyzInput(tag="input"),
-                        MorganFP(
+                        btf.ExtXyzInput(tag="input"),
+                        btf.MorganFP(
                             tag="descriptor",
                             args={"length": 2048, "radius": radius, "normalize": True},
                             inputs={"configs": "input.configs"},
                         ),
-                        WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
-                        DoDivideBySize(
+                        btf.WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
+                        btf.DoDivideBySize(
                             tag="input_norm",
                             args={
                                 "config_to_size": "lambda c: len(c)",
@@ -180,8 +181,8 @@ def compile_ecfp(**kwargs):
                                 "y": "input.y",
                             },
                         ),
-                        Ridge(tag="predictor", inputs={"X": "whiten.X", "y": "input_norm.y"}),
-                        UndoDivideBySize(
+                        btf.Ridge(tag="predictor", inputs={"X": "whiten.X", "y": "input_norm.y"}),
+                        btf.UndoDivideBySize(
                             tag="output", inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}
                         ),
                     ],
@@ -205,22 +206,22 @@ def compile_cm(*args, **kwargs):
     for permutation in ["sorted_l2", "eigenspectrum"]:
         models.extend(
             [
-                Module(
+                btf.Module(
                     tag="bmol_cm_%s_rr" % permutation,
                     transforms=[
-                        ExtXyzInput(tag="input"),
-                        DscribeCM(
+                        btf.ExtXyzInput(tag="input"),
+                        btf.DscribeCM(
                             tag="descriptor_atomic",
                             args={"permutation": permutation},
                             inputs={"configs": "input.configs"},
                         ),
-                        ReduceMatrix(
+                        btf.ReduceMatrix(
                             tag="descriptor",
                             args={"reduce": "np.mean(x, axis=0)", "norm": False, "epsilon": 1e-10},
                             inputs={"X": "descriptor_atomic.X"},
                         ),
-                        WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
-                        DoDivideBySize(
+                        btf.WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
+                        btf.DoDivideBySize(
                             tag="input_norm",
                             args={
                                 "config_to_size": "lambda c: len(c)",
@@ -233,8 +234,8 @@ def compile_cm(*args, **kwargs):
                                 "y": "input.y",
                             },
                         ),
-                        Ridge(tag="predictor", inputs={"X": "whiten.X", "y": "input_norm.y"}),
-                        UndoDivideBySize(
+                        btf.Ridge(tag="predictor", inputs={"X": "whiten.X", "y": "input_norm.y"}),
+                        btf.UndoDivideBySize(
                             tag="output", inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}
                         ),
                     ],
@@ -249,22 +250,22 @@ def compile_cm(*args, **kwargs):
                     broadcast={"meta": "input.meta"},
                     outputs={"y": "output.y"},
                 ),
-                Module(
+                btf.Module(
                     tag="bmol_cm_%s_krr" % permutation,
                     transforms=[
-                        ExtXyzInput(tag="input"),
-                        DscribeCM(
+                        btf.ExtXyzInput(tag="input"),
+                        btf.DscribeCM(
                             tag="descriptor_atomic",
                             args={"permutation": permutation},
                             inputs={"configs": "input.configs"},
                         ),
-                        ReduceMatrix(
+                        btf.ReduceMatrix(
                             tag="descriptor",
                             args={"reduce": "np.mean(x, axis=0)", "norm": False, "epsilon": 1e-10},
                             inputs={"X": "descriptor_atomic.X"},
                         ),
-                        KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
-                        DoDivideBySize(
+                        btf.KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
+                        btf.DoDivideBySize(
                             tag="input_norm",
                             args={
                                 "config_to_size": "lambda c: len(c)",
@@ -277,14 +278,14 @@ def compile_cm(*args, **kwargs):
                                 "y": "input.y",
                             },
                         ),
-                        KernelRidge(
+                        btf.KernelRidge(
                             tag="predictor",
                             args={
                                 "alpha": None,
                             },
                             inputs={"K": "kernel.K", "y": "input_norm.y"},
                         ),
-                        UndoDivideBySize(
+                        btf.UndoDivideBySize(
                             tag="output", inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}
                         ),
                     ],
@@ -312,11 +313,11 @@ def compile_acsf(adjust_to_species=["C", "N", "O"], *args, **kwargs):
         for extensive in [False, True]:
             models.extend(
                 [
-                    Module(
+                    btf.Module(
                         tag="bmol_acsf_%s_%s_rr" % (scale, "ext" if extensive else "int"),
                         transforms=[
-                            ExtXyzInput(tag="input"),
-                            UniversalDscribeACSF(
+                            btf.ExtXyzInput(tag="input"),
+                            btf.UniversalDscribeACSF(
                                 tag="descriptor_atomic",
                                 args={
                                     "adjust_to_species": None,  # TODO
@@ -325,7 +326,7 @@ def compile_acsf(adjust_to_species=["C", "N", "O"], *args, **kwargs):
                                 },
                                 inputs={"configs": "input.configs"},
                             ),
-                            ReduceMatrix(
+                            btf.ReduceMatrix(
                                 tag="descriptor",
                                 args={
                                     "reduce": "np.sum(x, axis=0)"
@@ -336,8 +337,8 @@ def compile_acsf(adjust_to_species=["C", "N", "O"], *args, **kwargs):
                                 },
                                 inputs={"X": "descriptor_atomic.X"},
                             ),
-                            WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
-                            DoDivideBySize(
+                            btf.WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
+                            btf.DoDivideBySize(
                                 tag="input_norm",
                                 args={
                                     "config_to_size": "lambda c: len(c)",
@@ -349,8 +350,10 @@ def compile_acsf(adjust_to_species=["C", "N", "O"], *args, **kwargs):
                                     "y": "input.y",
                                 },
                             ),
-                            Ridge(tag="predictor", inputs={"X": "whiten.X", "y": "input_norm.y"}),
-                            UndoDivideBySize(
+                            btf.Ridge(
+                                tag="predictor", inputs={"X": "whiten.X", "y": "input_norm.y"}
+                            ),
+                            btf.UndoDivideBySize(
                                 tag="output",
                                 inputs={"y": "predictor.y", "sizes": "input_norm.sizes"},
                             ),
@@ -366,16 +369,16 @@ def compile_acsf(adjust_to_species=["C", "N", "O"], *args, **kwargs):
                         broadcast={"meta": "input.meta"},
                         outputs={"y": "output.y"},
                     ),
-                    Module(
+                    btf.Module(
                         tag="bmol_acsf_%s_%s_krr" % (scale, "ext" if extensive else "int"),
                         transforms=[
-                            ExtXyzInput(tag="input"),
-                            UniversalDscribeACSF(
+                            btf.ExtXyzInput(tag="input"),
+                            btf.UniversalDscribeACSF(
                                 tag="descriptor_atomic",
                                 args={"adjust_to_species": None, "scalerange": scalerange},  # TODO
                                 inputs={"configs": "input.configs"},
                             ),
-                            ReduceMatrix(
+                            btf.ReduceMatrix(
                                 tag="descriptor",
                                 args={
                                     "reduce": "np.sum(x, axis=0)"
@@ -386,8 +389,8 @@ def compile_acsf(adjust_to_species=["C", "N", "O"], *args, **kwargs):
                                 },
                                 inputs={"X": "descriptor_atomic.X"},
                             ),
-                            KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
-                            DoDivideBySize(
+                            btf.KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
+                            btf.DoDivideBySize(
                                 tag="input_norm",
                                 args={
                                     "config_to_size": "lambda c: len(c)",
@@ -399,12 +402,12 @@ def compile_acsf(adjust_to_species=["C", "N", "O"], *args, **kwargs):
                                     "y": "input.y",
                                 },
                             ),
-                            KernelRidge(
+                            btf.KernelRidge(
                                 tag="predictor",
                                 args={"alpha": None},
                                 inputs={"K": "kernel.K", "y": "input_norm.y"},
                             ),
-                            UndoDivideBySize(
+                            btf.UndoDivideBySize(
                                 tag="output",
                                 inputs={"y": "predictor.y", "sizes": "input_norm.sizes"},
                             ),
@@ -430,16 +433,16 @@ def compile_mbtr(**kwargs):
         for extensive in [False, True]:
             models.extend(
                 [
-                    Module(
+                    btf.Module(
                         tag="bmol_mbtr_%s_rr" % ("ext" if extensive else "int"),
                         transforms=[
-                            ExtXyzInput(tag="input"),
-                            DscribeMBTR(
+                            btf.ExtXyzInput(tag="input"),
+                            btf.DscribeMBTR(
                                 tag="descriptor_atomic",
                                 args={},
                                 inputs={"configs": "input.configs"},
                             ),
-                            ReduceMatrix(
+                            btf.ReduceMatrix(
                                 tag="descriptor",
                                 args={
                                     "reduce": "np.sum(x, axis=0)"
@@ -450,8 +453,8 @@ def compile_mbtr(**kwargs):
                                 },
                                 inputs={"X": "descriptor_atomic.X"},
                             ),
-                            WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
-                            DoDivideBySize(
+                            btf.WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
+                            btf.DoDivideBySize(
                                 tag="input_norm",
                                 args={
                                     "config_to_size": "lambda c: len(c)",
@@ -463,8 +466,10 @@ def compile_mbtr(**kwargs):
                                     "y": "input.y",
                                 },
                             ),
-                            Ridge(tag="predictor", inputs={"X": "whiten.X", "y": "input_norm.y"}),
-                            UndoDivideBySize(
+                            btf.Ridge(
+                                tag="predictor", inputs={"X": "whiten.X", "y": "input_norm.y"}
+                            ),
+                            btf.UndoDivideBySize(
                                 tag="output",
                                 inputs={"y": "predictor.y", "sizes": "input_norm.sizes"},
                             ),
@@ -480,16 +485,16 @@ def compile_mbtr(**kwargs):
                         broadcast={"meta": "input.meta"},
                         outputs={"y": "output.y"},
                     ),
-                    Module(
+                    btf.Module(
                         tag="bmol_mbtr_%s_krr" % ("ext" if extensive else "int"),
                         transforms=[
-                            ExtXyzInput(tag="input"),
-                            DscribeMBTR(
+                            btf.ExtXyzInput(tag="input"),
+                            btf.DscribeMBTR(
                                 tag="descriptor_atomic",
                                 args={},
                                 inputs={"configs": "input.configs"},
                             ),
-                            ReduceMatrix(
+                            btf.ReduceMatrix(
                                 tag="descriptor",
                                 args={
                                     "reduce": "np.sum(x, axis=0)"
@@ -500,8 +505,8 @@ def compile_mbtr(**kwargs):
                                 },
                                 inputs={"X": "descriptor_atomic.X"},
                             ),
-                            KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
-                            DoDivideBySize(
+                            btf.KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
+                            btf.DoDivideBySize(
                                 tag="input_norm",
                                 args={
                                     "config_to_size": "lambda c: len(c)",
@@ -513,12 +518,12 @@ def compile_mbtr(**kwargs):
                                     "y": "input.y",
                                 },
                             ),
-                            KernelRidge(
+                            btf.KernelRidge(
                                 tag="predictor",
                                 args={"alpha": None},
                                 inputs={"K": "kernel.K", "y": "input_norm.y"},
                             ),
-                            UndoDivideBySize(
+                            btf.UndoDivideBySize(
                                 tag="output",
                                 inputs={"y": "predictor.y", "sizes": "input_norm.sizes"},
                             ),
@@ -626,12 +631,12 @@ def compile_soap(*args, **kwargs):
 
 
 def make_soap_krr(tag, extensive):
-    return Module(
+    return btf.Module(
         tag=tag,
         transforms=[
-            ExtXyzInput(tag="input"),
-            UniversalSoapGylmxx(tag="descriptor_atomic", inputs={"configs": "input.configs"}),
-            ReduceTypedMatrix(
+            btf.ExtXyzInput(tag="input"),
+            btf.UniversalSoapGylmxx(tag="descriptor_atomic", inputs={"configs": "input.configs"}),
+            btf.ReduceTypedMatrix(
                 tag="descriptor",
                 args={
                     "reduce_op": "np.sum(x, axis=0)",
@@ -642,9 +647,9 @@ def make_soap_krr(tag, extensive):
                 },
                 inputs={"X": "descriptor_atomic.X", "T": "descriptor_atomic.T"},
             ),
-            WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
-            KernelDot(tag="kernel", inputs={"X": "whiten.X"}),
-            DoDivideBySize(
+            btf.WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
+            btf.KernelDot(tag="kernel", inputs={"X": "whiten.X"}),
+            btf.DoDivideBySize(
                 tag="input_norm",
                 args={
                     "config_to_size": "lambda c: len(c)",
@@ -652,10 +657,10 @@ def make_soap_krr(tag, extensive):
                 },
                 inputs={"configs": "input.configs", "meta": "input.meta", "y": "input.y"},
             ),
-            KernelRidge(
+            btf.KernelRidge(
                 tag="predictor", args={"alpha": None}, inputs={"K": "kernel.K", "y": "input_norm.y"}
             ),
-            UndoDivideBySize(
+            btf.UndoDivideBySize(
                 tag="output", inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}
             ),
         ],
@@ -672,12 +677,12 @@ def make_soap_krr(tag, extensive):
 
 
 def make_soap_rr(tag, extensive):
-    return Module(
+    return btf.Module(
         tag=tag,
         transforms=[
-            ExtXyzInput(tag="input"),
-            UniversalSoapGylmxx(tag="descriptor_atomic", inputs={"configs": "input.configs"}),
-            ReduceTypedMatrix(
+            btf.ExtXyzInput(tag="input"),
+            btf.UniversalSoapGylmxx(tag="descriptor_atomic", inputs={"configs": "input.configs"}),
+            btf.ReduceTypedMatrix(
                 tag="descriptor",
                 args={
                     "reduce_op": "np.sum(x, axis=0)",
@@ -688,8 +693,8 @@ def make_soap_rr(tag, extensive):
                 },
                 inputs={"X": "descriptor_atomic.X", "T": "descriptor_atomic.T"},
             ),
-            WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
-            DoDivideBySize(
+            btf.WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
+            btf.DoDivideBySize(
                 tag="input_norm",
                 args={
                     "config_to_size": "lambda c: len(c)",
@@ -697,8 +702,8 @@ def make_soap_rr(tag, extensive):
                 },
                 inputs={"configs": "input.configs", "meta": "input.meta", "y": "input.y"},
             ),
-            Ridge(tag="predictor", inputs={"X": "whiten.X", "y": "input_norm.y"}),
-            UndoDivideBySize(
+            btf.Ridge(tag="predictor", inputs={"X": "whiten.X", "y": "input_norm.y"}),
+            btf.UndoDivideBySize(
                 tag="output", inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}
             ),
         ],
@@ -782,11 +787,11 @@ def compile_gylm(*args, **kwargs):
 
 
 def make_gylm_rr(tag, minimal, extensive):
-    return Module(
+    return btf.Module(
         tag=tag,
         transforms=[
-            ExtXyzInput(tag="input"),
-            GylmAtomic(
+            btf.ExtXyzInput(tag="input"),
+            btf.GylmAtomic(
                 tag="descriptor_atomic",
                 args={
                     "normalize": False,
@@ -804,7 +809,7 @@ def make_gylm_rr(tag, minimal, extensive):
                 },
                 inputs={"configs": "input.configs"},
             ),
-            ReduceTypedMatrix(
+            btf.ReduceTypedMatrix(
                 tag="descriptor",
                 args={
                     "reduce_op": "sum",
@@ -815,8 +820,8 @@ def make_gylm_rr(tag, minimal, extensive):
                 },
                 inputs={"X": "descriptor_atomic.X", "T": None},
             ),
-            WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
-            DoDivideBySize(
+            btf.WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
+            btf.DoDivideBySize(
                 tag="input_norm",
                 args={
                     "config_to_size": "lambda c: len(c)",
@@ -824,8 +829,8 @@ def make_gylm_rr(tag, minimal, extensive):
                 },
                 inputs={"configs": "input.configs", "meta": "input.meta", "y": "input.y"},
             ),
-            Ridge(tag="predictor", inputs={"X": "whiten.X", "y": "input_norm.y"}),
-            UndoDivideBySize(
+            btf.Ridge(tag="predictor", inputs={"X": "whiten.X", "y": "input_norm.y"}),
+            btf.UndoDivideBySize(
                 tag="output", inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}
             ),
         ],
@@ -842,11 +847,11 @@ def make_gylm_rr(tag, minimal, extensive):
 
 
 def make_gylm_krr(tag, minimal, extensive):
-    return Module(
+    return btf.Module(
         tag=tag,
         transforms=[
-            ExtXyzInput(tag="input"),
-            GylmAtomic(
+            btf.ExtXyzInput(tag="input"),
+            btf.GylmAtomic(
                 tag="descriptor_atomic",
                 args={
                     "normalize": False,
@@ -864,7 +869,7 @@ def make_gylm_krr(tag, minimal, extensive):
                 },
                 inputs={"configs": "input.configs"},
             ),
-            ReduceTypedMatrix(
+            btf.ReduceTypedMatrix(
                 tag="descriptor",
                 args={
                     "reduce_op": "sum",
@@ -875,8 +880,8 @@ def make_gylm_krr(tag, minimal, extensive):
                 },
                 inputs={"X": "descriptor_atomic.X", "T": None},
             ),
-            KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
-            DoDivideBySize(
+            btf.KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
+            btf.DoDivideBySize(
                 tag="input_norm",
                 args={
                     "config_to_size": "lambda c: len(c)",
@@ -884,12 +889,12 @@ def make_gylm_krr(tag, minimal, extensive):
                 },
                 inputs={"configs": "input.configs", "meta": "input.meta", "y": "input.y"},
             ),
-            KernelRidge(
+            btf.KernelRidge(
                 tag="predictor",
                 args={"alpha": None, "power": 2},
                 inputs={"K": "kernel.K", "y": "input_norm.y"},
             ),
-            UndoDivideBySize(
+            btf.UndoDivideBySize(
                 tag="output", inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}
             ),
         ],
@@ -915,11 +920,11 @@ def compile_pdf():
 
 def make_pdf_krr(minimal):
     return [
-        Module(
+        btf.Module(
             tag="bmol_pdf_soap_%s_krr" % ("minimal" if minimal else "standard"),
             transforms=[
-                ExtXyzInput(tag="input"),
-                SoapGylmxx(
+                btf.ExtXyzInput(tag="input"),
+                btf.SoapGylmxx(
                     tag="descriptor_atomic",
                     args={
                         "rcut": 3.0 if minimal else 5.0,
@@ -934,7 +939,7 @@ def make_pdf_krr(minimal):
                     },
                     inputs={"configs": "input.configs"},
                 ),
-                GylmReduceConvolve(
+                btf.GylmReduceConvolve(
                     tag="descriptor",
                     args={
                         "nmax": "@descriptor_atomic.nmax",
@@ -944,18 +949,18 @@ def make_pdf_krr(minimal):
                     },
                     inputs={"Q": "descriptor_atomic.X"},
                 ),
-                KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
-                DoDivideBySize(
+                btf.KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
+                btf.DoDivideBySize(
                     tag="input_norm",
                     args={"config_to_size": "lambda c: len(c)", "skip_if_not_force": False},
                     inputs={"configs": "input.configs", "meta": "input.meta", "y": "input.y"},
                 ),
-                KernelRidge(
+                btf.KernelRidge(
                     tag="predictor",
                     args={"alpha": None, "power": 2},
                     inputs={"K": "kernel.K", "y": "input_norm.y"},
                 ),
-                UndoDivideBySize(
+                btf.UndoDivideBySize(
                     tag="output", inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}
                 ),
             ],
@@ -969,11 +974,11 @@ def make_pdf_krr(minimal):
             broadcast={"meta": "input.meta"},
             outputs={"y": "output.y"},
         ),
-        Module(
+        btf.Module(
             tag="bmol_pdf_gylm_%s_krr" % ("minimal" if minimal else "standard"),
             transforms=[
-                ExtXyzInput(tag="input"),
-                GylmAtomic(
+                btf.ExtXyzInput(tag="input"),
+                btf.GylmAtomic(
                     tag="descriptor_atomic",
                     args={
                         "rcut": 3.0 if minimal else 5.0,
@@ -991,7 +996,7 @@ def make_pdf_krr(minimal):
                     },
                     inputs={"configs": "input.configs"},
                 ),
-                GylmReduceConvolve(
+                btf.GylmReduceConvolve(
                     tag="descriptor",
                     args={
                         "nmax": "@descriptor_atomic.nmax",
@@ -1001,18 +1006,18 @@ def make_pdf_krr(minimal):
                     },
                     inputs={"Q": "descriptor_atomic.X"},
                 ),
-                KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
-                DoDivideBySize(
+                btf.KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
+                btf.DoDivideBySize(
                     tag="input_norm",
                     args={"config_to_size": "lambda c: len(c)", "skip_if_not_force": False},
                     inputs={"configs": "input.configs", "meta": "input.meta", "y": "input.y"},
                 ),
-                KernelRidge(
+                btf.KernelRidge(
                     tag="predictor",
                     args={"alpha": None, "power": 2},
                     inputs={"K": "kernel.K", "y": "input_norm.y"},
                 ),
-                UndoDivideBySize(
+                btf.UndoDivideBySize(
                     tag="output", inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}
                 ),
             ],
@@ -1031,11 +1036,11 @@ def make_pdf_krr(minimal):
 
 def make_pdf_rr(minimal):
     return [
-        Module(
+        btf.Module(
             tag="bmol_pdf_soap_%s_rr" % ("minimal" if minimal else "standard"),
             transforms=[
-                ExtXyzInput(tag="input"),
-                SoapGylmxx(
+                btf.ExtXyzInput(tag="input"),
+                btf.SoapGylmxx(
                     tag="descriptor_atomic",
                     args={
                         "rcut": 3.0 if minimal else 5.0,
@@ -1050,7 +1055,7 @@ def make_pdf_rr(minimal):
                     },
                     inputs={"configs": "input.configs"},
                 ),
-                GylmReduceConvolve(
+                btf.GylmReduceConvolve(
                     tag="descriptor",
                     args={
                         "nmax": "@descriptor_atomic.nmax",
@@ -1060,14 +1065,14 @@ def make_pdf_rr(minimal):
                     },
                     inputs={"Q": "descriptor_atomic.X"},
                 ),
-                WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
-                DoDivideBySize(
+                btf.WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
+                btf.DoDivideBySize(
                     tag="input_norm",
                     args={"config_to_size": "lambda c: len(c)", "skip_if_not_force": False},
                     inputs={"configs": "input.configs", "meta": "input.meta", "y": "input.y"},
                 ),
-                Ridge(tag="predictor", inputs={"X": "whiten.X", "y": "input_norm.y"}),
-                UndoDivideBySize(
+                btf.Ridge(tag="predictor", inputs={"X": "whiten.X", "y": "input_norm.y"}),
+                btf.UndoDivideBySize(
                     tag="output", inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}
                 ),
             ],
@@ -1082,11 +1087,11 @@ def make_pdf_rr(minimal):
             broadcast={"meta": "input.meta"},
             outputs={"y": "output.y"},
         ),
-        Module(
+        btf.Module(
             tag="bmol_pdf_gylm_%s_rr" % ("minimal" if minimal else "standard"),
             transforms=[
-                ExtXyzInput(tag="input"),
-                GylmAtomic(
+                btf.ExtXyzInput(tag="input"),
+                btf.GylmAtomic(
                     tag="descriptor_atomic",
                     args={
                         "rcut": 3.0 if minimal else 5.0,
@@ -1104,7 +1109,7 @@ def make_pdf_rr(minimal):
                     },
                     inputs={"configs": "input.configs"},
                 ),
-                GylmReduceConvolve(
+                btf.GylmReduceConvolve(
                     tag="descriptor",
                     args={
                         "nmax": "@descriptor_atomic.nmax",
@@ -1114,14 +1119,14 @@ def make_pdf_rr(minimal):
                     },
                     inputs={"Q": "descriptor_atomic.X"},
                 ),
-                WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
-                DoDivideBySize(
+                btf.WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
+                btf.DoDivideBySize(
                     tag="input_norm",
                     args={"config_to_size": "lambda c: len(c)", "skip_if_not_force": False},
                     inputs={"configs": "input.configs", "meta": "input.meta", "y": "input.y"},
                 ),
-                Ridge(tag="predictor", inputs={"X": "whiten.X", "y": "input_norm.y"}),
-                UndoDivideBySize(
+                btf.Ridge(tag="predictor", inputs={"X": "whiten.X", "y": "input_norm.y"}),
+                btf.UndoDivideBySize(
                     tag="output", inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}
                 ),
             ],

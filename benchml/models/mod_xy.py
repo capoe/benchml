@@ -1,13 +1,14 @@
-from ..transforms import *
+import benchml.transforms as btf
+from benchml.hyper import GridHyper, Hyper
 
 
 def compile_xy_regressors(*args, **kwargs):
     return [
-        Module(
+        btf.Module(
             tag="xy_rf_regressor",
             transforms=[
-                XyInput(tag="input"),
-                RandomForestRegressor(tag="predictor", inputs={"X": "input.X", "y": "input.y"}),
+                btf.XyInput(tag="input"),
+                btf.RandomForestRegressor(tag="predictor", inputs={"X": "input.X", "y": "input.y"}),
             ],
             hyper=GridHyper(Hyper({"predictor.max_depth": [None]})),
             broadcast={},
@@ -18,11 +19,13 @@ def compile_xy_regressors(*args, **kwargs):
 
 def compile_xy_classifiers(*args, **kwargs):
     return [
-        Module(
+        btf.Module(
             tag="xy_rf_classifier",
             transforms=[
-                XyInput(tag="input"),
-                RandomForestClassifier(tag="predictor", inputs={"X": "input.X", "y": "input.y"}),
+                btf.XyInput(tag="input"),
+                btf.RandomForestClassifier(
+                    tag="predictor", inputs={"X": "input.X", "y": "input.y"}
+                ),
             ],
             hyper=GridHyper(Hyper({"predictor.max_depth": [None]})),
             broadcast={},

@@ -1,18 +1,18 @@
 import numpy as np
 
-from ..hyper import GridHyper, Hyper
-from ..transforms import *
+import benchml.transforms as btf
+from benchml.hyper import GridHyper, Hyper
 
 
 def compile_dscribe(**kwargs):
     return [
-        Module(
+        btf.Module(
             tag=DescriptorClass.__name__ + "_ridge",
             transforms=[
-                ExtXyzInput(tag="input"),
+                btf.ExtXyzInput(tag="input"),
                 DescriptorClass(tag="descriptor", inputs={"configs": "input.configs"}),
-                ReduceMatrix(tag="reduce", inputs={"X": "descriptor.X"}),
-                Ridge(tag="predictor", inputs={"X": "reduce.X", "y": "input.y"}),
+                btf.ReduceMatrix(tag="reduce", inputs={"X": "descriptor.X"}),
+                btf.Ridge(tag="predictor", inputs={"X": "reduce.X", "y": "input.y"}),
             ],
             hyper=GridHyper(
                 Hyper(
@@ -24,19 +24,19 @@ def compile_dscribe(**kwargs):
             broadcast={"meta": "input.meta"},
             outputs={"y": "predictor.y"},
         )
-        for DescriptorClass in [DscribeCM, DscribeACSF, DscribeMBTR, DscribeLMBTR]
+        for DescriptorClass in [btf.DscribeCM, btf.DscribeACSF, btf.DscribeMBTR, btf.DscribeLMBTR]
     ]
 
 
 def compile_dscribe_periodic(**kwargs):
     return [
-        Module(
+        btf.Module(
             tag=DescriptorClass.__name__ + "_ridge",
             transforms=[
-                ExtXyzInput(tag="input"),
+                btf.ExtXyzInput(tag="input"),
                 DescriptorClass(tag="descriptor", inputs={"configs": "input.configs"}),
-                ReduceMatrix(tag="reduce", inputs={"X": "descriptor.X"}),
-                Ridge(tag="predictor", inputs={"X": "reduce.X", "y": "input.y"}),
+                btf.ReduceMatrix(tag="reduce", inputs={"X": "descriptor.X"}),
+                btf.Ridge(tag="predictor", inputs={"X": "reduce.X", "y": "input.y"}),
             ],
             hyper=GridHyper(
                 Hyper(
@@ -48,7 +48,7 @@ def compile_dscribe_periodic(**kwargs):
             broadcast={"meta": "input.meta"},
             outputs={"y": "predictor.y"},
         )
-        for DescriptorClass in [DscribeSineMatrix]
+        for DescriptorClass in [btf.DscribeSineMatrix]
     ]
 
 

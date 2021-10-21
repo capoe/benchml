@@ -1,10 +1,12 @@
 import json
 import os
 
+import numpy as np
+
 import benchml
+import benchml.transforms as btf
 
 from ..logger import Mock, log
-from ..transforms import *
 
 
 def assert_equal(x, y, tol):

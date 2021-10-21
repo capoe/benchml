@@ -1,7 +1,8 @@
 import numpy as np
 
-from ..hyper import BayesianHyper, Hyper
-from ..transforms import *
+import benchml.transforms as btf
+from benchml.hyper import BayesianHyper, GridHyper, Hyper
+from benchml.models import collections
 
 
 def compile(groups, **kwargs):
@@ -30,18 +31,18 @@ def compile_physchem(custom_fields=[], with_hyper=False, **kwargs):
     else:
         hyper = GridHyper(Hyper({"pred.max_depth": [None]}))
     return [
-        Module(
+        btf.Module(
             tag="physchem",
             transforms=[
-                ExtXyzInput(tag="input"),
-                Physchem2D(tag="Physchem2D", inputs={"configs": "input.configs"}),
-                PhyschemUser(
+                btf.ExtXyzInput(tag="input"),
+                btf.Physchem2D(tag="Physchem2D", inputs={"configs": "input.configs"}),
+                btf.PhyschemUser(
                     tag="PhyschemUser",
                     args={"fields": custom_fields},
                     inputs={"configs": "input.configs"},
                 ),
-                Concatenate(tag="desc", inputs={"X": ["Physchem2D.X", "PhyschemUser.X"]}),
-                RandomForestRegressor(tag="pred", inputs={"X": "desc.X", "y": "input.y"}),
+                btf.Concatenate(tag="desc", inputs={"X": ["Physchem2D.X", "PhyschemUser.X"]}),
+                btf.RandomForestRegressor(tag="pred", inputs={"X": "desc.X", "y": "input.y"}),
             ],
             hyper=hyper,
             broadcast={"meta": "input.meta"},
@@ -51,15 +52,15 @@ def compile_physchem(custom_fields=[], with_hyper=False, **kwargs):
 
 
 def make_soap_krr(tag):
-    return Module(
+    return btf.Module(
         tag=tag,
         transforms=[
-            ExtXyzInput(tag="input"),
-            UniversalSoapGylmxx(tag="descriptor", inputs={"configs": "input.configs"}),
-            ReduceTypedMatrix(tag="reduce", inputs={"X": "descriptor.X", "T": "descriptor.T"}),
-            WhitenMatrix(tag="whiten", inputs={"X": "reduce.X"}),
-            KernelDot(tag="kernel", inputs={"X": "whiten.X"}),
-            KernelRidge(
+            btf.ExtXyzInput(tag="input"),
+            btf.UniversalSoapGylmxx(tag="descriptor", inputs={"configs": "input.configs"}),
+            btf.ReduceTypedMatrix(tag="reduce", inputs={"X": "descriptor.X", "T": "descriptor.T"}),
+            btf.WhitenMatrix(tag="whiten", inputs={"X": "reduce.X"}),
+            btf.KernelDot(tag="kernel", inputs={"X": "whiten.X"}),
+            btf.KernelRidge(
                 tag="predictor", args={"alpha": None}, inputs={"K": "kernel.K", "y": "input.y"}
             ),
         ],
@@ -110,13 +111,13 @@ def compile_soap(basic=False, **kwargs):
 
 def compile_dscribe(**kwargs):
     return [
-        Module(
+        btf.Module(
             tag=DescriptorClass.__name__ + "_ridge",
             transforms=[
-                ExtXyzInput(tag="input"),
+                btf.ExtXyzInput(tag="input"),
                 DescriptorClass(tag="descriptor", inputs={"configs": "input.configs"}),
-                ReduceMatrix(tag="reduce", inputs={"X": "descriptor.X"}),
-                Ridge(tag="predictor", inputs={"X": "reduce.X", "y": "input.y"}),
+                btf.ReduceMatrix(tag="reduce", inputs={"X": "descriptor.X"}),
+                btf.Ridge(tag="predictor", inputs={"X": "reduce.X", "y": "input.y"}),
             ],
             hyper=GridHyper(
                 Hyper(
@@ -128,19 +129,19 @@ def compile_dscribe(**kwargs):
             broadcast={"meta": "input.meta"},
             outputs={"y": "predictor.y"},
         )
-        for DescriptorClass in [DscribeCM, DscribeACSF, DscribeMBTR, DscribeLMBTR]
+        for DescriptorClass in [btf.DscribeCM, btf.DscribeACSF, btf.DscribeMBTR, btf.DscribeLMBTR]
     ]
 
 
 def compile_dscribe_periodic(**kwargs):
     return [
-        Module(
+        btf.Module(
             tag=DescriptorClass.__name__ + "_ridge",
             transforms=[
-                ExtXyzInput(tag="input"),
+                btf.ExtXyzInput(tag="input"),
                 DescriptorClass(tag="descriptor", inputs={"configs": "input.configs"}),
-                ReduceMatrix(tag="reduce", inputs={"X": "descriptor.X"}),
-                Ridge(tag="predictor", inputs={"X": "reduce.X", "y": "input.y"}),
+                btf.ReduceMatrix(tag="reduce", inputs={"X": "descriptor.X"}),
+                btf.Ridge(tag="predictor", inputs={"X": "reduce.X", "y": "input.y"}),
             ],
             hyper=GridHyper(
                 Hyper(
@@ -152,15 +153,18 @@ def compile_dscribe_periodic(**kwargs):
             broadcast={"meta": "input.meta"},
             outputs={"y": "predictor.y"},
         )
-        for DescriptorClass in [DscribeSineMatrix]
+        for DescriptorClass in [btf.DscribeSineMatrix]
     ]
 
 
 def compile_asap(**kwargs):
     return [
-        Module(
+        btf.Module(
             tag="asap_xyz",
-            transforms=[ExtXyzInput(tag="input"), AsapXyz(inputs={"configs": "input.configs"})],
+            transforms=[
+                btf.ExtXyzInput(tag="input"),
+                btf.AsapXyz(inputs={"configs": "input.configs"}),
+            ],
             broadcast={"meta": "input.meta"},
         )
     ]
@@ -168,17 +172,17 @@ def compile_asap(**kwargs):
 
 def compile_morgan_krr(**kwargs):
     return [
-        Module(
+        btf.Module(
             tag="morgan_krr",
             transforms=[
-                ExtXyzInput(tag="input"),
-                MorganFP(
+                btf.ExtXyzInput(tag="input"),
+                btf.MorganFP(
                     tag="desc",
                     args={"length": 4096, "radius": 2, "normalize": True},
                     inputs={"configs": "input.configs"},
                 ),
-                KernelDot(tag="kern", inputs={"X": "desc.X"}),
-                KernelRidge(
+                btf.KernelDot(tag="kern", inputs={"X": "desc.X"}),
+                btf.KernelRidge(
                     args={"alpha": 1e-5, "power": 2}, inputs={"K": "kern.K", "y": "input.y"}
                 ),
             ],
@@ -232,17 +236,17 @@ def compile_morgan(**kwargs):
         # >>>     broadcast={ "meta": "input.meta" },
         # >>>     outputs={ "y": "KernelRidge.y" },
         # >>> ),
-        Module(
+        btf.Module(
             tag="morgan_krr_ext",
             transforms=[
-                ExtXyzInput(tag="input"),
-                MorganFP(
+                btf.ExtXyzInput(tag="input"),
+                btf.MorganFP(
                     tag="desc",
                     args={"length": 4096, "radius": 2},
                     inputs={"configs": "input.configs"},
                 ),
-                KernelDot(tag="kern", inputs={"X": "desc.X"}),
-                KernelRidge(
+                btf.KernelDot(tag="kern", inputs={"X": "desc.X"}),
+                btf.KernelRidge(
                     args={"alpha": 1e-5, "power": 2}, inputs={"K": "kern.K", "y": "input.y"}
                 ),
             ],
@@ -266,12 +270,12 @@ def compile_morgan(**kwargs):
             broadcast={"meta": "input.meta"},
             outputs={"y": "KernelRidge.y"},
         ),
-        Module(
+        btf.Module(
             tag="morgan_ridge",
             transforms=[
-                ExtXyzInput(tag="input"),
-                MorganFP(args={"length": 2048}, inputs={"configs": "input.configs"}),
-                Ridge(inputs={"X": "MorganFP.X", "y": "input.y"}),
+                btf.ExtXyzInput(tag="input"),
+                btf.MorganFP(args={"length": 2048}, inputs={"configs": "input.configs"}),
+                btf.Ridge(inputs={"X": "MorganFP.X", "y": "input.y"}),
             ],
             hyper=BayesianHyper(
                 Hyper({"Ridge.alpha": np.linspace(-2, 2, 5)}),
@@ -279,12 +283,12 @@ def compile_morgan(**kwargs):
             ),
             outputs={"y": "Ridge.y"},
         ),
-        Module(
+        btf.Module(
             tag="morgan_gb",
             transforms=[
-                ExtXyzInput(tag="input"),
-                MorganFP(args={"length": 2048}, inputs={"configs": "input.configs"}),
-                GradientBoosting(inputs={"X": "MorganFP.X", "y": "input.y"}),
+                btf.ExtXyzInput(tag="input"),
+                btf.MorganFP(args={"length": 2048}, inputs={"configs": "input.configs"}),
+                btf.GradientBoosting(inputs={"X": "MorganFP.X", "y": "input.y"}),
             ],
             hyper=GridHyper(Hyper({"GradientBoosting.max_depth": [1, 3, 5]})),
             outputs={"y": "GradientBoosting.y"},
@@ -294,13 +298,13 @@ def compile_morgan(**kwargs):
 
 def compile_gylm_match(**kwargs):
     return [
-        Module(
+        btf.Module(
             tag="gylm_smooth_match",
             transforms=[
-                ExtXyzInput(tag="input"),
-                GylmAtomic(tag="desc", inputs={"configs": "input.configs"}),
-                KernelSmoothMatch(inputs={"X": "desc.X"}),
-                KernelRidge(
+                btf.ExtXyzInput(tag="input"),
+                btf.GylmAtomic(tag="desc", inputs={"configs": "input.configs"}),
+                btf.KernelSmoothMatch(inputs={"X": "desc.X"}),
+                btf.KernelRidge(
                     args={"alpha": 1e-5, "power": 2},
                     inputs={"K": "KernelSmoothMatch.K", "y": "input.y"},
                 ),
@@ -321,13 +325,13 @@ def compile_gylm_match(**kwargs):
 
 def compile_gylm(**kwargs):
     return [
-        Module(
+        btf.Module(
             tag="gylm",
             transforms=[
-                ExtXyzInput(tag="input"),
-                GylmAverage(tag="desc", inputs={"configs": "input.configs"}),
-                KernelDot(inputs={"X": "desc.X"}),
-                KernelRidge(
+                btf.ExtXyzInput(tag="input"),
+                btf.GylmAverage(tag="desc", inputs={"configs": "input.configs"}),
+                btf.KernelDot(inputs={"X": "desc.X"}),
+                btf.KernelRidge(
                     args={"alpha": 1e-5, "power": 2}, inputs={"K": "KernelDot.K", "y": "input.y"}
                 ),
             ],
@@ -350,13 +354,13 @@ def compile_gylm(**kwargs):
 
 def compile_gylm_grid(**kwargs):
     return [
-        Module(
+        btf.Module(
             tag="gylm_grid",
             transforms=[
-                ExtXyzInput(tag="input"),
-                GylmAverage(tag="desc", inputs={"configs": "input.configs"}),
-                KernelDot(inputs={"X": "desc.X"}),
-                KernelRidge(
+                btf.ExtXyzInput(tag="input"),
+                btf.GylmAverage(tag="desc", inputs={"configs": "input.configs"}),
+                btf.KernelDot(inputs={"X": "desc.X"}),
+                btf.KernelRidge(
                     args={"alpha": 1e-5, "power": 2}, inputs={"K": "KernelDot.K", "y": "input.y"}
                 ),
             ],

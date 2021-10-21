@@ -1,37 +1,38 @@
 import numpy as np
 
-from ..transforms import *
+import benchml.transforms as btf
+from benchml.hyper import GridHyper, Hyper
 
 
 def compile_logd_ai(*args, **kwargs):
     return [
-        Module(
+        btf.Module(
             tag="logd_ai_hybrid_topo_cxlogp_gp",
             transforms=[
-                ExtXyzInput(tag="input"),
-                CxCalcTransform(
+                btf.ExtXyzInput(tag="input"),
+                btf.CxCalcTransform(
                     tag="cx", args={"reshape_as_matrix": True}, inputs={"configs": "input.configs"}
                 ),
-                KernelGaussian(
+                btf.KernelGaussian(
                     tag="kern_gaussian", args={"self_kernel": True}, inputs={"X": "cx.X"}
                 ),
-                MorganFP(
+                btf.MorganFP(
                     tag="desc",
                     args={"length": 4096, "radius": 2, "normalize": True},
                     inputs={"configs": "input.configs"},
                 ),
-                KernelDot(tag="kern", args={"self_kernel": True}, inputs={"X": "desc.X"}),
-                Add(
+                btf.KernelDot(tag="kern", args={"self_kernel": True}, inputs={"X": "desc.X"}),
+                btf.Add(
                     tag="add_k",
                     args={"coeffs": [0.5, 0.5]},
                     inputs={"X": ["kern_gaussian.K", "kern.K"]},
                 ),
-                Add(
+                btf.Add(
                     tag="add_k_self",
                     args={"coeffs": [0.5, 0.5]},
                     inputs={"X": ["kern_gaussian.K_self", "kern.K_self"]},
                 ),
-                GaussianProcess(
+                btf.GaussianProcess(
                     args={"alpha": 1e-5, "power": 2},
                     inputs={"K": "add_k.y", "K_self": "add_k_self.y", "y": "input.y"},
                 ),
@@ -55,35 +56,35 @@ def compile_logd_ai(*args, **kwargs):
                 "dy_zscore": "GaussianProcess.dy_zscore",
             },
         ),
-        Module(
+        btf.Module(
             tag="logd_ai_hybrid_topo_rdlogp_gp",
             transforms=[
-                ExtXyzInput(tag="input"),
-                Physchem2D(
+                btf.ExtXyzInput(tag="input"),
+                btf.Physchem2D(
                     tag="Physchem2D",
                     args={"select": ["mollogp"]},
                     inputs={"configs": "input.configs"},
                 ),
-                KernelGaussian(
+                btf.KernelGaussian(
                     tag="kern_gaussian", args={"self_kernel": True}, inputs={"X": "Physchem2D.X"}
                 ),
-                MorganFP(
+                btf.MorganFP(
                     tag="desc",
                     args={"length": 4096, "radius": 2, "normalize": True},
                     inputs={"configs": "input.configs"},
                 ),
-                KernelDot(tag="kern", args={"self_kernel": True}, inputs={"X": "desc.X"}),
-                Add(
+                btf.KernelDot(tag="kern", args={"self_kernel": True}, inputs={"X": "desc.X"}),
+                btf.Add(
                     tag="add_k",
                     args={"coeffs": [0.5, 0.5]},
                     inputs={"X": ["kern_gaussian.K", "kern.K"]},
                 ),
-                Add(
+                btf.Add(
                     tag="add_k_self",
                     args={"coeffs": [0.5, 0.5]},
                     inputs={"X": ["kern_gaussian.K_self", "kern.K_self"]},
                 ),
-                GaussianProcess(
+                btf.GaussianProcess(
                     args={"alpha": 1e-5, "power": 2},
                     inputs={"K": "add_k.y", "K_self": "add_k_self.y", "y": "input.y"},
                 ),
