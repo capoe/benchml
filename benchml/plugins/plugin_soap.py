@@ -6,7 +6,14 @@ from benchml.logger import log
 from benchml.pipeline import Transform
 from benchml.ptable import lookup
 
-from .plugin_check import *
+from .plugin_check import (
+    asaplib,
+    check_asap_available,
+    check_dscribe_available,
+    check_gylmxx_available,
+    dd,
+    gylm,
+)
 
 
 class SoapBase(Transform):

@@ -3,7 +3,7 @@ import numpy as np
 from benchml.pipeline import Transform
 from benchml.utils import LineExpansion, get_smiles
 
-from .plugin_check import *
+from .plugin_check import rchem, rdesc
 
 
 class PhyschemXtal(Transform):

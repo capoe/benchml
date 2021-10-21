@@ -5,7 +5,7 @@ from benchml.logger import log
 from benchml.pipeline import Macro, Transform
 from benchml.utils import get_smiles
 
-from .plugin_check import *
+from .plugin_check import achem, check_rdkit_available, rchem
 
 
 class MorganFP(Transform):

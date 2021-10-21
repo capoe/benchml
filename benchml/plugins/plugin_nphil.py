@@ -3,7 +3,7 @@ import numpy as np
 from benchml.logger import log
 from benchml.pipeline import Transform
 
-from .plugin_check import *
+from .plugin_check import check_nphil_available, nphil
 
 
 class NonlinearFeatureFilter(Transform):
@@ -67,6 +67,7 @@ class NonlinearFeatureFilter(Transform):
     def _map(self, inputs, stream):
         X = np.copy(inputs["X"])
         fgraph = self.params().get("fgraph")
+        variables = self.params().get("variables")
         if fgraph is None:  # Might have be none'd to allow serialization
             fgraph = self.generateGraph(variables)
             self.params().put("fgraph", fgraph)
