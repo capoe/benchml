@@ -1,6 +1,5 @@
 import numpy as np
 
-from benchml.logger import log
 from benchml.pipeline import Transform
 
 from .plugin_check import check_nphil_available, nphil

@@ -1,6 +1,5 @@
 import numpy as np
 
-from benchml.logger import log
 from benchml.pipeline import Transform
 
 try:

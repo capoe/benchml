@@ -1,7 +1,6 @@
 import numpy as np
 
-from .logger import log
-from .pipeline import Transform
+from benchml.pipeline import Transform
 
 
 class Reshape(Transform):

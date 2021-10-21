@@ -1,7 +1,6 @@
 import numpy as np
 
 from benchml.kernels import KernelDot
-from benchml.logger import log
 from benchml.pipeline import Macro, Transform
 from benchml.utils import get_smiles
 
