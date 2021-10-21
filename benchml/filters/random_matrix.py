@@ -1,8 +1,8 @@
 import numpy as np
 import scipy
 
-from ..logger import log
-from ..pipeline import Transform
+from benchml.logger import log
+from benchml.pipeline import Transform
 
 
 def dist_mp(x, gamma):

@@ -5,8 +5,7 @@ import numpy as np
 
 import benchml
 import benchml.transforms as btf
-
-from ..logger import Mock, log
+from benchml.logger import Mock, log
 
 
 def assert_equal(x, y, tol):

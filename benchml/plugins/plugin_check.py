@@ -1,4 +1,4 @@
-from ..logger import Mock
+from benchml.logger import Mock
 
 try:
     import nphil

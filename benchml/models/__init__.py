@@ -26,7 +26,7 @@ import re
 
 import numpy as np
 
-from ..logger import log
+from benchml.logger import log
 
 
 def list_all(verbose=True):

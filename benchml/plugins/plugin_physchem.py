@@ -1,7 +1,8 @@
 import numpy as np
 
-from ..pipeline import Transform
-from ..utils import LineExpansion, get_smiles
+from benchml.pipeline import Transform
+from benchml.utils import LineExpansion, get_smiles
+
 from .plugin_check import *
 
 

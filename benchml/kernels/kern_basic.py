@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..pipeline import Transform
+from benchml.pipeline import Transform
 
 
 class KernelBase(object):

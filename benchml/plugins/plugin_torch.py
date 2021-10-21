@@ -1,9 +1,10 @@
 import numpy as np
 
-from ..logger import log
-from ..pipeline import Transform
-from ..readwrite import load
-from .plugin_check import *
+from benchml.logger import log
+from benchml.pipeline import Transform
+from benchml.readwrite import load
+
+from .plugin_check import check_torch_available, nn, torch
 
 
 class TorchModuleTransform(Transform, nn.Module):

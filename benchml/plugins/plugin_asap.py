@@ -1,5 +1,5 @@
-from ..logger import Mock
-from ..pipeline import Transform
+from benchml.logger import Mock
+from benchml.pipeline import Transform
 
 try:
     import asaplib

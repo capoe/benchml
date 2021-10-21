@@ -1,8 +1,9 @@
 import numpy as np
 
-from ..logger import log
-from ..pipeline import Transform
-from ..ptable import lookup
+from benchml.logger import log
+from benchml.pipeline import Transform
+from benchml.ptable import lookup
+
 from .plugin_check import *
 
 

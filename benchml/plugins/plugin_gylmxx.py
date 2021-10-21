@@ -3,8 +3,9 @@ import time
 
 import numpy as np
 
-from ..logger import log
-from ..pipeline import Transform
+from benchml.logger import log
+from benchml.pipeline import Transform
+
 from .plugin_check import *
 
 
@@ -110,7 +111,7 @@ class AttributeKernelSmoothMatchSVM(Transform):
             Z.append(z_attr)
         if self.args["write_xyz"] != "":
             assert configs is not None  # Require configs input to produce xyz
-            from ..readwrite import write
+            from benchml.ptable import write
 
             for cidx, config in enumerate(configs):
                 config.info["z_attr"] = list(Z[cidx].tolist())

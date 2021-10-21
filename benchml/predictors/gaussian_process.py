@@ -1,7 +1,7 @@
 import numpy as np
 
-from ..logger import log
-from ..pipeline import Transform
+from benchml.logger import log
+from benchml.pipeline import Transform
 
 
 class GaussianProcess(Transform):
@@ -95,7 +95,7 @@ class ResidualGaussianProcess(Transform):
         residuals = []
 
         # Residuals on folds
-        from ..splits import SplitKfold
+        from benchml.splits import SplitKfold
 
         split = SplitKfold(K, k=20)
         for info, train, test in split:

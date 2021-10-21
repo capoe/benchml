@@ -1,9 +1,10 @@
 import numpy as np
 
-from ..kernels import KernelDot
-from ..logger import log
-from ..pipeline import Macro, Transform
-from ..utils import get_smiles
+from benchml.kernels import KernelDot
+from benchml.logger import log
+from benchml.pipeline import Macro, Transform
+from benchml.utils import get_smiles
+
 from .plugin_check import *
 
 

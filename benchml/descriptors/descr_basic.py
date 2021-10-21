@@ -1,7 +1,7 @@
 import numpy as np
 
-from ..logger import log
-from ..pipeline import Transform
+from benchml.logger import log
+from benchml.pipeline import Transform
 
 
 class DescriptorRandom(Transform):
