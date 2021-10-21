@@ -2,12 +2,6 @@ import numpy as np
 
 import benchml.transforms as btf
 from benchml.hyper import BayesianHyper, GridHyper, Hyper
-from benchml.models import collections
-
-
-def compile(groups, **kwargs):
-    selected = [model for group in groups for model in collections[group](**kwargs)]
-    return selected
 
 
 def compile_null(**kwargs):
