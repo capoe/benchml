@@ -147,7 +147,7 @@ class SliceMatrix(Transform):
 
     def _map(self, inputs, stream):
         s = self.params().get("slice")
-        stream.put("X", X[s])
+        stream.put("X", inputs["X"][s])
 
 
 class DoDivideBySize(Transform):
