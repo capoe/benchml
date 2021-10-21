@@ -157,19 +157,6 @@ def compile_dscribe_periodic(**kwargs):
     ]
 
 
-def compile_asap(**kwargs):
-    return [
-        btf.Module(
-            tag="asap_xyz",
-            transforms=[
-                btf.ExtXyzInput(tag="input"),
-                btf.AsapXyz(inputs={"configs": "input.configs"}),
-            ],
-            broadcast={"meta": "input.meta"},
-        )
-    ]
-
-
 def compile_morgan_krr(**kwargs):
     return [
         btf.Module(
@@ -383,7 +370,6 @@ def compile_gylm_grid(**kwargs):
 
 def register_all():
     return {
-        "asap": compile_asap,
         "dscribe": compile_dscribe,
         "dscribe_periodic": compile_dscribe_periodic,
         "ecfp": compile_morgan,
