@@ -13,6 +13,7 @@ from test_soap import *
 
 import benchml
 from benchml.logger import log
+from benchml.test import TestMock
 
 # NOTE Independent random seeds used in
 # - Split
