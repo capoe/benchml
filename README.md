@@ -3,11 +3,11 @@
 </div>
 
 # Description
-BenchML is a machine-learning (ML) suite for rapid development and deployment of ML models. 
+BenchML is a machine-learning (ML) suite for rapid development and deployment of ML models.
 The library is geared towards physical/chemical datasets and prediction settings. It implements
-transforms and provides plugins for a variety of atomistic and molecular descriptors, 
+transforms and provides plugins for a variety of atomistic and molecular descriptors,
 data filtering and feature generation routines, regressors and classifiers, etc. The pipelines
-can be efficiently optimized using grid-based or Bayesian protocols that minimise recomputation 
+can be efficiently optimized using grid-based or Bayesian protocols that minimise recomputation
 by dependency hashing.
 
 # Installation
@@ -44,12 +44,12 @@ Transforms are the nodes of the pipeline: They act on the data stream via calls 
 ```python
 trafo = RandomProjector(
   args={
-    "cutoff": 0.1, 
-    "epsilon": 0.01, 
-    ...}, 
+    "cutoff": 0.1,
+    "epsilon": 0.01,
+    ...},
   inputs={
-    "X": "descriptor.x", 
-    "y": "input.y", 
+    "X": "descriptor.x",
+    "y": "input.y",
     "M": "predictor._model",
     ...})
 ```
@@ -64,7 +64,7 @@ There are three types of transforms: input, map, and fit+map transforms. Which t
 
 Input transforms, such as ExtXyzInput, implement the .\_feed method that is called inside .open of a model (= pipeline):
 ```python
-stream = model.open(data) # < Internally this will call .feed on all 
+stream = model.open(data) # < Internally this will call .feed on all
                           #   transforms that implement the ._feed method.
 ```
 Below we show an example implementation for an input node (here: ExtXyzInput), where .feed is used to release "configs", "y" and "meta" into the data stream:
@@ -96,11 +96,11 @@ class RandomDescriptor(Transform):
     precompute = True
     def _map(self, inputs, stream):       # < The inputs dictionary comes preloaded with the appropriate data
         shape = (
-          len(inputs["configs"]), 
+          len(inputs["configs"]),
           self.args["dim"])
         X = np.random.uniform(
-          self.args["xmin"], 
-          self.args["xmax"], 
+          self.args["xmin"],
+          self.args["xmax"],
           size=shape)
         stream.put("X", X) # < The X matrix is stored in the active stream of the transform
 ```
@@ -139,7 +139,7 @@ class Transform(object):
     stream_samples = tuple()
     stream_kernel = tuple()
 ```
-Computationally expensive transforms should typically set "precompute = True", which will add them to the list of transforms mapped during a call to model.precompute(stream). This will precompute the output for a specific data stream, and then only recompute values if the version hash of the stream changes (e.g., due to an args update of an ancestral transform). 
+Computationally expensive transforms should typically set "precompute = True", which will add them to the list of transforms mapped during a call to model.precompute(stream). This will precompute the output for a specific data stream, and then only recompute values if the version hash of the stream changes (e.g., due to an args update of an ancestral transform).
 
 For hyperoptimization, as well as benchmarking purposes, the stream attached to a transform needs to know how to split its data into a train and test partition. Consider e.g.,
 ```python
@@ -176,7 +176,7 @@ New transforms can be defined either externally or internally. In the latter cas
 
 ## Modules
 
-A module (also referred to as a *pipeline* or *model*) comprises a set of interdependent transforms, with at least one input transform. The module applies the transforms sequentially to the data input during the fitting and mapping stages, managing both data streams and parameters. 
+A module (also referred to as a *pipeline* or *model*) comprises a set of interdependent transforms, with at least one input transform. The module applies the transforms sequentially to the data input during the fitting and mapping stages, managing both data streams and parameters.
 
 The code example below creates a new pipeline instance that combines a topological fingerprint with a dot-product kernel and kernel ridge regression:
 ```python
@@ -195,12 +195,12 @@ model = Module(
             inputs={"K": "kernel.K", "y": "input.y"})
     ],
     hyper=BayesianHyper(
-        Hyper({ 
+        Hyper({
             "KernelRidge.alpha": [-3, 3 ],
             "KernelRidge.power": [ 1., 3. ]}),
         convert={
             "KernelRidge.alpha": lambda a: 10**a}),
-    broadcast={ "meta": "input.meta" },           # < Data objects referenced here are broadcast to 
+    broadcast={ "meta": "input.meta" },           # < Data objects referenced here are broadcast to
     outputs={ "y": "KernelRidge.y" }              #   all transforms, and can be accessed via the
 ),                                                #   inputs argument in their .\_map and .\_fit methods.
 ```
@@ -229,7 +229,7 @@ model.hyperfit(
   target_ref="input.y")         #   (read from the model output) and reference "input.y"
                                 #   (read from the stream of the "input" transform).
   ```
-  
+
 ### Accessing data within a stream or module
 The methods model.open(data) as well as stream.split(...) return handles on a data stream. You can manually access the data stored in the stream via
 ```python
@@ -285,7 +285,7 @@ Module(
     ]
 )
 ```
-Note that streams within the macros are located within their own namespace. Hence the kernel from transform "A" is referenced outside the macro via "A/kernel.K" instead of just "kernel.K". 
+Note that streams within the macros are located within their own namespace. Hence the kernel from transform "A" is referenced outside the macro via "A/kernel.K" instead of just "kernel.K".
 
 ## Hyper-optimization
 
@@ -299,10 +299,10 @@ model = Module(
     ],
     hyper=GridHyper(
         Hyper({ "KernelRidge.alpha": np.logspace(-3,+3, 5), }),
-        Hyper({ "KernelRidge.power": [ 1., 2., 3. ] })),          
-),                                               
+        Hyper({ "KernelRidge.power": [ 1., 2., 3. ] })),
+),
 ```
-As there are two independent <Hyper> objects within the GridHyper constructor, a complete combinatorial sweep will be performed, testing all combinations of "KernelRidge.alpha" and "KernelRidge.power" (here: 5x3 = 15). Hyperparameters contained within the same Hyper object, by contrast, are swept over in a linear fashion:    
+As there are two independent <Hyper> objects within the GridHyper constructor, a complete combinatorial sweep will be performed, testing all combinations of "KernelRidge.alpha" and "KernelRidge.power" (here: 5x3 = 15). Hyperparameters contained within the same Hyper object, by contrast, are swept over in a linear fashion:
 ```python
 model = Module(
     transforms=[
@@ -311,13 +311,13 @@ model = Module(
         ...
     ],
     hyper=GridHyper(
-        Hyper({ 
+        Hyper({
             "KernelRidge.alpha": np.logspace(-3,+3, 3), # < Only three combinations considered:
             "KernelRidge.power": [ 1., 2., 3. ]         #   (alpha, power) = (-3,1), (0,2), (3,3)
         }))
-)                                               
+)
 ```
-    
+
 As the number of hyperparameters increases, the grid-based sweep becomes increasingly expensive. Bayesian optimization can then be a more efficient choice:
 ```python
 model = Module(
@@ -327,17 +327,17 @@ model = Module(
         ...
     ],
     hyper=BayesianHyper(
-        Hyper({ 
+        Hyper({
             "KernelRidge.alpha": [ -3, 3 ],
             "KernelRidge.power": [ 1., 3. ] }),
-        convert={"KernelRidge.alpha": lambda a: 10**a}),          
-),                                               
+        convert={"KernelRidge.alpha": lambda a: 10**a}),
+),
 ```
 Here we specified the lower and upper limit for each hyperparameter. The "convert" dictionary contains instructions that are applied to a hyperparameter before it is supplied to the module: For example, "KernelRidge.alpha" is exponentiated with base 10, such that the Bayesian optimization (which is hence applied to the log of the regularization alpha) experiences a smoother landscape. A similar conversion is necessary when integral or boolean parameters are to be optimized:
 ```python
    ...
    hyper=BayesianHyper(
-        Hyper({ 
+        Hyper({
             "trafo.some_boolean": [ 0., 1. ],
             "trafo.some_integer": [ 128, 512] }),
         convert={

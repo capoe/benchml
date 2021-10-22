@@ -11,7 +11,7 @@ bbatch --walk data --collections "^bmol_.*$" --models ".*" \
 
 mkdir -p logs # Collects stdout
 ```
-   
+
 See below an example bbatch command that creates a batch script for a single model only:
 ```bash
 bbatch --walk subdirectory/in/data/repository --collections ".*" --models "^bmol_ecfp_krr$" \
@@ -27,4 +27,4 @@ In the "atomized" form, a batch consists of benchmarking a single model against 
 bml --meta path/to/meta.json --models "^my_model_tag$" --benchmark_json results/test.json --use_ase
 ```
 
-Note that the model tag is treated as a regular expression that is matched against all model tags in the benchml collection (these can be inspected via binfo --list_collections), hence the circumflex and dollar sign to guarantee matching against a single model entry only. 
+Note that the model tag is treated as a regular expression that is matched against all model tags in the benchml collection (these can be inspected via binfo --list_collections), hence the circumflex and dollar sign to guarantee matching against a single model entry only.
