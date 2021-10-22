@@ -4,9 +4,7 @@ import numpy as np
 
 from benchml.logger import log
 from benchml.pipeline import Transform
-from benchml.ptable import lookup
-
-from .plugin_check import (
+from benchml.plugins.plugin_check import (
     asaplib,
     check_asap_available,
     check_dscribe_available,
@@ -14,6 +12,7 @@ from .plugin_check import (
     dd,
     gylm,
 )
+from benchml.ptable import lookup
 
 
 class SoapBase(Transform):

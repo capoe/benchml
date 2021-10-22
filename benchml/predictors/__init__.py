@@ -1,5 +1,5 @@
-from .gaussian_process import GaussianProcess, ResidualGaussianProcess
-from .pred_sklearn import (
+from benchml.predictors.gaussian_process import GaussianProcess, ResidualGaussianProcess
+from benchml.predictors.pred_sklearn import (
     AdaBoost,
     ElasticNet,
     ElasticNetClassifier,

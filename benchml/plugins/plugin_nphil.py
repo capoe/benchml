@@ -1,8 +1,7 @@
 import numpy as np
 
 from benchml.pipeline import Transform
-
-from .plugin_check import check_nphil_available, nphil
+from benchml.plugins.plugin_check import check_nphil_available, nphil
 
 
 class NonlinearFeatureFilter(Transform):

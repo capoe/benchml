@@ -3,8 +3,7 @@ import re
 import numpy as np
 
 from benchml.logger import log
-
-from . import (
+from benchml.models import (
     mod_basic,
     mod_bench,
     mod_bench_class,

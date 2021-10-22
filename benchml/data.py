@@ -6,7 +6,7 @@ import os
 
 import numpy as np
 
-from .readwrite import read
+from benchml.readwrite import read
 
 
 class BenchmarkData(object):

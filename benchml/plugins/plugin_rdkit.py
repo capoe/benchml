@@ -2,9 +2,8 @@ import numpy as np
 
 from benchml.kernels import KernelDot
 from benchml.pipeline import Macro, Transform
+from benchml.plugins.plugin_check import achem, check_rdkit_available, rchem
 from benchml.utils import get_smiles
-
-from .plugin_check import achem, check_rdkit_available, rchem
 
 
 class MorganFP(Transform):

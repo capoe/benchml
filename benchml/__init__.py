@@ -3,14 +3,14 @@
 .. moduleauthor:: Carl Poelking <cp605@cam.ac.uk>
 """
 
-from . import analysis, benchmark, data, models, pipeline, splits, transforms, utils
-from .accumulator import Accumulator
-from .data import load_dataset
-from .logger import log
-from .pipeline import hupdate, sopen, stream
-from .readwrite import load, read, save, write
-from .splits import Split
-from .transforms import Transform
+from benchml import analysis, benchmark, data, models, pipeline, splits, transforms, utils
+from benchml.accumulator import Accumulator
+from benchml.data import load_dataset
+from benchml.logger import log
+from benchml.pipeline import hupdate, sopen, stream
+from benchml.readwrite import load, read, save, write
+from benchml.splits import Split
+from benchml.transforms import Transform
 
 __version__ = "0.1.3"
 __all__ = [

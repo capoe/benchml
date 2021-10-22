@@ -5,8 +5,7 @@ import numpy as np
 
 from benchml.logger import log
 from benchml.pipeline import Transform
-
-from .plugin_check import check_gylmxx_available, gylm
+from benchml.plugins.plugin_check import check_gylmxx_available, gylm
 
 
 class KernelSmoothMatch(Transform):

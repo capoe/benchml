@@ -1,18 +1,17 @@
 import inspect
 
+from benchml.basic import *  # noqa: F401, F403
+from benchml.conformal import *  # noqa: F401, F403
+from benchml.descriptors import *  # noqa: F401, F403
+from benchml.ensemble import *  # noqa: F401, F403
+from benchml.filters import *  # noqa: F401, F403
+from benchml.inputs import *  # noqa: F401, F403
+from benchml.kernels import *  # noqa: F401, F403
 from benchml.logger import log
+from benchml.matrix import *  # noqa: F401, F403
 from benchml.pipeline import Module, Transform
-
-from .basic import *  # noqa: F401, F403
-from .conformal import *  # noqa: F401, F403
-from .descriptors import *  # noqa: F401, F403
-from .ensemble import *  # noqa: F401, F403
-from .filters import *  # noqa: F401, F403
-from .inputs import *  # noqa: F401, F403
-from .kernels import *  # noqa: F401, F403
-from .matrix import *  # noqa: F401, F403
-from .plugins import *  # noqa: F401, F403
-from .predictors import *  # noqa: F401, F403
+from benchml.plugins import *  # noqa: F401, F403
+from benchml.predictors import *  # noqa: F401, F403
 
 
 def transform_info(tf, log, verbose=True):

@@ -2,9 +2,8 @@ import numpy as np
 
 from benchml.logger import log
 from benchml.pipeline import Transform
+from benchml.plugins.plugin_check import check_torch_available, nn, torch
 from benchml.readwrite import load
-
-from .plugin_check import check_torch_available, nn, torch
 
 
 class TorchModuleTransform(Transform, nn.Module):
