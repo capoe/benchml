@@ -2,8 +2,16 @@ import inspect
 
 import numpy as np
 
+from .conformal import *  # noqa: F401
+from .descriptors import *  # noqa: F401
+from .ensemble import *  # noqa: F401
+from .filters import *  # noqa: F401
+from .kernels import *  # noqa: F401
 from .logger import log
+from .matrix import *  # noqa: F401
 from .pipeline import Module, Transform
+from .plugins import *  # noqa: F401
+from .predictors import *  # noqa: F401
 
 
 class ExttInput(Transform):
@@ -224,16 +232,6 @@ class UndoDivideBySize(Transform):
         assert y_in.shape[0] == sizes.shape[0]  # UndoDivideBySize: inconsistent input dim
         y_out = y_in * sizes
         stream.put("y", y_out)
-
-
-from .conformal import *  # noqa: F401
-from .descriptors import *  # noqa: F401
-from .ensemble import *  # noqa: F401
-from .filters import *  # noqa: F401
-from .kernels import *  # noqa: F401
-from .matrix import *  # noqa: F401
-from .plugins import *  # noqa: F401
-from .predictors import *  # noqa: F401
 
 
 def transform_info(tf, log, verbose=True):

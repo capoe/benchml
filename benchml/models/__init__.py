@@ -1,3 +1,9 @@
+import re
+
+import numpy as np
+
+from benchml.logger import log
+
 from . import (
     mod_basic,
     mod_bench,
@@ -21,12 +27,6 @@ for register in [
     mod_xy.register_all,
 ]:
     collections.update(register())
-
-import re
-
-import numpy as np
-
-from benchml.logger import log
 
 
 def list_all(verbose=True):
