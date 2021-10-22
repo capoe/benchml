@@ -216,8 +216,10 @@ class Params(object):
 
 
 class Transform(object):
-    """Transforms constitute the nodes of a pipeline.
-    Each transforms implements at least one of three methods through which it acts on the data stream: map, fit, and feed.
+    """
+    Transforms constitute the nodes of a pipeline.
+    Each transforms implements at least one of three methods,
+    through which it acts on the data stream: map, fit, and feed.
 
     Args:
         tag (str, optional): Address of the transform via which its outputs can be referenced.

@@ -45,7 +45,10 @@ if __name__ == "__main__":
             name_model.append(model_i.tag)
             for j, model_j in enumerate(models):
                 if i > j:
-                    # kij = np.mean(np.multiply(np.asmatrix(kmat[model_i.tag]), np.asmatrix(kmat[model_j.tag])))
+                    # kij = np.mean(
+                    #     np.multiply(np.asmatrix(kmat[model_i.tag]),
+                    #     np.asmatrix(kmat[model_j.tag]))
+                    # )
                     kijS, _ = spearmanr(kmat[model_i.tag], kmat[model_j.tag], axis=None)
                     # print(np.shape(kmat[model_i.tag].ravel()))
                     kijP, _ = pearsonr(kmat[model_i.tag].ravel(), kmat[model_j.tag].ravel())

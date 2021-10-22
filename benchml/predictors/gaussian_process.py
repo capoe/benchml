@@ -110,9 +110,11 @@ class ResidualGaussianProcess(Transform):
             r_i = y_std * (y_i_test - (K[test][:, train] ** self.args["power"]).dot(w_i))
             residuals.append(np.abs(r_i))
 
-        # K_i_inv = np.linalg.inv(K**self.args["power"] + self.args["alpha"]*np.identity(K.shape[0]))
+        # K_i_inv = np.linalg.inv(
+        #     K ** self.args["power"] + self.args["alpha"] * np.identity(K.shape[0])
+        # )
         # w_i = K_i_inv.dot(y_train)
-        # r_i = y_std*(y_train - (K**self.args["power"]).dot(w_i))
+        # r_i = y_std * (y_train - (K ** self.args["power"]).dot(w_i))
         # residuals.append(r_i)
 
         # Train residual GP

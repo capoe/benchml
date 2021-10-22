@@ -83,7 +83,8 @@ class Dataset(object):
         return
 
     def info(self):
-        return "{name:30s}  #configs={size:<5d}  task={task:8s}  metrics={metrics:s}   std={std:1.2e}".format(
+        s = "{name:30s}  #configs={size:<5d}  task={task:8s}  metrics={metrics:s}   std={std:1.2e}"
+        return s.format(
             name=self.meta["name"],
             size=len(self.configs),
             task=self.meta["task"],
