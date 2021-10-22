@@ -1,6 +1,4 @@
-"""
-for processing data
-"""
+"""For processing data."""
 
 import numpy as np
 from asaplib.fit import LC_SCOREBOARD

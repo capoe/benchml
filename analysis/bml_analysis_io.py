@@ -1,6 +1,4 @@
-"""
-for parsing
-"""
+"""For parsing."""
 
 import gzip
 import itertools

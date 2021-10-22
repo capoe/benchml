@@ -18,10 +18,7 @@ default_config = {
 
 
 class State(object):
-    """
-    Mock object, needs to be finished or removed.
-
-    """
+    """Mock object, needs to be finished or removed."""
 
     def __init__(self, ising_J, ising_B):
         # TODO

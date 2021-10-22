@@ -1,7 +1,6 @@
-"""BenchML __init__.py
+"""BenchML.
 
 .. moduleauthor:: Carl Poelking <cp605@cam.ac.uk>
-
 """
 
 from . import analysis, benchmark, data, models, pipeline, splits, transforms, utils

@@ -1,6 +1,4 @@
-"""
-for making plots
-"""
+"""For making plots."""
 import matplotlib.pyplot as plt
 import numpy as np
 from asaplib.fit import LC_SCOREBOARD
