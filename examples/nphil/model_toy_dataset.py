@@ -1,4 +1,5 @@
 import benchml as bml
+from benchml.hyper import GridHyper, Hyper
 
 log = bml.log
 
@@ -12,7 +13,7 @@ def build_simple_rf():
                 tag="predictor", inputs={"X": "input.X", "y": "input.Y"}
             ),
         ],
-        hyper=bml.transforms.GridHyper(bml.transforms.Hyper({"predictor.max_depth": [None]})),
+        hyper=GridHyper(Hyper({"predictor.max_depth": [None]})),
         broadcast={},
         outputs={"y": "predictor.y"},
     )
