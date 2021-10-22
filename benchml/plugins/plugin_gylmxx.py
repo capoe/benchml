@@ -25,9 +25,9 @@ class KernelSmoothMatch(Transform):
     def evaluate(self, X1, X2, symmetric):
         K = np.zeros((X1.shape[0], X2.shape[0]))
         for i in range(X1.shape[0]):
-            xi = X1[i]
+            xi = X1[i]  # noqa: F841
             for j in range(i if symmetric else 0, X2.shape[0]):
-                xj = X2[j]
+                xj = X2[j]  # noqa: F841
                 if self.verbose:
                     log << log.back << " Match %4d/%-4d   " % (i, j) << log.flush
                 kij = eval(self.args["base_kernel"]) ** self.args["base_power"]
@@ -62,7 +62,7 @@ class KernelSmoothMatch(Transform):
 
 
 class AttributeKernelSmoothMatchSVM(Transform):
-    req_inputs = ("configs", "X", "X_probe", "z_probe", "model")
+    req_inputs = ("configs", "X", "X_probe", "model")
     default_args = {
         "write_xyz": "",
         "gamma": "@kernel.gamma",
@@ -79,7 +79,6 @@ class AttributeKernelSmoothMatchSVM(Transform):
         model = inputs["model"]
         X_probe = inputs["X_probe"]
         X = inputs["X"]
-        z_probe = inputs["z_probe"]
         if stream.parent is not None:
             stream.put("Z", None)
             return
@@ -90,7 +89,7 @@ class AttributeKernelSmoothMatchSVM(Transform):
             xi = X_probe[i]
             k_attr = np.zeros((len(xi), len(X)))
             for j in range(len(X)):
-                xj = X[j]
+                xj = X[j]  # noqa: F841
                 kij = eval(self.args["base_kernel"]) ** self.args["base_power"]
                 pij = np.zeros_like(kij)
                 gylm.smooth_match(

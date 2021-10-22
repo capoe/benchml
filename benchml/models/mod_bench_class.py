@@ -227,7 +227,6 @@ def compile_gylm_match_class(**kwargs):
                         "configs": "input.configs",
                         "X": "kernel._X",
                         "X_probe": "descriptor.X",
-                        "z_probe": "predictor.z",
                         "model": "predictor._model",
                     },
                 ),
@@ -241,7 +240,7 @@ def compile_gylm_match_class(**kwargs):
                 Hyper({"predictor.power": [2.0]}),
             ),
             broadcast={"meta": "input.meta"},
-            outputs={"y": "predictor.z", "y_attr": "attribute.Z"},
+            outputs={"y_attr": "attribute.Z"},
         ),
     ]
 
