@@ -114,7 +114,6 @@ class ElasticNetClassifier(SklearnTransform):
         w[i1] = w1
         model = sklearn.linear_model.ElasticNet(**self.args)
         model.fit(X=inputs["X"], y=y_spin, sample_weight=w)
-        z = model.predict(inputs["X"])
         params.put("model", model)
         self._map(inputs, stream)
 
@@ -139,7 +138,6 @@ class OMPClassifier(Transform):
         y_spin = 2 * (y - 0.5)
         model = sklearn.linear_model.OrthogonalMatchingPursuit(**self.args)
         model.fit(X=inputs["X"], y=y_spin)
-        z = model.predict(inputs["X"])
         params.put("model", model)
         self._map(inputs, stream)
 
@@ -376,7 +374,6 @@ class LogisticRegression(SklearnTransform):
     def _fit(self, inputs, stream, params):
         model = sklearn.linear_model.LogisticRegression(**self.args)
         model.fit(X=inputs["X"], y=inputs["y"])
-        yp = model.predict(inputs["X"])
         params.put("model", model)
         self._map(inputs, stream)
 
@@ -396,7 +393,6 @@ class ElasticNet(SklearnTransform):
     def _fit(self, inputs, stream, params):
         model = sklearn.linear_model.ElasticNet(**self.args)
         model.fit(X=inputs["X"], y=inputs["y"])
-        yp = model.predict(inputs["X"])
         params.put("model", model)
         self._map(inputs, stream)
 
@@ -448,7 +444,6 @@ class OrthogonalMatchingPursuit(SklearnTransform):
     def _fit(self, inputs, stream, params):
         model = sklearn.linear_model.OrthogonalMatchingPursuit(**self.args)
         model.fit(X=inputs["X"], y=inputs["y"])
-        yp = model.predict(inputs["X"])
         params.put("model", model)
         self._map(inputs, stream)
 

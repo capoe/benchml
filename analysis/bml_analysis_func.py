@@ -9,9 +9,6 @@ from sklearn import linear_model
 
 
 def model_elementwise_error(model_now, select="test", compare="MSE", replica=None):
-
-    n_repeats = model_now["n_repeats"]
-
     # some options to select certain data points
 
     if select == "all":

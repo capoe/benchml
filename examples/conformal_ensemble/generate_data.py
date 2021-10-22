@@ -32,8 +32,6 @@ class IsingModel(object):
     def __init__(self, config):
         self.config = {k: config[k] for k in config}
         dim = config["dim"]
-        J_min = config["J_min"]
-        J_max = config["J_max"]
         J_sc = config["J_scale"]
         B_min = config["B_min"]
         B_max = config["B_max"]

@@ -239,7 +239,6 @@ def tokenize_extxyz_meta(fs, allow_json=True):
     # Process key-value pairs
     info = {}
     for kv in kvs:
-        key = kv[0]
         value = "=".join(kv[1:])
         value = value.replace('"', "").replace("'", "")
         # Float?

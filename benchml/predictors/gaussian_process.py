@@ -128,7 +128,6 @@ class ResidualGaussianProcess(Transform):
         rsd_gp.openParams("temp")
         rsd_gp._fit({"K": K, "y": residuals})
         rsd_gp._map({"K": K, "y": residuals})
-        y = rsd_gp.stream().get("y")
         self.params().put("res", residuals)
         self.params().put("res_model", rsd_gp)
 
