@@ -1,6 +1,5 @@
-import numpy as np
-
 from benchml.pipeline import Transform
+
 
 class ExttInput(Transform):
     allow_stream = {"X", "Y", "meta"}

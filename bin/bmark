@@ -2,7 +2,6 @@
 import json
 
 import benchml
-from benchml.transforms import *  # noqa: F401, F403
 
 log = benchml.log
 benchml.readwrite.configure(use_ase=False)

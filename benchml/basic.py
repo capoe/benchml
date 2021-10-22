@@ -2,6 +2,7 @@ import numpy as np
 
 from benchml.pipeline import Transform
 
+
 class Add(Transform):
     req_args = {
         "coeffs",
