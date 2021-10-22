@@ -169,7 +169,7 @@ class GradientBoosting(SklearnTransform):
 class RandomForestRegressor(SklearnTransform):
     default_args = dict(
         n_estimators=100,
-        criterion="mse",
+        criterion="squared_error",
         max_depth=None,
         min_samples_split=2,
         min_samples_leaf=1,
