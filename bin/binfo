@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 import benchml
-from benchml.transforms import *  # noqa: F401
+from benchml.transforms import *  # noqa: F401, F403
 
 log = benchml.log
 

@@ -5,11 +5,11 @@ import re
 import sys
 
 import numpy as np
-from test_asap import *  # noqa: F401
-from test_dscribe import *  # noqa: F401
-from test_gylm import *  # noqa: F401
-from test_morgan import *  # noqa: F401
-from test_soap import *  # noqa: F401
+from test_asap import *  # noqa: F401, F403
+from test_dscribe import *  # noqa: F401, F403
+from test_gylm import *  # noqa: F401, F403
+from test_morgan import *  # noqa: F401, F403
+from test_soap import *  # noqa: F401, F403
 
 import benchml
 from benchml.logger import log
