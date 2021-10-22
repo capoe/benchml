@@ -13,7 +13,7 @@ from .readwrite import load, read, save, write
 from .splits import Split
 from .transforms import Transform
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 __all__ = [
     "analysis",
     "benchmark",
