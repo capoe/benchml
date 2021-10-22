@@ -226,14 +226,14 @@ class UndoDivideBySize(Transform):
         stream.put("y", y_out)
 
 
-from .conformal import *
-from .descriptors import *
-from .ensemble import *
-from .filters import *
-from .kernels import *
-from .matrix import *
-from .plugins import *
-from .predictors import *
+from .conformal import *  # noqa: F401
+from .descriptors import *  # noqa: F401
+from .ensemble import *  # noqa: F401
+from .filters import *  # noqa: F401
+from .kernels import *  # noqa: F401
+from .matrix import *  # noqa: F401
+from .plugins import *  # noqa: F401
+from .predictors import *  # noqa: F401
 
 
 def transform_info(tf, log, verbose=True):
