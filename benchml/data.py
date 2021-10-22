@@ -182,7 +182,9 @@ def compile(root="./data", filter_fct=lambda meta: True):
     return BenchmarkData(root, filter_fct=filter_fct)
 
 
-def load_xyz_dataset(filename, meta={}):
+def load_xyz_dataset(filename, meta=None):
+    if meta is None:
+        meta = {}
     configs = read(filename)
     return Dataset(configs=configs, meta=meta)
 

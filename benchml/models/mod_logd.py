@@ -157,7 +157,9 @@ def compile_logd_extensive(**kwargs):
     ]
 
 
-def compile_logd(custom_fields=[], **kwargs):
+def compile_logd(custom_fields=None, **kwargs):
+    if custom_fields is None:
+        custom_fields = []
     return [
         btf.Module(
             tag="logp_linear",

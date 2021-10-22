@@ -56,7 +56,11 @@ def get(re):
     return compile_and_filter(filter_collections=[".*"], filter_models=re)
 
 
-def compile_and_filter(filter_collections=[".*"], filter_models=[".*"], verbose=False):
+def compile_and_filter(filter_collections=None, filter_models=None, verbose=False):
+    if filter_collections is None:
+        filter_collections = [".*"]
+    if filter_models is None:
+        filter_models = [".*"]
     if verbose:
         log << "Compile & filter models" << log.endl
     filter_models = [re.compile(f) for f in filter_models]

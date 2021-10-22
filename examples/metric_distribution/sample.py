@@ -117,9 +117,13 @@ def evaluate_single(
     dataset,
     model,
     hyper=None,
-    split=dict(method="random", n_splits=5, train_fraction=0.9),
-    hsplit=dict(method="random", n_splits=3, train_fraction=0.75),
+    split=None,
+    hsplit=None,
 ):
+    if split is None:
+        split = dict(method="random", n_splits=5, train_fraction=0.9)
+    if hsplit is None:
+        hsplit = dict(method="random", n_splits=3, train_fraction=0.75)
     log << log.mg << "Model %s" % model.tag << log.endl
     if hyper is not None:
         model.hyperUpdate(hyper, verbose=True)

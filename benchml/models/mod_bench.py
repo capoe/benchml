@@ -7,7 +7,9 @@ whiten_hyper = [False]  # NOTE: False = no whitening in ridge models
 regularization_range = np.logspace(-9, +7, 17)
 
 
-def compile_physchem(custom_fields=[], with_hyper=False, **kwargs):
+def compile_physchem(custom_fields=None, with_hyper=False, **kwargs):
+    if custom_fields is None:
+        custom_fields = []
     models = []
     for descriptor_set in ["basic", "core", "logp", "extended"]:
         models.extend(
@@ -305,7 +307,9 @@ def compile_cm(*args, **kwargs):
     return models
 
 
-def compile_acsf(adjust_to_species=["C", "N", "O"], *args, **kwargs):
+def compile_acsf(adjust_to_species=None, *args, **kwargs):
+    if adjust_to_species is None:
+        adjust_to_species = ["C", "N", "O"]
     models = []
     for scalerange, sharpness, scale in zip(
         [0.85, 1.2, 1.8], [1.0, 1.0, 1.2], ["minimal", "smart", "longrange"]

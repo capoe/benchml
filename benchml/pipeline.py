@@ -591,8 +591,12 @@ class Module(Transform):
         hyper (object): Hyper-optimization controller
     """
 
-    def __init__(self, tag="module", broadcast={}, transforms=[], hyper=None, **kwargs):
+    def __init__(self, tag="module", broadcast=None, transforms=None, hyper=None, **kwargs):
         Transform.__init__(self, tag=tag, **kwargs)
+        if broadcast is None:
+            broadcast = {}
+        if transforms is None:
+            transforms = []
         self.broadcast = broadcast
         self.transforms = []
         self.map_transforms = {}
@@ -943,7 +947,11 @@ class Macro(object):
     transforms = []
     is_macro = True
 
-    def __init__(self, tag=None, args={}, inputs={}, **kwargs):
+    def __init__(self, tag=None, args=None, inputs=None, **kwargs):
+        if args is None:
+            args = {}
+        if inputs is None:
+            inputs = {}
         self.tag = tag if tag is not None else self.__class__.__name__
         self.args = args
         self.inputs = inputs

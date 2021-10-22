@@ -139,7 +139,9 @@ class UniversalSoapGylmxx(UniversalSoapBase):
     def check_available():
         return UniversalSoapBase.check_available and check_gylmxx_available(__class__)
 
-    def updateParams(self, par, meta={}):
+    def updateParams(self, par, meta=None):
+        if meta is None:
+            meta = {}
         out = {}
         out["types"] = par.pop("species")
         out["nmax"] = par.pop("n")
@@ -162,7 +164,9 @@ class UniversalSoapDscribe(UniversalSoapBase):
     def check_available():
         return UniversalSoapBase.check_available and check_dscribe_available(UniversalSoapDscribe)
 
-    def updateParams(self, par, meta={}):
+    def updateParams(self, par, meta=None):
+        if meta is None:
+            meta = {}
         out = {}
         out["species"] = par.pop("species")
         out["nmax"] = par.pop("n")

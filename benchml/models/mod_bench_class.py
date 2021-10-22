@@ -4,7 +4,9 @@ import benchml.transforms as btf
 from benchml.hyper import GridHyper, Hyper
 
 
-def compile_physchem_class(custom_fields=[], with_hyper=False, **kwargs):
+def compile_physchem_class(custom_fields=None, with_hyper=False, **kwargs):
+    if custom_fields is None:
+        custom_fields = []
     models = []
     for descriptor_set in ["basic", "core", "logp", "extended"]:
         models.extend(

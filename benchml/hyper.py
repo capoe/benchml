@@ -120,7 +120,9 @@ class GridHyper(object):
 
 
 class BayesianHyper(object):
-    def __init__(self, *hypers, convert={}, seed=0, init_points=5, n_iter=10):
+    def __init__(self, *hypers, convert=None, seed=0, init_points=5, n_iter=10):
+        if convert is None:
+            convert = {}
         if BayesianOptimization is None:
             raise ImportError(
                 "bayesian-optimization missing, try 'pip install bayesian-optimization'"

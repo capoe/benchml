@@ -34,7 +34,11 @@ def configure(use_ase):
 
 
 class ExtendedTxt(object):
-    def __init__(self, arrays={}, meta={}):
+    def __init__(self, arrays=None, meta=None):
+        if arrays is None:
+            arrays = {}
+        if meta is None:
+            meta = {}
         self.arrays = arrays
         self.meta = meta
 
@@ -54,7 +58,9 @@ class ExtendedTxt(object):
         return self.arrays[key]
 
 
-def write_extt(extt_file, arrays, meta={}):
+def write_extt(extt_file, arrays, meta=None):
+    if meta is None:
+        meta = {}
     if type(arrays) is dict:
         with open(extt_file, "w") as f:
             for k, v in arrays.items():
@@ -83,7 +89,13 @@ def read_extt(extt_file):
 
 
 class ExtendedXyz(object):
-    def __init__(self, pos=[], symbols=[], cell=None, positions=None):  # For compatibility with ASE
+    def __init__(
+        self, pos=None, symbols=None, cell=None, positions=None
+    ):  # For compatibility with ASE
+        if pos is None:
+            pos = []
+        if symbols is None:
+            symbols = []
         self.info = {}
         self.cell = cell
         self.pbc = self.set_pbc()
