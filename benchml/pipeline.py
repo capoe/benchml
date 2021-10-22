@@ -6,9 +6,9 @@ import time
 
 import numpy as np
 
-from .accumulator import Accumulator
-from .logger import log
-from .splits import Split
+from benchml.accumulator import Accumulator
+from benchml.logger import log
+from benchml.splits import Split
 
 VERBOSE = False
 

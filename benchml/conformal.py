@@ -1,9 +1,9 @@
 import numpy as np
 from scipy.optimize import curve_fit
 
-from .logger import log
-from .pipeline import Params, Transform
-from .splits import Split
+from benchml.logger import log
+from benchml.pipeline import Params, Transform
+from benchml.splits import Split
 
 
 def fsigmoid(x, a, b):

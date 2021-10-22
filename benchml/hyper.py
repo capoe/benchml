@@ -3,7 +3,7 @@ import itertools
 
 import numpy as np
 
-from .accumulator import Accumulator
+from benchml.accumulator import Accumulator
 
 try:
     from bayes_opt import BayesianOptimization

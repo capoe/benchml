@@ -1,7 +1,7 @@
 import numpy as np
 
-from .accumulator import Accumulator
-from .logger import log
+from benchml.accumulator import Accumulator
+from benchml.logger import log
 
 
 def read_split_props_single(split):

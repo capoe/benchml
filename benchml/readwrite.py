@@ -7,8 +7,9 @@ import types
 
 import numpy as np
 
+from benchml.logger import Mock, log
+
 from . import ptable, utils
-from .logger import Mock, log
 
 ase = Mock()
 ase.io = None

@@ -2,8 +2,8 @@ import copy
 import json
 import time
 
-from .accumulator import Accumulator
-from .logger import log
+from benchml.accumulator import Accumulator
+from benchml.logger import log
 
 
 def parse(benchmark):

@@ -1,7 +1,7 @@
 import numpy as np
 
-from .logger import log
-from .pipeline import Params, Transform
+from benchml.logger import log
+from benchml.pipeline import Params, Transform
 
 
 class EnsembleBase(Transform):

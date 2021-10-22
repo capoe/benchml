@@ -4,8 +4,9 @@ import time
 
 import numpy as np
 
+from benchml.logger import log
+
 from . import readwrite
-from .logger import log
 
 
 class LineExpansion(object):
