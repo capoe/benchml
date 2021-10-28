@@ -7,8 +7,8 @@ def compile_xy_regressors(*args, **kwargs):
         btf.Module(
             tag="xy_rf_regressor",
             transforms=[
-                btf.XyInput(tag="input"),
-                btf.RandomForestRegressor(tag="predictor", inputs={"X": "input.X", "y": "input.y"}),
+                btf.ExttInput(tag="input"),
+                btf.RandomForestRegressor(tag="predictor", inputs={"X": "input.X", "y": "input.Y"}),
             ],
             hyper=GridHyper(Hyper({"predictor.max_depth": [None]})),
             broadcast={},
@@ -22,9 +22,9 @@ def compile_xy_classifiers(*args, **kwargs):
         btf.Module(
             tag="xy_rf_classifier",
             transforms=[
-                btf.XyInput(tag="input"),
+                btf.ExttInput(tag="input"),
                 btf.RandomForestClassifier(
-                    tag="predictor", inputs={"X": "input.X", "y": "input.y"}
+                    tag="predictor", inputs={"X": "input.X", "y": "input.Y"}
                 ),
             ],
             hyper=GridHyper(Hyper({"predictor.max_depth": [None]})),

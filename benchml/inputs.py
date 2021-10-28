@@ -29,12 +29,3 @@ class ExtXyzInput(Transform):
             stream.put("meta", data.meta)
         else:
             stream.put("meta", {})
-
-
-class XyInput(Transform):
-    allow_stream = {"X", "y"}
-    stream_samples = {"X", "y"}
-
-    def _feed(self, data, stream):
-        stream.put("X", data.X)
-        stream.put("y", data.y)
