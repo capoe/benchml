@@ -62,7 +62,7 @@ class Dataset(object):
         "": "lambda y: y",
         "log": "lambda y: np.log(y)",
         "log10": "lambda y: np.log10(y)",
-        "plog": "lambda y: -np.log10(y)",
+        "-log10": "lambda y: -np.log10(y)",
     }
 
     def __init__(self, ext_xyz=None, meta=None, configs=None):

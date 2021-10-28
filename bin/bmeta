@@ -69,7 +69,7 @@ def write_meta(configs, extxyz, meta_json):
         convert=lambda s: s.split(),
     )
     per_atom = False
-    conv = prompt("Set conversion", options=["''", "log", "log10", "plog"], default="")
+    conv = prompt("Set conversion", options=["''", "log", "log10", "-log10"], default="")
     elements = set()
     for config in configs:
         elements = elements.union(set(list(config.symbols)))
