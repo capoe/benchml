@@ -132,7 +132,7 @@ class ExttDataset(object):
 
     def __getitem__(self, key):
         if np.issubdtype(type(key), np.integer):
-            return self.X[key]
+            return self.arrays["X"][key]
         elif type(key) in {list, np.ndarray}:
             return self.slice(key)
         elif type(key) is str:
