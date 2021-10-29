@@ -173,13 +173,15 @@ def compile(root="./data", filter_fct=lambda meta: True):
     return BenchmarkData(root, filter_fct=filter_fct)
 
 
+DATASET_FORMATS = {
+    ".extt": ExttDataset,
+    ".xyz": Dataset,
+}
+
+
 def load_dataset(filename, *args, **kwargs):
-    load_formats = {
-        ".extt": ExttDataset,
-        ".xyz": Dataset,
-    }
     base, ext = os.path.splitext(filename)
-    dataset = load_formats[ext].create_from_file(filename, *args, **kwargs)
+    dataset = DATASET_FORMATS[ext].create_from_file(filename, *args, **kwargs)
     return dataset
 
 
