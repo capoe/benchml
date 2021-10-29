@@ -6,7 +6,7 @@ import os
 
 import numpy as np
 
-from benchml.readwrite import read
+from benchml.readwrite import read_extt, read_xyz
 
 
 class BenchmarkData(object):
@@ -68,15 +68,12 @@ class Dataset(object):
     def __init__(self, ext_xyz=None, meta=None, configs=None):
         self.configs = configs
         if ext_xyz is not None:
-            if type(ext_xyz) is str:
-                self.configs = read(ext_xyz)
-            else:
-                self.configs = []
-                for xyz in ext_xyz:
-                    self.configs.extend(read(xyz))
+            self.configs = self.read_data(ext_xyz)
+        if meta is None:
+            meta = {}
         self.meta = meta
         self.convert = self.target_converter[self.meta.pop("convert", "")]
-        if meta is not None and "target" in meta:
+        if "target" in meta:
             self.y = eval(self.convert)(
                 np.array([float(s.info[meta["target"]]) for s in self.configs])
             )
@@ -111,6 +108,22 @@ class Dataset(object):
     def __iter__(self):
         return self.configs.__iter__()
 
+    @staticmethod
+    def read_data(data, index=None):
+        if type(data) is str:
+            configs = read_xyz(data, index)
+        else:
+            configs = []
+            for input_file in data:
+                configs.extend(read_xyz(input_file, index))
+        return configs
+
+    @classmethod
+    def create_from_file(cls, data, *args, **kwargs):
+        index = kwargs.pop("index", None)
+        configs = cls.read_data(data, index)
+        return Dataset(configs=configs, *args, **kwargs)
+
 
 class ExttDataset(object):
     def __init__(self, extt, meta=None):
@@ -141,6 +154,15 @@ class ExttDataset(object):
         for name, x in self.arrays.items():
             s += "Array[%s%s] " % (name, repr(x.shape))
         return s
+
+    @staticmethod
+    def read_data_from_file(input_file):
+        return read_extt(input_file)
+
+    @classmethod
+    def create_from_file(cls, input_file, *args, **kwargs):
+        extt = cls.read_data_from_file(input_file)
+        return ExttDataset(extt=extt, *args, **kwargs)
 
 
 class XyDataset(object):
@@ -182,24 +204,14 @@ def compile(root="./data", filter_fct=lambda meta: True):
     return BenchmarkData(root, filter_fct=filter_fct)
 
 
-def load_xyz_dataset(filename, meta=None):
-    if meta is None:
-        meta = {}
-    configs = read(filename)
-    return Dataset(configs=configs, meta=meta)
-
-
-def load_extt_dataset(filename, meta=None):
-    extt = read(filename)
-    return ExttDataset(extt=extt, meta=meta)
-
-
-load_formats = {".extt": load_extt_dataset, ".xyz": load_xyz_dataset}
-
-
 def load_dataset(filename, *args, **kwargs):
+    load_formats = {
+        ".extt": ExttDataset,
+        ".xyz": Dataset,
+    }
     base, ext = os.path.splitext(filename)
-    return load_formats[ext](filename, *args, **kwargs)
+    dataset = load_formats[ext].create_from_file(filename, *args, **kwargs)
+    return dataset
 
 
 if __name__ == "__main__":
