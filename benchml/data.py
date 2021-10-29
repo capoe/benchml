@@ -6,7 +6,7 @@ import os
 
 import numpy as np
 
-from benchml.readwrite import read_extt, read_xyz
+from benchml.readwrite import ExtendedTxt, read_extt, read_xyz
 
 
 class BenchmarkData(object):
@@ -142,7 +142,7 @@ class ExttDataset(object):
 
     def slice(self, idcs):
         arrays_sliced = {k: v[idcs] for k, v in self.arrays.items()}
-        return ExttDataset(arrays_sliced, meta=self.meta)
+        return ExttDataset(extt=ExtendedTxt(arrays=arrays_sliced, meta=self.meta))
 
     def __len__(self):
         return len(self.arrays[list(self.arrays.keys())[0]])
