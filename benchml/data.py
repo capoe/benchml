@@ -134,11 +134,15 @@ class ExttDataset(object):
         if np.issubdtype(type(key), np.integer):
             return self.X[key]
         elif type(key) in {list, np.ndarray}:
-            return XyDataset(X=self.X[key], y=self.y[key], meta=self.meta)
+            return self.slice(key)
         elif type(key) is str:
             return self.meta[key]
         else:
             raise TypeError("Invalid type in __getitem__: %s" % type(key))
+
+    def slice(self, idcs):
+        arrays_sliced = {k: v[idcs] for k, v in self.arrays.items()}
+        return ExttDataset(arrays_sliced, meta=self.meta)
 
     def __len__(self):
         return len(self.arrays[list(self.arrays.keys())[0]])
@@ -163,41 +167,6 @@ class ExttDataset(object):
     def create_from_file(cls, input_file, *args, **kwargs):
         extt = cls.read_data_from_file(input_file)
         return ExttDataset(extt=extt, *args, **kwargs)
-
-
-class XyDataset(object):
-    def __init__(self, X, y, name="?", **kwargs):
-        self.X = X
-        self.y = y
-        self.meta = kwargs
-        self.meta["name"] = name
-
-    def info(self):
-        return "{name:50s}  #samples={size:<5d}  metrics={metrics:s}   std={std:1.2e}".format(
-            name=self.meta["name"],
-            size=len(self),
-            metrics=",".join(self.meta["metrics"]),
-            std=np.std(self.y),
-        )
-
-    def __getitem__(self, key):
-        if np.issubdtype(type(key), np.integer):
-            return self.X[key]
-        elif type(key) in {list, np.ndarray}:
-            return XyDataset(X=self.X[key], y=self.y[key], meta=self.meta)
-        elif type(key) is str:
-            return self.meta[key]
-        else:
-            raise TypeError("Invalid type in __getitem__: %s" % type(key))
-
-    def __len__(self):
-        return len(self.X)
-
-    def __str__(self):
-        return self.info()
-
-    def __contains__(self, key):
-        return key in self.meta
 
 
 def compile(root="./data", filter_fct=lambda meta: True):
