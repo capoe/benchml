@@ -2,6 +2,7 @@ import numpy as np
 
 import benchml.transforms as btf
 from benchml.hyper import BayesianHyper, GridHyper, Hyper
+from benchml.models.mod_dscribe import compile_dscribe, compile_dscribe_periodic
 
 
 def compile_null(**kwargs):
@@ -103,54 +104,6 @@ def compile_soap(basic=False, **kwargs):
         model.hyperUpdate(updates)
         models.append(model)
     return models
-
-
-def compile_dscribe(**kwargs):
-    return [
-        btf.Module(
-            tag=DescriptorClass.__name__ + "_ridge",
-            transforms=[
-                btf.ExtXyzInput(tag="input"),
-                DescriptorClass(tag="descriptor", inputs={"configs": "input.configs"}),
-                btf.ReduceMatrix(tag="reduce", inputs={"X": "descriptor.X"}),
-                btf.Ridge(tag="predictor", inputs={"X": "reduce.X", "y": "input.y"}),
-            ],
-            hyper=GridHyper(
-                Hyper(
-                    {
-                        "predictor.alpha": np.logspace(-5, +5, 7),
-                    }
-                )
-            ),
-            broadcast={"meta": "input.meta"},
-            outputs={"y": "predictor.y"},
-        )
-        for DescriptorClass in [btf.DscribeCM, btf.DscribeACSF, btf.DscribeMBTR, btf.DscribeLMBTR]
-    ]
-
-
-def compile_dscribe_periodic(**kwargs):
-    return [
-        btf.Module(
-            tag=DescriptorClass.__name__ + "_ridge",
-            transforms=[
-                btf.ExtXyzInput(tag="input"),
-                DescriptorClass(tag="descriptor", inputs={"configs": "input.configs"}),
-                btf.ReduceMatrix(tag="reduce", inputs={"X": "descriptor.X"}),
-                btf.Ridge(tag="predictor", inputs={"X": "reduce.X", "y": "input.y"}),
-            ],
-            hyper=GridHyper(
-                Hyper(
-                    {
-                        "predictor.alpha": np.logspace(-5, +5, 7),
-                    }
-                )
-            ),
-            broadcast={"meta": "input.meta"},
-            outputs={"y": "predictor.y"},
-        )
-        for DescriptorClass in [btf.DscribeSineMatrix]
-    ]
 
 
 def compile_morgan_krr(**kwargs):
