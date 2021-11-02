@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+"""Module for BenchML Read/Write functionality."""
 import copy
 import json
 import os
@@ -33,7 +33,7 @@ def configure(use_ase):
         disable_ase()
 
 
-class ExtendedTxt(object):
+class ExtendedTxt:
     def __init__(self, arrays=None, meta=None):
         if arrays is None:
             arrays = {}
@@ -61,10 +61,11 @@ class ExtendedTxt(object):
 def write_extt(extt_file, arrays, meta=None):
     if meta is None:
         meta = {}
-    if type(arrays) is dict:
-        with open(extt_file, "w") as f:
+    if isinstance(arrays, dict):
+        with open(extt_file, "w", encoding="utf-8") as f:
             for k, v in arrays.items():
-                f.write("%s:%s " % (k, str(v.shape).replace(" ", "")))
+                sh = str(v.shape).replace(" ", "")
+                f.write(f"{k}:{sh} ")
             f.write("\n")
             f.write(json.dumps(meta))
             f.write("\n")
@@ -73,11 +74,10 @@ def write_extt(extt_file, arrays, meta=None):
             f.close()
     else:
         arrays.save(extt_file)
-    return
 
 
 def read_extt(extt_file):
-    with open(extt_file) as f:
+    with open(extt_file, "r", encoding="utf-8") as f:
         tuples = [item.split(":") for item in f.readline().strip().split()]
         array_rows = {t[0]: int(t[1].replace("(", "").split(",")[0]) for t in tuples}
         meta_str = f.readline().strip()
@@ -88,7 +88,7 @@ def read_extt(extt_file):
     return ExtendedTxt(arrays=arrays, meta=meta)
 
 
-class ExtendedXyz(object):
+class ExtendedXyz:
     def __init__(
         self, pos=None, symbols=None, cell=None, positions=None
     ):  # For compatibility with ASE
@@ -178,7 +178,6 @@ class ExtendedXyz(object):
             self.symbols.append(new_atom.name)
         self.positions = np.array(self.positions)
         self.get_cell()
-        return
 
     def create_atom(self, ln):
         ln = ln.split()
@@ -190,7 +189,7 @@ class ExtendedXyz(object):
         return new_atom
 
 
-class ExtendedXyzAtom(object):
+class ExtendedXyzAtom:
     def __init__(self, name, pos):
         self.name = name
         self.pos = pos
@@ -256,31 +255,31 @@ def tokenize_extxyz_meta(fs, allow_json=True):
         if "." in value:
             try:
                 value = float(value)
-            except Exception:
+            except ValueError:
                 pass
         else:
             # Int?
             try:
                 value = int(value)
-            except Exception:
+            except ValueError:
                 pass
         info[kv[0]] = value
     return info
 
 
 def read_extxyz_meta_only(config_file):
-    ifs = open(config_file, "r")
-    while True:
-        header = ifs.readline().split()
-        if header:
-            assert len(header) == 1
-            n_atoms = int(header[0])
-            info = tokenize_extxyz_meta(ifs)
-            for _ in range(n_atoms):
-                ifs.readline()
-            yield info
-        else:
-            break
+    with open(config_file, "r", encoding="utf-8") as ifs:
+        while True:
+            header = ifs.readline().split()
+            if header:
+                assert len(header) == 1
+                n_atoms = int(header[0])
+                info = tokenize_extxyz_meta(ifs)
+                for _ in range(n_atoms):
+                    ifs.readline()
+                yield info
+            else:
+                break
 
 
 def patch_ase_config(config):
@@ -308,55 +307,55 @@ def read_xyz(config_file, index=":"):
     if ase.io is not None:
         return read_ase(config_file, index)
     configs = []
-    ifs = open(config_file, "r")
-    while True:
-        header = ifs.readline().split()
-        if header:
-            assert len(header) == 1
-            n_atoms = int(header[0])
-            config = ExtendedXyz()
-            config.create(n_atoms, ifs)
-            configs.append(config)
-        else:
-            break
+    with open(config_file, "r", encoding="utf-8") as ifs:
+        while True:
+            header = ifs.readline().split()
+            if header:
+                assert len(header) == 1
+                n_atoms = int(header[0])
+                config = ExtendedXyz()
+                config.create(n_atoms, ifs)
+                configs.append(config)
+            else:
+                break
     return configs
 
 
 def write_xyz(config_file, configs, allow_json=True):
     if ase.io is not None:
-        return ase.io.write(config_file, configs)
-    ofs = open(config_file, "w")
-    for c in configs:
-        ofs.write("%d\n" % (len(c)))
-        if allow_json:
-            ofs.write("%s" % json.dumps(c.info, sort_keys=True))
-        else:
-            for k in sorted(c.info.keys()):
-                # int or float?
-                if type(c.info[k]) not in {str}:
-                    ofs.write("%s=%s " % (k, c.info[k]))
-                # String
+        ase.io.write(config_file, configs)
+    else:
+        with open(config_file, "w", encoding="utf-8") as ofs:
+            for c in configs:
+                ofs.write(f"{len(c)}\n")
+                if allow_json:
+                    json_s = json.dumps(c.info, sort_keys=True)
+                    ofs.write(json_s)
                 else:
-                    ofs.write('%s="%s" ' % (k, c.info[k]))
-        ofs.write("\n")
-        for i in range(len(c)):
-            ofs.write(
-                "%s %+1.4f %+1.4f %+1.4f\n"
-                % (
-                    c.get_chemical_symbols()[i],
-                    c.positions[i][0],
-                    c.positions[i][1],
-                    c.positions[i][2],
-                )
-            )
-    ofs.close()
-    return
+                    for k in sorted(c.info.keys()):
+                        # int or float?
+                        if not isinstance(c.info[k], str):
+                            ofs.write(f"{k}={c.info[k]} ")
+                        # String
+                        else:
+                            ofs.write(f'{k}="{c.info[k]}" ' '%s="%s" ')
+                ofs.write("\n")
+                for i in range(len(c)):
+                    ofs.write(
+                        "%s %+1.4f %+1.4f %+1.4f\n"
+                        % (
+                            c.get_chemical_symbols()[i],
+                            c.positions[i][0],
+                            c.positions[i][1],
+                            c.positions[i][2],
+                        )
+                    )
 
 
 def save(archfile, obj, method=None, embed_git_hash=False, **kwargs):
     if method is None:
-        if type(archfile) is not str:
-            assert type(obj) is str  # Invalid function call to benchml.save
+        if not isinstance(archfile, str):
+            assert isinstance(obj, str)  # Invalid function call to benchml.save
             archfile, obj = obj, archfile
         if embed_git_hash:
             obj = {"git_hash": utils.git_hash(), "bml_object": obj}
@@ -370,9 +369,12 @@ def save(archfile, obj, method=None, embed_git_hash=False, **kwargs):
 
 def load(archfile, method=None, **kwargs):
     if method is None:
-        return pickle.load(open(archfile, "rb"))
+        res = None
+        with open(archfile, "rb") as model:
+            res = pickle.load(model)
     else:
-        return method.load(archfile, **kwargs)
+        res = method.load(archfile, **kwargs)
+    return res
 
 
 read_formats = {".extt": read_extt, ".xyz": read_xyz}
@@ -381,10 +383,10 @@ write_formats = {".extt": write_extt, ".xyz": write_xyz}
 
 
 def read(input_file, *args, **kwargs):
-    base, ext = os.path.splitext(input_file)
+    _, ext = os.path.splitext(input_file)
     return read_formats[ext](input_file, *args, **kwargs)
 
 
 def write(output_file, *args, **kwargs):
-    base, ext = os.path.splitext(output_file)
+    _, ext = os.path.splitext(output_file)
     return write_formats[ext](output_file, *args, **kwargs)
