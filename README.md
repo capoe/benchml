@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://github.com/capoe/benchml/raw/master/web/bml.png" width="250px"></img>
+    <img src="https://github.com/capoe/benchml/raw/master/web/bml.png" width="250px">
 </div>
 
 # Description
@@ -29,7 +29,7 @@ pip install nphil
 # BenchML pipelines
 
 <div align="center">
-    <img src="https://github.com/capoe/benchml/raw/master/web/model.png" width="75%"></img>
+    <img src="https://github.com/capoe/benchml/raw/master/web/model.png" width="75%">
 </div>
 
 # A short guide to ...
