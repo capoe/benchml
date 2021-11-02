@@ -38,7 +38,9 @@ class TestMock(Mock):
         args.verbose = False
         args.output = os.path.join(self.path, "test_ref.json" if create else "test.json")
         benchml.splits.synchronize(args.seed)
-        data = benchml.data.compile(root=args.data_folder, filter_fct=benchml.filters[args.filter])
+        data = benchml.data.BenchmarkData(
+            root=args.data_folder, filter_fct=benchml.filters[args.filter]
+        )
         models = benchml.models.compile(args.groups.split())
         bench = benchml.benchmark.evaluate(data, models, log, verbose=args.verbose)
         json.dump(bench, open(args.output, "w"), indent=1, sort_keys=True)

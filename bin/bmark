@@ -10,7 +10,9 @@ benchml.readwrite.configure(use_ase=False)
 def main(args):
     # Load datasets (as iterator)
     benchml.splits.synchronize(args.seed)
-    data = benchml.data.compile(root=args.data_folder, filter_fct=benchml.filters[args.filter])
+    data = benchml.data.BenchmarkData(
+        root=args.data_folder, filter_fct=benchml.filters[args.filter]
+    )
     # Compile models
     models = benchml.models.compile(args.groups)
     # Evaluate
