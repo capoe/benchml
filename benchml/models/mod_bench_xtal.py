@@ -7,8 +7,7 @@ from benchml.models.common import (
     get_bench_pdf_gylm_rr_kwargs,
     get_bench_pdf_soap_krr_kwargs,
     get_bench_pdf_soap_rr_kwargs,
-    make_gylm_krr,
-    make_gylm_rr,
+    get_compile_gylm,
     make_soap_krr,
     make_soap_rr,
 )
@@ -544,71 +543,7 @@ def compile_soap(*args, **kwargs):
     return models
 
 
-def compile_gylm(*args, **kwargs):
-    krr_int_settings = GridHyper(
-        Hyper({"descriptor_atomic.normalize": [False]}),
-        Hyper({"descriptor.reduce_op": ["mean"]}),
-        Hyper({"descriptor.normalize": [False]}),
-        Hyper({"descriptor.reduce_by_type": [False]}),
-        Hyper({"predictor.power": [2]}),
-    )
-    krr_int_hyper = GridHyper(Hyper({"predictor.power": [1, 2, 3]}))
-    krr_ext_settings = GridHyper(
-        Hyper({"descriptor_atomic.normalize": [False]}),
-        Hyper({"descriptor.reduce_op": ["sum"]}),
-        Hyper({"descriptor.normalize": [False]}),
-        Hyper({"descriptor.reduce_by_type": [False]}),
-        Hyper({"predictor.power": [1]}),
-    )
-    krr_ext_hyper = GridHyper(Hyper({"predictor.power": [1, 2, 3]}))
-    rr_int_settings = GridHyper(
-        Hyper({"descriptor_atomic.normalize": [False]}),
-        Hyper({"descriptor.reduce_op": ["mean"]}),
-        Hyper({"descriptor.normalize": [False]}),
-        Hyper({"descriptor.reduce_by_type": [False]}),
-        Hyper({"whiten.centre": [True]}),
-        Hyper({"whiten.scale": [True]}),
-    )
-    rr_int_hyper = GridHyper(Hyper({"whiten.centre": whiten_hyper, "whiten.scale": whiten_hyper}))
-    rr_ext_settings = GridHyper(
-        Hyper({"descriptor_atomic.normalize": [False]}),
-        Hyper({"descriptor.reduce_op": ["sum"]}),
-        Hyper({"descriptor.normalize": [False]}),
-        Hyper({"descriptor.reduce_by_type": [False]}),
-        Hyper({"whiten.centre": [False]}),
-        Hyper({"whiten.scale": [False]}),
-    )
-    rr_ext_hyper = GridHyper(Hyper({"whiten.centre": whiten_hyper, "whiten.scale": whiten_hyper}))
-    models = []
-    for hidx, updates in enumerate(krr_int_settings):
-        for minimal in [True, False]:
-            tag = "%s" % ("minimal" if minimal else "standard")
-            model = make_gylm_krr("bxtal_gylm_%s_int_krr" % tag, minimal, extensive=False)
-            model.hyperUpdate(updates)
-            model.hyper.add(krr_int_hyper)
-            models.append(model)
-    for hidx, updates in enumerate(krr_ext_settings):
-        for minimal in [True, False]:
-            tag = "%s" % ("minimal" if minimal else "standard")
-            model = make_gylm_krr("bxtal_gylm_%s_ext_krr" % tag, minimal, extensive=True)
-            model.hyperUpdate(updates)
-            model.hyper.add(krr_ext_hyper)
-            models.append(model)
-    for hidx, updates in enumerate(rr_int_settings):
-        for minimal in [True, False]:
-            tag = "%s" % ("minimal" if minimal else "standard")
-            model = make_gylm_rr("bxtal_gylm_%s_int_rr" % tag, minimal, extensive=False)
-            model.hyperUpdate(updates)
-            model.hyper.add(rr_int_hyper)
-            models.append(model)
-    for hidx, updates in enumerate(rr_ext_settings):
-        for minimal in [True, False]:
-            tag = "%s" % ("minimal" if minimal else "standard")
-            model = make_gylm_rr("bxtal_gylm_%s_ext_rr" % tag, minimal, extensive=True)
-            model.hyperUpdate(updates)
-            model.hyper.add(rr_ext_hyper)
-            models.append(model)
-    return models
+compile_gylm = get_compile_gylm("bxtal", whiten_hyper)
 
 
 def compile_pdf():

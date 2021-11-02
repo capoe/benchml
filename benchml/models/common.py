@@ -491,3 +491,77 @@ def make_soap_rr(tag, extensive):
         broadcast={"meta": "input.meta"},
         outputs={"y": "output.y"},
     )
+
+
+def get_compile_gylm(mod_name, whiten_hyper):
+    def customisable_compile_gylm(*args, **kwargs):
+        krr_int_settings = GridHyper(
+            Hyper({"descriptor_atomic.normalize": [False]}),
+            Hyper({"descriptor.reduce_op": ["mean"]}),
+            Hyper({"descriptor.normalize": [False]}),
+            Hyper({"descriptor.reduce_by_type": [False]}),
+            Hyper({"predictor.power": [2]}),
+        )
+        krr_int_hyper = GridHyper(Hyper({"predictor.power": [1, 2, 3]}))
+        krr_ext_settings = GridHyper(
+            Hyper({"descriptor_atomic.normalize": [False]}),
+            Hyper({"descriptor.reduce_op": ["sum"]}),
+            Hyper({"descriptor.normalize": [False]}),
+            Hyper({"descriptor.reduce_by_type": [False]}),
+            Hyper({"predictor.power": [1]}),
+        )
+        krr_ext_hyper = GridHyper(Hyper({"predictor.power": [1, 2, 3]}))
+        rr_int_settings = GridHyper(
+            Hyper({"descriptor_atomic.normalize": [False]}),
+            Hyper({"descriptor.reduce_op": ["mean"]}),
+            Hyper({"descriptor.normalize": [False]}),
+            Hyper({"descriptor.reduce_by_type": [False]}),
+            Hyper({"whiten.centre": [True]}),
+            Hyper({"whiten.scale": [True]}),
+        )
+        rr_int_hyper = GridHyper(
+            Hyper({"whiten.centre": whiten_hyper, "whiten.scale": whiten_hyper})
+        )
+        rr_ext_settings = GridHyper(
+            Hyper({"descriptor_atomic.normalize": [False]}),
+            Hyper({"descriptor.reduce_op": ["sum"]}),
+            Hyper({"descriptor.normalize": [False]}),
+            Hyper({"descriptor.reduce_by_type": [False]}),
+            Hyper({"whiten.centre": [False]}),
+            Hyper({"whiten.scale": [False]}),
+        )
+        rr_ext_hyper = GridHyper(
+            Hyper({"whiten.centre": whiten_hyper, "whiten.scale": whiten_hyper})
+        )
+        models = []
+        for hidx, updates in enumerate(krr_int_settings):
+            for minimal in [True, False]:
+                tag = "%s" % ("minimal" if minimal else "standard")
+                model = make_gylm_krr(f"{mod_name}_gylm_{tag}_int_krr", minimal, extensive=False)
+                model.hyperUpdate(updates)
+                model.hyper.add(krr_int_hyper)
+                models.append(model)
+        for hidx, updates in enumerate(krr_ext_settings):
+            for minimal in [True, False]:
+                tag = "%s" % ("minimal" if minimal else "standard")
+                model = make_gylm_krr(f"{mod_name}_gylm_{tag}_ext_krr", minimal, extensive=True)
+                model.hyperUpdate(updates)
+                model.hyper.add(krr_ext_hyper)
+                models.append(model)
+        for hidx, updates in enumerate(rr_int_settings):
+            for minimal in [True, False]:
+                tag = "%s" % ("minimal" if minimal else "standard")
+                model = make_gylm_rr(f"{mod_name}_gylm_{tag}_int_rr", minimal, extensive=False)
+                model.hyperUpdate(updates)
+                model.hyper.add(rr_int_hyper)
+                models.append(model)
+        for hidx, updates in enumerate(rr_ext_settings):
+            for minimal in [True, False]:
+                tag = "%s" % ("minimal" if minimal else "standard")
+                model = make_gylm_rr(f"{mod_name}_gylm_{tag}_ext_rr", minimal, extensive=True)
+                model.hyperUpdate(updates)
+                model.hyper.add(rr_ext_hyper)
+                models.append(model)
+        return models
+
+    return customisable_compile_gylm
