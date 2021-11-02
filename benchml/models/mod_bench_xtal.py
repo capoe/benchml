@@ -9,6 +9,8 @@ from benchml.models.common import (
     get_bench_pdf_soap_rr_kwargs,
     make_gylm_krr,
     make_gylm_rr,
+    make_soap_krr,
+    make_soap_rr,
 )
 
 whiten_hyper = [False]  # NOTE: False = no whitening in ridge models
@@ -540,95 +542,6 @@ def compile_soap(*args, **kwargs):
         model.hyper.add(rr_ext_hyper)
         models.append(model)
     return models
-
-
-def make_soap_krr(tag, extensive):
-    return btf.Module(
-        tag=tag,
-        transforms=[
-            btf.ExtXyzInput(tag="input"),
-            btf.UniversalSoapGylmxx(tag="descriptor_atomic", inputs={"configs": "input.configs"}),
-            btf.ReduceTypedMatrix(
-                tag="descriptor",
-                args={
-                    "reduce_op": "np.sum(x, axis=0)",
-                    "normalize": False,
-                    "reduce_by_type": False,
-                    "types": None,
-                    "epsilon": 1e-10,
-                },
-                inputs={"X": "descriptor_atomic.X", "T": "descriptor_atomic.T"},
-            ),
-            btf.WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
-            btf.KernelDot(tag="kernel", inputs={"X": "whiten.X"}),
-            btf.DoDivideBySize(
-                tag="input_norm",
-                args={
-                    "config_to_size": "lambda c: len(c)",
-                    "skip_if_not_force": True if extensive else False,
-                },
-                inputs={"configs": "input.configs", "meta": "input.meta", "y": "input.y"},
-            ),
-            btf.KernelRidge(
-                tag="predictor", args={"alpha": None}, inputs={"K": "kernel.K", "y": "input_norm.y"}
-            ),
-            btf.UndoDivideBySize(
-                tag="output", inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}
-            ),
-        ],
-        hyper=GridHyper(
-            Hyper(
-                {
-                    "predictor.alpha": regularization_range,
-                }
-            )
-        ),
-        broadcast={"meta": "input.meta"},
-        outputs={"y": "output.y"},
-    )
-
-
-def make_soap_rr(tag, extensive):
-    return btf.Module(
-        tag=tag,
-        transforms=[
-            btf.ExtXyzInput(tag="input"),
-            btf.UniversalSoapGylmxx(tag="descriptor_atomic", inputs={"configs": "input.configs"}),
-            btf.ReduceTypedMatrix(
-                tag="descriptor",
-                args={
-                    "reduce_op": "np.sum(x, axis=0)",
-                    "normalize": False,
-                    "reduce_by_type": False,
-                    "types": None,
-                    "epsilon": 1e-10,
-                },
-                inputs={"X": "descriptor_atomic.X", "T": "descriptor_atomic.T"},
-            ),
-            btf.WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
-            btf.DoDivideBySize(
-                tag="input_norm",
-                args={
-                    "config_to_size": "lambda c: len(c)",
-                    "skip_if_not_force": True if extensive else False,
-                },
-                inputs={"configs": "input.configs", "meta": "input.meta", "y": "input.y"},
-            ),
-            btf.Ridge(tag="predictor", inputs={"X": "whiten.X", "y": "input_norm.y"}),
-            btf.UndoDivideBySize(
-                tag="output", inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}
-            ),
-        ],
-        hyper=GridHyper(
-            Hyper(
-                {
-                    "predictor.alpha": regularization_range,
-                }
-            )
-        ),
-        broadcast={"meta": "input.meta"},
-        outputs={"y": "output.y"},
-    )
 
 
 def compile_gylm(*args, **kwargs):
