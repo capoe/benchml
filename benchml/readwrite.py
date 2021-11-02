@@ -272,7 +272,7 @@ def read_extxyz_meta_only(config_file):
     ifs = open(config_file, "r")
     while True:
         header = ifs.readline().split()
-        if header != []:
+        if header:
             assert len(header) == 1
             n_atoms = int(header[0])
             info = tokenize_extxyz_meta(ifs)
@@ -311,7 +311,7 @@ def read_xyz(config_file, index=":"):
     ifs = open(config_file, "r")
     while True:
         header = ifs.readline().split()
-        if header != []:
+        if header:
             assert len(header) == 1
             n_atoms = int(header[0])
             config = ExtendedXyz()

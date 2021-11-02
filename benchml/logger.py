@@ -319,12 +319,13 @@ class OptionsInterface(object):
 
     def __getitem__(self, key):
         try:
-            return self.xspace.__dict__[key]
+            item = self.xspace.__dict__.get[key]
         except KeyError:
-            return self.cmd_ln_opts.__dict__[key]
-        except KeyError:
-            raise AttributeError("No such option registered: '%s'" % key)
-        return None
+            try:
+                item = self.cmd_ln_opts.__dict__[key]
+            except KeyError:
+                raise AttributeError(f"No such option registered: '{key}'")
+        return item
 
 
 class ShellInterface(object):
