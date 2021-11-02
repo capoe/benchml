@@ -52,3 +52,129 @@ logd_hybrid_topo_gp_kwargs = dict(
         "dy_zscore": "GaussianProcess.dy_zscore",
     },
 )
+
+gylm_regularization_range = np.logspace(-9, +7, 17)
+
+
+def make_gylm_rr(tag, minimal, extensive):
+    return btf.Module(
+        tag=tag,
+        transforms=[
+            btf.ExtXyzInput(tag="input"),
+            btf.GylmAtomic(
+                tag="descriptor_atomic",
+                args={
+                    "normalize": False,
+                    "rcut": 3.0 if minimal else 5.0,
+                    "rcut_width": 0.5,
+                    "nmax": 6 if minimal else 9,
+                    "lmax": 4 if minimal else 6,
+                    "sigma": 0.75,
+                    "part_sigma": 0.5,
+                    "wconstant": False,
+                    "wscale": 0.5,
+                    "wcentre": 0.5,
+                    "ldamp": 0.5,
+                    "power": True,
+                },
+                inputs={"configs": "input.configs"},
+            ),
+            btf.ReduceTypedMatrix(
+                tag="descriptor",
+                args={
+                    "reduce_op": "sum",
+                    "normalize": False,
+                    "reduce_by_type": False,
+                    "types": None,
+                    "epsilon": 1e-10,
+                },
+                inputs={"X": "descriptor_atomic.X", "T": None},
+            ),
+            btf.WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
+            btf.DoDivideBySize(
+                tag="input_norm",
+                args={
+                    "config_to_size": "lambda c: len(c)",
+                    "skip_if_not_force": True if extensive else False,
+                },
+                inputs={"configs": "input.configs", "meta": "input.meta", "y": "input.y"},
+            ),
+            btf.Ridge(tag="predictor", inputs={"X": "whiten.X", "y": "input_norm.y"}),
+            btf.UndoDivideBySize(
+                tag="output", inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}
+            ),
+        ],
+        hyper=GridHyper(
+            Hyper(
+                {
+                    "predictor.alpha": gylm_regularization_range,
+                }
+            )
+        ),
+        broadcast={"meta": "input.meta"},
+        outputs={"y": "output.y"},
+    )
+
+
+def make_gylm_krr(tag, minimal, extensive):
+    return btf.Module(
+        tag=tag,
+        transforms=[
+            btf.ExtXyzInput(tag="input"),
+            btf.GylmAtomic(
+                tag="descriptor_atomic",
+                args={
+                    "normalize": False,
+                    "rcut": 3.0 if minimal else 5.0,
+                    "rcut_width": 0.5,
+                    "nmax": 6 if minimal else 9,
+                    "lmax": 4 if minimal else 6,
+                    "sigma": 0.75,
+                    "part_sigma": 0.5,
+                    "wconstant": False,
+                    "wscale": 0.5,
+                    "wcentre": 0.5,
+                    "ldamp": 0.5,
+                    "power": True,
+                },
+                inputs={"configs": "input.configs"},
+            ),
+            btf.ReduceTypedMatrix(
+                tag="descriptor",
+                args={
+                    "reduce_op": "sum",
+                    "normalize": False,
+                    "reduce_by_type": False,
+                    "types": None,
+                    "epsilon": 1e-10,
+                },
+                inputs={"X": "descriptor_atomic.X", "T": None},
+            ),
+            btf.KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
+            btf.DoDivideBySize(
+                tag="input_norm",
+                args={
+                    "config_to_size": "lambda c: len(c)",
+                    "skip_if_not_force": True if extensive else False,
+                },
+                inputs={"configs": "input.configs", "meta": "input.meta", "y": "input.y"},
+            ),
+            btf.KernelRidge(
+                tag="predictor",
+                args={"alpha": None, "power": 2},
+                inputs={"K": "kernel.K", "y": "input_norm.y"},
+            ),
+            btf.UndoDivideBySize(
+                tag="output", inputs={"y": "predictor.y", "sizes": "input_norm.sizes"}
+            ),
+        ],
+        hyper=GridHyper(
+            Hyper(
+                {
+                    "predictor.alpha": gylm_regularization_range,
+                }
+            )
+        ),
+        broadcast={"meta": "input.meta"},
+        outputs={"y": "output.y"},
+    )
