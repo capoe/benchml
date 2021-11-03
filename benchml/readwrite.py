@@ -64,8 +64,8 @@ def write_extt(extt_file, arrays, meta=None):
     if isinstance(arrays, dict):
         with open(extt_file, "w", encoding="utf-8") as f:
             for k, v in arrays.items():
-                sh = str(v.shape).replace(" ", "")
-                f.write(f"{k}:{sh} ")
+                shape = str(v.shape).replace(" ", "")
+                f.write(f"{k}:{shape} ")
             f.write("\n")
             f.write(json.dumps(meta))
             f.write("\n")
@@ -125,11 +125,8 @@ class ExtendedXyz:
             self.set_pbc()
         return self.cell
 
-    def padToCutoff(self, r_cut):
-        cell = np.array(self.get_cell())
-        if cell is None:
-            return self
-        # Calculate # replicates
+    @staticmethod
+    def _calculate_number_of_replicates(cell, r_cut):
         u, v, w = cell[0], cell[1], cell[2]
         a = np.cross(v, w, axis=0)
         b = np.cross(w, u, axis=0)
@@ -139,6 +136,14 @@ class ExtendedXyz:
         wc = np.dot(w, c) / np.dot(c, c) * c
         proj = np.linalg.norm(np.array([ua, vb, wc]), axis=1)
         nkl = np.ceil(r_cut / proj).astype("int")
+        return nkl
+
+    def padToCutoff(self, r_cut):
+        cell = np.array(self.get_cell())
+        if cell is None:
+            return self
+        # Calculate # replicates
+        nkl = self._calculate_number_of_replicates(cell, r_cut)
         # Replicate
         n_atoms = len(self)
         n_images = np.product(2 * nkl + 1)
@@ -169,10 +174,10 @@ class ExtendedXyz:
         return self.heavy, self.symbols[self.heavy], self.positions[self.heavy]
 
     def create(self, n_atoms, fs):
-        self.info = tokenize_extxyz_meta(fs)
+        self.info = tokenize_extxyz_meta(fs.readline())
         self.positions = []
         self.symbols = []
-        for i in range(n_atoms):
+        for _ in range(n_atoms):
             new_atom = self.create_atom(fs.readline())
             self.positions.append(new_atom.pos)
             self.symbols.append(new_atom.name)
@@ -195,9 +200,9 @@ class ExtendedXyzAtom:
         self.pos = pos
 
 
-def tokenize_extxyz_meta(fs, allow_json=True):
+def tokenize_extxyz_meta(header, allow_json=True):
     # Parse header: key1="str1" key2=123 key3="another value" ...
-    header = fs.readline().replace("\n", "")
+    header = header.replace("\n", "")
     if allow_json and header.startswith("{"):
         return json.loads(header)
     tokens = []
@@ -274,7 +279,7 @@ def read_extxyz_meta_only(config_file):
             if header:
                 assert len(header) == 1
                 n_atoms = int(header[0])
-                info = tokenize_extxyz_meta(ifs)
+                info = tokenize_extxyz_meta(ifs.readline())
                 for _ in range(n_atoms):
                     ifs.readline()
                 yield info

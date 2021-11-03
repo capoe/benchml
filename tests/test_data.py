@@ -1,5 +1,6 @@
 import numpy as np
 
+import benchml as bml
 from benchml.data import Dataset, ExttDataset, load_dataset
 
 
@@ -59,3 +60,10 @@ def test_ExttDataset():
     assert info_example == info_method_tester(d)
     assert len(d) == 0
     assert len(list(d)) == 0
+
+
+def test_ase():
+    bml.readwrite.configure(use_ase=True)
+    d = load_dataset("test/test_data/molecular/set_1.xyz", index=":")
+    assert len(d) == 420
+    assert len(list(d)) == 420
