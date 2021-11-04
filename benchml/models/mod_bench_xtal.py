@@ -10,6 +10,7 @@ from benchml.models.common import (
     get_bench_pdf_soap_krr_kwargs,
     get_bench_pdf_soap_rr_kwargs,
     get_compile_gylm,
+    get_mbtr_krr_kwargs,
     get_mbtr_rr_kwargs,
     make_soap_krr,
     make_soap_rr,
@@ -256,56 +257,7 @@ def compile_mbtr(**kwargs):
                     ),
                     btf.Module(
                         tag="bxtal_mbtr_%s_krr" % ("ext" if extensive else "int"),
-                        transforms=[
-                            btf.ExtXyzInput(tag="input"),
-                            btf.DscribeMBTR(
-                                tag="descriptor_atomic",
-                                args={},
-                                inputs={"configs": "input.configs"},
-                            ),
-                            btf.ReduceMatrix(
-                                tag="descriptor",
-                                args={
-                                    "reduce": "np.sum(x, axis=0)"
-                                    if extensive
-                                    else "np.mean(x, axis=0)",
-                                    "norm": False,
-                                    "epsilon": 1e-10,
-                                },
-                                inputs={"X": "descriptor_atomic.X"},
-                            ),
-                            btf.KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
-                            btf.DoDivideBySize(
-                                tag="input_norm",
-                                args={
-                                    "config_to_size": "lambda c: len(c)",
-                                    "skip_if_not_force": True if extensive else False,
-                                },
-                                inputs={
-                                    "configs": "input.configs",
-                                    "meta": "input.meta",
-                                    "y": "input.y",
-                                },
-                            ),
-                            btf.KernelRidge(
-                                tag="predictor",
-                                args={"alpha": None},
-                                inputs={"K": "kernel.K", "y": "input_norm.y"},
-                            ),
-                            btf.UndoDivideBySize(
-                                tag="output",
-                                inputs={"y": "predictor.y", "sizes": "input_norm.sizes"},
-                            ),
-                        ],
-                        hyper=GridHyper(
-                            Hyper(
-                                {
-                                    "predictor.alpha": regularization_range,
-                                }
-                            )
-                        ),
-                        broadcast={"meta": "input.meta"},
-                        outputs={"y": "output.y"},
+                        **get_mbtr_krr_kwargs(extensive, regularization_range),
                     ),
                 ]
             )
