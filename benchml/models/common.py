@@ -565,3 +565,56 @@ def get_compile_gylm(mod_name, whiten_hyper):
         return models
 
     return customisable_compile_gylm
+
+
+def get_acsf_krr_kwargs(scalerange, extensive, regularization_range):
+    return dict(
+        transforms=[
+            btf.ExtXyzInput(tag="input"),
+            btf.UniversalDscribeACSF(
+                tag="descriptor_atomic",
+                args={"adjust_to_species": None, "scalerange": scalerange},  # TODO
+                inputs={"configs": "input.configs"},
+            ),
+            btf.ReduceMatrix(
+                tag="descriptor",
+                args={
+                    "reduce": "np.sum(x, axis=0)" if extensive else "np.mean(x, axis=0)",
+                    "norm": False,
+                    "epsilon": 1e-10,
+                },
+                inputs={"X": "descriptor_atomic.X"},
+            ),
+            btf.KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
+            btf.DoDivideBySize(
+                tag="input_norm",
+                args={
+                    "config_to_size": "lambda c: len(c)",
+                    "skip_if_not_force": True if extensive else False,
+                },
+                inputs={
+                    "configs": "input.configs",
+                    "meta": "input.meta",
+                    "y": "input.y",
+                },
+            ),
+            btf.KernelRidge(
+                tag="predictor",
+                args={"alpha": None},
+                inputs={"K": "kernel.K", "y": "input_norm.y"},
+            ),
+            btf.UndoDivideBySize(
+                tag="output",
+                inputs={"y": "predictor.y", "sizes": "input_norm.sizes"},
+            ),
+        ],
+        hyper=GridHyper(
+            Hyper(
+                {
+                    "predictor.alpha": regularization_range,
+                }
+            )
+        ),
+        broadcast={"meta": "input.meta"},
+        outputs={"y": "output.y"},
+    )

@@ -3,6 +3,7 @@ import numpy as np
 import benchml.transforms as btf
 from benchml.hyper import GridHyper, Hyper
 from benchml.models.common import (
+    get_acsf_krr_kwargs,
     get_bench_pdf_gylm_krr_kwargs,
     get_bench_pdf_gylm_rr_kwargs,
     get_bench_pdf_soap_krr_kwargs,
@@ -284,56 +285,7 @@ def compile_acsf(adjust_to_species=None, *args, **kwargs):
                     ),
                     btf.Module(
                         tag="bxtal_acsf_%s_%s_krr" % (scale, "ext" if extensive else "int"),
-                        transforms=[
-                            btf.ExtXyzInput(tag="input"),
-                            btf.UniversalDscribeACSF(
-                                tag="descriptor_atomic",
-                                args={"adjust_to_species": None, "scalerange": scalerange},  # TODO
-                                inputs={"configs": "input.configs"},
-                            ),
-                            btf.ReduceMatrix(
-                                tag="descriptor",
-                                args={
-                                    "reduce": "np.sum(x, axis=0)"
-                                    if extensive
-                                    else "np.mean(x, axis=0)",
-                                    "norm": False,
-                                    "epsilon": 1e-10,
-                                },
-                                inputs={"X": "descriptor_atomic.X"},
-                            ),
-                            btf.KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
-                            btf.DoDivideBySize(
-                                tag="input_norm",
-                                args={
-                                    "config_to_size": "lambda c: len(c)",
-                                    "skip_if_not_force": True if extensive else False,
-                                },
-                                inputs={
-                                    "configs": "input.configs",
-                                    "meta": "input.meta",
-                                    "y": "input.y",
-                                },
-                            ),
-                            btf.KernelRidge(
-                                tag="predictor",
-                                args={"alpha": None},
-                                inputs={"K": "kernel.K", "y": "input_norm.y"},
-                            ),
-                            btf.UndoDivideBySize(
-                                tag="output",
-                                inputs={"y": "predictor.y", "sizes": "input_norm.sizes"},
-                            ),
-                        ],
-                        hyper=GridHyper(
-                            Hyper(
-                                {
-                                    "predictor.alpha": regularization_range,
-                                }
-                            )
-                        ),
-                        broadcast={"meta": "input.meta"},
-                        outputs={"y": "output.y"},
+                        **get_acsf_krr_kwargs(scalerange, extensive, regularization_range),
                     ),
                 ]
             )
