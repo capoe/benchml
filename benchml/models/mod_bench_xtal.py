@@ -317,7 +317,11 @@ def compile_soap(*args, **kwargs):
             updates["descriptor_atomic.mode"],
             "cross" if updates["descriptor_atomic.crossover"] else "nocross",
         )
-        model = make_soap_krr(tag="bxtal_soap_%s_int_krr" % tag, extensive=False)
+        model = make_soap_krr(
+            "bxtal_soap_%s_int_krr" % tag,
+            extensive=False,
+            regularization_range=regularization_range,
+        )
         model.hyperUpdate(updates)
         model.hyper.add(krr_int_hyper)
         models.append(model)
@@ -326,7 +330,9 @@ def compile_soap(*args, **kwargs):
             updates["descriptor_atomic.mode"],
             "cross" if updates["descriptor_atomic.crossover"] else "nocross",
         )
-        model = make_soap_krr(tag="bxtal_soap_%s_ext_krr" % tag, extensive=True)
+        model = make_soap_krr(
+            "bxtal_soap_%s_ext_krr" % tag, extensive=True, regularization_range=regularization_range
+        )
         model.hyperUpdate(updates)
         model.hyper.add(krr_ext_hyper)
         models.append(model)
@@ -335,7 +341,9 @@ def compile_soap(*args, **kwargs):
             updates["descriptor_atomic.mode"],
             "cross" if updates["descriptor_atomic.crossover"] else "nocross",
         )
-        model = make_soap_rr(tag="bxtal_soap_%s_int_rr" % tag, extensive=False)
+        model = make_soap_rr(
+            "bxtal_soap_%s_int_rr" % tag, extensive=False, regularization_range=regularization_range
+        )
         model.hyperUpdate(updates)
         model.hyper.add(rr_int_hyper)
         models.append(model)
@@ -344,14 +352,16 @@ def compile_soap(*args, **kwargs):
             updates["descriptor_atomic.mode"],
             "cross" if updates["descriptor_atomic.crossover"] else "nocross",
         )
-        model = make_soap_rr(tag="bxtal_soap_%s_ext_rr" % tag, extensive=True)
+        model = make_soap_rr(
+            "bxtal_soap_%s_ext_rr" % tag, extensive=True, regularization_range=regularization_range
+        )
         model.hyperUpdate(updates)
         model.hyper.add(rr_ext_hyper)
         models.append(model)
     return models
 
 
-compile_gylm = get_compile_gylm("bxtal", whiten_hyper)
+compile_gylm = get_compile_gylm("bxtal", whiten_hyper, regularization_range)
 
 
 def compile_pdf():

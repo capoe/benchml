@@ -58,10 +58,12 @@ def get_logd_hybrid_topo_gp_kwargs():
     )
 
 
-gylm_regularization_range = np.logspace(-9, +7, 17)
-
-
-def make_gylm_rr(tag, minimal, extensive):
+def make_gylm_rr(
+    tag,
+    minimal,
+    extensive,
+    regularization_range,
+):
     return btf.Module(
         tag=tag,
         transforms=[
@@ -112,7 +114,7 @@ def make_gylm_rr(tag, minimal, extensive):
         hyper=GridHyper(
             Hyper(
                 {
-                    "predictor.alpha": gylm_regularization_range,
+                    "predictor.alpha": regularization_range,
                 }
             )
         ),
@@ -121,7 +123,7 @@ def make_gylm_rr(tag, minimal, extensive):
     )
 
 
-def make_gylm_krr(tag, minimal, extensive):
+def make_gylm_krr(tag, minimal, extensive, regularization_range):
     return btf.Module(
         tag=tag,
         transforms=[
@@ -176,7 +178,7 @@ def make_gylm_krr(tag, minimal, extensive):
         hyper=GridHyper(
             Hyper(
                 {
-                    "predictor.alpha": gylm_regularization_range,
+                    "predictor.alpha": regularization_range,
                 }
             )
         ),
@@ -409,7 +411,7 @@ def get_pdf_soap_krr_kwargs(minimal, regularization_range):
     )
 
 
-def make_soap_krr(tag, extensive):
+def make_soap_krr(tag, extensive, regularization_range):
     return btf.Module(
         tag=tag,
         transforms=[
@@ -446,7 +448,7 @@ def make_soap_krr(tag, extensive):
         hyper=GridHyper(
             Hyper(
                 {
-                    "predictor.alpha": gylm_regularization_range,
+                    "predictor.alpha": regularization_range,
                 }
             )
         ),
@@ -455,7 +457,7 @@ def make_soap_krr(tag, extensive):
     )
 
 
-def make_soap_rr(tag, extensive):
+def make_soap_rr(tag, extensive, regularization_range):
     return btf.Module(
         tag=tag,
         transforms=[
@@ -489,7 +491,7 @@ def make_soap_rr(tag, extensive):
         hyper=GridHyper(
             Hyper(
                 {
-                    "predictor.alpha": gylm_regularization_range,
+                    "predictor.alpha": regularization_range,
                 }
             )
         ),
@@ -498,7 +500,7 @@ def make_soap_rr(tag, extensive):
     )
 
 
-def get_compile_gylm(mod_name, whiten_hyper):
+def get_compile_gylm(mod_name, whiten_hyper, regularization_range):
     def customisable_compile_gylm(*args, **kwargs):
         krr_int_settings = GridHyper(
             Hyper({"descriptor_atomic.normalize": [False]}),
@@ -542,28 +544,48 @@ def get_compile_gylm(mod_name, whiten_hyper):
         for hidx, updates in enumerate(krr_int_settings):
             for minimal in [True, False]:
                 tag = "%s" % ("minimal" if minimal else "standard")
-                model = make_gylm_krr(f"{mod_name}_gylm_{tag}_int_krr", minimal, extensive=False)
+                model = make_gylm_krr(
+                    f"{mod_name}_gylm_{tag}_int_krr",
+                    minimal,
+                    extensive=False,
+                    regularization_range=regularization_range,
+                )
                 model.hyperUpdate(updates)
                 model.hyper.add(krr_int_hyper)
                 models.append(model)
         for hidx, updates in enumerate(krr_ext_settings):
             for minimal in [True, False]:
                 tag = "%s" % ("minimal" if minimal else "standard")
-                model = make_gylm_krr(f"{mod_name}_gylm_{tag}_ext_krr", minimal, extensive=True)
+                model = make_gylm_krr(
+                    f"{mod_name}_gylm_{tag}_ext_krr",
+                    minimal,
+                    extensive=True,
+                    regularization_range=regularization_range,
+                )
                 model.hyperUpdate(updates)
                 model.hyper.add(krr_ext_hyper)
                 models.append(model)
         for hidx, updates in enumerate(rr_int_settings):
             for minimal in [True, False]:
                 tag = "%s" % ("minimal" if minimal else "standard")
-                model = make_gylm_rr(f"{mod_name}_gylm_{tag}_int_rr", minimal, extensive=False)
+                model = make_gylm_rr(
+                    f"{mod_name}_gylm_{tag}_int_rr",
+                    minimal,
+                    extensive=False,
+                    regularization_range=regularization_range,
+                )
                 model.hyperUpdate(updates)
                 model.hyper.add(rr_int_hyper)
                 models.append(model)
         for hidx, updates in enumerate(rr_ext_settings):
             for minimal in [True, False]:
                 tag = "%s" % ("minimal" if minimal else "standard")
-                model = make_gylm_rr(f"{mod_name}_gylm_{tag}_ext_rr", minimal, extensive=True)
+                model = make_gylm_rr(
+                    f"{mod_name}_gylm_{tag}_ext_rr",
+                    minimal,
+                    extensive=True,
+                    regularization_range=regularization_range,
+                )
                 model.hyperUpdate(updates)
                 model.hyper.add(rr_ext_hyper)
                 models.append(model)
