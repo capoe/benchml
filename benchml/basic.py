@@ -96,7 +96,9 @@ class SliceMatrix(Transform):
         if self.args["axis"] is None:
             slice = inputs["slice"]
         elif isinstance(self.args["axis"], int):
-            slice = [slice(None) for r in len(inputs["X"].shape)]
+            if self.args["axis"] > len(inputs["X"].shape) - 1:
+                raise ValueError("SliceMatrix arg 'axis' should be <= than input X number of axis.")
+            slice = [None] * len(inputs["X"].shape)
             slice[self.args["axis"]] = inputs["slice"]
         else:
             raise ValueError("SliceMatrix arg 'slice' expects None or int")

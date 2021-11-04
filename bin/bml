@@ -47,7 +47,6 @@ def train_models(models, dataset, args):
         if os.path.dirname(archfile) != "":
             log >> "mkdir -p %s" % os.path.dirname(archfile)
         benchml.save(archfile, model)
-    return model
 
 
 def configure_models(models, *override_json_str):

@@ -750,27 +750,27 @@ class Module(Transform):
             print("Precompute '%s'" % stream.tag)
         self.activateStream(stream)
         for tidx, tf in enumerate(filter(lambda tf: tf.tag in precomps_deps, self.transforms)):
-            if hasattr(tf, "_fit"):
-                if verbose:
-                    (
-                        log
-                        << " ".join(
-                            [" " * tidx, "Fit (precompute)", tf.tag, "using stream", stream.tag]
-                        )
-                        << log.flush
+            do_fit = hasattr(tf, "_fit")
+            method_naming = {True: "Fit", False: "Map"}
+            if verbose:
+                (
+                    log
+                    << " ".join(
+                        [
+                            " " * tidx,
+                            method_naming[do_fit],
+                            "(precompute)",
+                            tf.tag,
+                            "using stream",
+                            stream.tag,
+                        ]
                     )
-                    t0 = time.time()
+                    << log.flush
+                )
+                t0 = time.time()
+            if do_fit:
                 tf.fit(stream, verbose=verbose)
             else:
-                if verbose:
-                    (
-                        log
-                        << " ".join(
-                            [" " * tidx, "Map (precompute)", tf.tag, "using stream", stream.tag]
-                        )
-                        << log.flush
-                    )
-                    t0 = time.time()
                 tf.map(stream, verbose=verbose)
             if verbose:
                 t1 = time.time()
@@ -800,23 +800,20 @@ class Module(Transform):
         self.activateStream(stream)
         sweep = self.filter(endpoint=endpoint)
         for tidx, t in enumerate(sweep):
-            if hasattr(t, "_fit"):
-                if verbose:
-                    (
-                        log
-                        << " ".join([" " * tidx, "Fit", t.tag, "using stream", stream.tag])
-                        << log.flush
+            do_fit = hasattr(t, "_fit")
+            method_naming = {True: "Fit", False: "Map"}
+            if verbose:
+                (
+                    log
+                    << " ".join(
+                        [" " * tidx, method_naming[do_fit], t.tag, "using stream", stream.tag]
                     )
-                    t0 = time.time()
+                    << log.flush
+                )
+                t0 = time.time()
+            if do_fit:
                 t.fit(stream, verbose=verbose)
             else:
-                if verbose:
-                    (
-                        log
-                        << " ".join([" " * tidx, "Map", t.tag, "using stream", stream.tag])
-                        << log.flush
-                    )
-                    t0 = time.time()
                 t.map(stream, verbose=verbose)
             if verbose:
                 t1 = time.time()

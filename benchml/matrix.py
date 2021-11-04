@@ -109,11 +109,11 @@ class ReduceTypedMatrix(Transform):
     req_inputs = ("X",)
     allow_stream = ("X",)
     allow_params = ("types",)
-    allow_ops = {"sum", "mean"}
+    allow_ops = {"sum": np.sum, "mean": np.mean}
     stream_samples = ("X",)
 
     def _setup(self, *args, **kwargs):
-        assert self.args["reduce_op"] in self.allow_ops  # Only 'sum' and 'mean' allowed
+        assert self.args["reduce_op"] in self.allow_ops.keys()  # Only 'sum' and 'mean' allowed
         if self.args["reduce_by_type"]:
             assert "T" in self.inputs  # Require input T if reduce_by_type = True
 
@@ -140,10 +140,8 @@ class ReduceTypedMatrix(Transform):
                     x_red = (x_red.T / (t_count + self.args["epsilon"])).T
                 x_red = x_red.flatten()
             else:
-                if self.args["reduce_op"] == "sum":
-                    x_red = np.sum(x, axis=0)
-                elif self.args["reduce_op"] == "mean":
-                    x_red = np.mean(x, axis=0)
+                chosen_op = self.allow_ops[self.args["reduce_op"]]
+                x_red = chosen_op(x, axis=0)
             if self.args["normalize"]:
                 x_red = x_red / (np.sqrt(np.dot(x_red, x_red)) + self.args["epsilon"])
             X_red.append(x_red)

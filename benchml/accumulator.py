@@ -176,14 +176,13 @@ class Accumulator(object):
             channels_iter = filter(lambda cd: cd.startswith(match), sorted(self.yp_map))
         for channel in channels_iter:
             res[channel] = {}
-            vs = []
-            dvs = []
+            metric_logs = []
             for metric in metrics:
                 v, dv = self.evaluate(channel, metric, bootstrap=bootstrap)
                 res[channel][metric] = v
                 res[channel][metric + "_std"] = dv
-                vs.append(v)
-                dvs.append(dv)
+                if log:
+                    metric_logs.append((metric, v, dv))
             if log:
                 (
                     log
@@ -195,7 +194,7 @@ class Accumulator(object):
                     )
                     << log.flush
                 )
-                for v, metric in zip(vs, metrics):
+                for metric, v, dv in metric_logs:
                     log << "%s=%+1.4e +- %+1.4e" % (metric, v, dv) << log.flush
                 log << log.endl
         return res
