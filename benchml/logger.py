@@ -559,7 +559,8 @@ class ShellInterface(object):
     def pwd(self):
         return self.cwd()
 
-    def cwd(self):
+    @staticmethod
+    def cwd():
         return os.getcwd()
 
     def root(self):
@@ -635,7 +636,8 @@ class LOGGER(ShellInterface, OptionsInterface):
         OptionsInterface.__init__(self)
         return
 
-    def sleep(self, dt):
+    @staticmethod
+    def sleep(dt):
         time.sleep(dt)
         return
 

@@ -83,6 +83,7 @@ class GridHyper(object):
         prev = None
         invert = -1 if Accumulator.select(**accu_args) == "smallest" else +1
         for hyperidx, updates in enumerate(self):
+            log_colour = log.ww
             metric = module.hyperEval(
                 stream, updates, split_args, accu_args, target, target_ref, **kwargs
             )
@@ -90,16 +91,12 @@ class GridHyper(object):
             if prev is None:
                 prev = invert * metric
             if invert * metric >= prev:
-                if log:
-                    colour = log.pp
+                log_colour = log.pp
                 prev = invert * metric
-            else:
-                if log:
-                    colour = log.ww
             if log:
                 (
                     log
-                    << colour
+                    << log_colour
                     << "|   %-5d   |  %+1.2e  |" % (hyperidx + 1, metric)
                     + "|".join(
                         map(

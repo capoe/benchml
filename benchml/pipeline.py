@@ -753,27 +753,24 @@ class Module(Transform):
             do_fit = hasattr(tf, "_fit")
             method_naming = {True: "Fit", False: "Map"}
             if verbose:
-                (
-                    log
-                    << " ".join(
-                        [
-                            " " * tidx,
-                            method_naming[do_fit],
-                            "(precompute)",
-                            tf.tag,
-                            "using stream",
-                            stream.tag,
-                        ]
-                    )
-                    << log.flush
+                msg = " ".join(
+                    [
+                        " " * tidx,
+                        method_naming[do_fit],
+                        "(precompute)",
+                        tf.tag,
+                        "using stream",
+                        stream.tag,
+                    ]
                 )
-                t0 = time.time()
+                log << msg << log.flush
+            t0 = time.time()
             if do_fit:
                 tf.fit(stream, verbose=verbose)
             else:
                 tf.map(stream, verbose=verbose)
+            t1 = time.time()
             if verbose:
-                t1 = time.time()
                 log << "[%1.4f]" % (t1 - t0) << log.flush
                 log << log.endl
         return stream
@@ -785,11 +782,12 @@ class Module(Transform):
         sweep = self.filter(endpoint=endpoint)
         for tidx, t in enumerate(sweep):
             if verbose:
-                log << " ".join([" " * tidx, "Map", t.tag, "using stream", stream.tag]) << log.flush
-                t0 = time.time()
+                msg = " ".join([" " * tidx, "Map", t.tag, "using stream", stream.tag])
+                log << msg << log.flush
+            t0 = time.time()
             t.map(stream, verbose=verbose)
+            t1 = time.time()
             if verbose:
-                t1 = time.time()
                 log << "[%1.4f]" % (t1 - t0) << log.flush
                 log << log.endl
         return self.resolveOutputs(stream)
@@ -803,20 +801,17 @@ class Module(Transform):
             do_fit = hasattr(t, "_fit")
             method_naming = {True: "Fit", False: "Map"}
             if verbose:
-                (
-                    log
-                    << " ".join(
-                        [" " * tidx, method_naming[do_fit], t.tag, "using stream", stream.tag]
-                    )
-                    << log.flush
+                msg = " ".join(
+                    [" " * tidx, method_naming[do_fit], t.tag, "using stream", stream.tag]
                 )
-                t0 = time.time()
+                log << msg << log.flush
+            t0 = time.time()
             if do_fit:
                 t.fit(stream, verbose=verbose)
             else:
                 t.map(stream, verbose=verbose)
+            t1 = time.time()
             if verbose:
-                t1 = time.time()
                 log << "[%1.4f]" % (t1 - t0) << log.endl
         return
 
