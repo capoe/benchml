@@ -2,12 +2,12 @@ import numpy as np
 
 import benchml.transforms as btf
 from benchml.hyper import GridHyper, Hyper
-from benchml.models.common import logd_hybrid_topo_gp_kwargs
+from benchml.models.common import get_logd_hybrid_topo_gp_kwargs
 
 
 def compile_logd_ai(*args, **kwargs):
     return [
-        btf.Module(tag="logd_ai_hybrid_topo_cxlogp_gp", **logd_hybrid_topo_gp_kwargs),
+        btf.Module(tag="logd_ai_hybrid_topo_cxlogp_gp", **get_logd_hybrid_topo_gp_kwargs()),
         btf.Module(
             tag="logd_ai_hybrid_topo_rdlogp_gp",
             transforms=[

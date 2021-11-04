@@ -2,7 +2,7 @@ import numpy as np
 
 import benchml.transforms as btf
 from benchml.hyper import GridHyper, Hyper
-from benchml.models.common import logd_hybrid_topo_gp_kwargs
+from benchml.models.common import get_logd_hybrid_topo_gp_kwargs
 
 
 def compile_logd_extensive(**kwargs):
@@ -375,7 +375,7 @@ def compile_logd(custom_fields=None, **kwargs):
             broadcast={"meta": "input.meta"},
             outputs={"y": "gp.y", "dy": "gp.dy", "dk": "gp.dk"},
         ),
-        btf.Module(tag="logd_hybrid_topo_gp", **logd_hybrid_topo_gp_kwargs),
+        btf.Module(tag="logd_hybrid_topo_gp", **get_logd_hybrid_topo_gp_kwargs()),
         btf.Module(
             tag="logd_hybrid_gylm_krr",
             transforms=[

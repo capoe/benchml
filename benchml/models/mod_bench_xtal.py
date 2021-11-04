@@ -5,13 +5,13 @@ from benchml.hyper import GridHyper, Hyper
 from benchml.models.common import (
     get_acsf_krr_kwargs,
     get_acsf_rr_kwargs,
-    get_bench_pdf_gylm_krr_kwargs,
-    get_bench_pdf_gylm_rr_kwargs,
-    get_bench_pdf_soap_krr_kwargs,
-    get_bench_pdf_soap_rr_kwargs,
     get_compile_gylm,
     get_mbtr_krr_kwargs,
     get_mbtr_rr_kwargs,
+    get_pdf_gylm_krr_kwargs,
+    get_pdf_gylm_rr_kwargs,
+    get_pdf_soap_krr_kwargs,
+    get_pdf_soap_rr_kwargs,
     make_soap_krr,
     make_soap_rr,
 )
@@ -366,11 +366,11 @@ def make_pdf_krr(minimal):
     return [
         btf.Module(
             tag="bxtal_pdf_soap_%s_krr" % ("minimal" if minimal else "standard"),
-            **get_bench_pdf_soap_krr_kwargs(minimal, regularization_range),
+            **get_pdf_soap_krr_kwargs(minimal, regularization_range),
         ),
         btf.Module(
             tag="bxtal_pdf_gylm_%s_krr" % ("minimal" if minimal else "standard"),
-            **get_bench_pdf_gylm_krr_kwargs(minimal, regularization_range),
+            **get_pdf_gylm_krr_kwargs(minimal, regularization_range),
         ),
     ]
 
@@ -379,11 +379,11 @@ def make_pdf_rr(minimal):
     return [
         btf.Module(
             tag="bxtal_pdf_soap_%s_rr" % ("minimal" if minimal else "standard"),
-            **get_bench_pdf_soap_rr_kwargs(minimal, whiten_hyper, regularization_range),
+            **get_pdf_soap_rr_kwargs(minimal, whiten_hyper, regularization_range),
         ),
         btf.Module(
             tag="bxtal_pdf_gylm_%s_rr" % ("minimal" if minimal else "standard"),
-            **get_bench_pdf_gylm_rr_kwargs(minimal, whiten_hyper, regularization_range),
+            **get_pdf_gylm_rr_kwargs(minimal, whiten_hyper, regularization_range),
         ),
     ]
 
