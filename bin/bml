@@ -110,8 +110,7 @@ def run(args):
     elif args.mode == "train":
         models, dataset = load_models_and_dataset(args)
         for data in dataset:
-            train_models(models, dataset[0], args)
-            break
+            train_models(models, data[0], args)
 
 
 if __name__ == "__main__":
