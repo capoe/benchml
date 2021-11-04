@@ -35,8 +35,8 @@ class SoapBase(Transform):
     precompute = True
     log = log
 
-    def check_available():
-        return check_gylmxx_available(__class__)
+    def check_available(self, *args, **kwargs):
+        return check_gylmxx_available(self, *args, **kwargs)
 
     def evaluateSingle(self, calc, config, pos_centres):
         raise NotImplementedError("Missing method overload")
@@ -109,8 +109,10 @@ class UniversalSoapBase(SoapBase):
     allow_params = ("calcs",)
     CalculatorClass = None
 
-    def check_available():
-        return SoapBase.check_available() and check_asap_available(__class__)
+    def check_available(self, *args, **kwargs):
+        return super().check_available(*args, **kwargs) and check_asap_available(
+            self, *args, **kwargs
+        )
 
     def _fit(self, inputs, stream, params):
         types = self.args["types"] if self.args["types"] is not None else inputs["meta"]["elements"]
@@ -136,8 +138,10 @@ class UniversalSoapBase(SoapBase):
 class UniversalSoapGylmxx(UniversalSoapBase):
     CalculatorClass = gylm.SoapGtoCalculator
 
-    def check_available():
-        return UniversalSoapBase.check_available and check_gylmxx_available(__class__)
+    def check_available(self, *args, **kwargs):
+        return super().check_available(*args, **kwargs) and check_gylmxx_available(
+            self, *args, **kwargs
+        )
 
     def updateParams(self, par, meta=None):
         if meta is None:
@@ -161,8 +165,10 @@ class UniversalSoapGylmxx(UniversalSoapBase):
 class UniversalSoapDscribe(UniversalSoapBase):
     CalculatorClass = dd.SOAP
 
-    def check_available():
-        return UniversalSoapBase.check_available and check_dscribe_available(UniversalSoapDscribe)
+    def check_available(self, *args, **kwargs):
+        return super().check_available(*args, **kwargs) and check_dscribe_available(
+            self, *args, **kwargs
+        )
 
     def updateParams(self, par, meta=None):
         if meta is None:

@@ -244,7 +244,7 @@ class Transform(object):
     help_stream = {}
     help_params = {}
 
-    def check_available():
+    def check_available(self, *args, **kwargs):
         return True
 
     def __init__(self, detached=False, **kwargs):
@@ -610,8 +610,10 @@ class Module(Transform):
         self.updateDependencies()
 
     # Status
-    def check_available(self):
-        return np.array([tf.__class__.check_available() for tf in self.transforms]).all()
+    def check_available(self, *args, **kwargs):
+        return np.array(
+            [tf.__class__.check_available(*args, **kwargs) for tf in self.transforms]
+        ).all()
 
     def freeze(self, *tfs, freeze=True):
         for tf in tfs:

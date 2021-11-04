@@ -23,8 +23,8 @@ class NonlinearFeatureFilter(Transform):
     }
     allow_params = {"fgraph", "ranked", "variables"}
 
-    def check_available():
-        return check_nphil_available(__class__)
+    def check_available(self, *args, **kwargs):
+        return check_nphil_available(self, *args, **kwargs)
 
     def generateGraph(self, variables):
         return nphil.generate.generate_graph(

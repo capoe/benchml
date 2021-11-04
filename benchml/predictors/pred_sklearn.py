@@ -22,8 +22,8 @@ def check_sklearn_available(obj, require=False):
 
 
 class SklearnTransform(Transform):
-    def check_available():
-        return check_sklearn_available(SklearnTransform)
+    def check_available(self, *args, **kwargs):
+        return check_sklearn_available(self, *args, **kwargs)
 
 
 class LinearRegression(SklearnTransform):

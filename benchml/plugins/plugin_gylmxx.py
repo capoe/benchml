@@ -18,8 +18,8 @@ class KernelSmoothMatch(Transform):
     verbose = True
     log = log
 
-    def check_available():
-        return check_gylmxx_available(__class__)
+    def check_available(self, *args, **kwargs):
+        return check_gylmxx_available(self, *args, **kwargs)
 
     def evaluate(self, X1, X2, symmetric):
         K = np.zeros((X1.shape[0], X2.shape[0]))
@@ -142,8 +142,8 @@ class GylmTransform(Transform):
     precompute = True
     log = None
 
-    def check_available():
-        return check_gylmxx_available(GylmAverage)
+    def check_available(self, *args, **kwargs):
+        return check_gylmxx_available(self, *args, **kwargs)
 
     def _setup(self, *args):
         self.procs = self.args.pop("procs", 1)
@@ -195,8 +195,8 @@ class NlocX(Transform):
         },
     }
 
-    def check_available():
-        return check_gylmxx_available(NlocX)
+    def check_available(self, *args, **kwargs):
+        return check_gylmxx_available(self, *args, **kwargs)
 
     def _map(self, inputs, stream):
         calc_a = gylm.GylmCalculator(**self.args["gylma"])

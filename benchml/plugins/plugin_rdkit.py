@@ -18,8 +18,8 @@ class MorganFP(Transform):
     stream_samples = ("X",)
     precompute = True
 
-    def check_available():
-        return check_rdkit_available(MorganFP)
+    def check_available(self, *args, **kwargs):
+        return check_rdkit_available(self, *args, **kwargs)
 
     def _setup(self):
         self.radius = self.args["radius"]

@@ -18,8 +18,8 @@ def check_asap_available(obj, require=False):
 
 
 class AsapTransform(Transform):
-    def check_available():
-        return check_asap_available(AsapTransform)
+    def check_available(self, *args, **kwargs):
+        return check_asap_available(self, *args, **kwargs)
 
 
 class SparseKRR(AsapTransform):

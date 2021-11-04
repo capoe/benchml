@@ -9,8 +9,8 @@ from benchml.readwrite import load
 class TorchModuleTransform(Transform, nn.Module):
     default_args = {"device": "", "reset_parameters": False, "reset_optimizer": False}
 
-    def check_available():
-        return check_torch_available(__class__)
+    def check_available(self, *args, **kwargs):
+        return check_torch_available(self, *args, **kwargs)
 
     def __init__(self, **kwargs):
         Transform.__init__(self, **kwargs)

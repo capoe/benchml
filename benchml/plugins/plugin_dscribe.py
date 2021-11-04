@@ -16,8 +16,8 @@ class DscribeTransform(Transform):
     verbose = True
     log = log
 
-    def check_available():
-        return check_dscribe_available(DscribeTransform)
+    def check_available(self, *args, **kwargs):
+        return check_dscribe_available(self, *args, **kwargs)
 
     def _prepare(self, inputs):
         args = {}
@@ -103,9 +103,9 @@ class UniversalDscribeACSF(DscribeTransform):
     }
     CalculatorClass = dd.ACSF
 
-    def check_available():
-        return check_dscribe_available(UniversalDscribeACSF) and check_asap_available(
-            UniversalDscribeACSF
+    def check_available(self, *args, **kwargs):
+        return check_dscribe_available(self, *args, **kwargs) and check_asap_available(
+            self, *args, **kwargs
         )
 
     def _prepare(self, inputs):
