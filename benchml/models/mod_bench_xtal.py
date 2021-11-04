@@ -10,6 +10,7 @@ from benchml.models.common import (
     get_bench_pdf_soap_krr_kwargs,
     get_bench_pdf_soap_rr_kwargs,
     get_compile_gylm,
+    get_mbtr_rr_kwargs,
     make_soap_krr,
     make_soap_rr,
 )
@@ -230,59 +231,9 @@ def compile_acsf(adjust_to_species=None, *args, **kwargs):
                 [
                     btf.Module(
                         tag="bxtal_acsf_%s_%s_rr" % (scale, "ext" if extensive else "int"),
-                        transforms=[
-                            btf.ExtXyzInput(tag="input"),
-                            btf.UniversalDscribeACSF(
-                                tag="descriptor_atomic",
-                                args={
-                                    "adjust_to_species": None,  # TODO
-                                    "scalerange": scalerange,
-                                    "sharpness": sharpness,
-                                },
-                                inputs={"configs": "input.configs"},
-                            ),
-                            btf.ReduceMatrix(
-                                tag="descriptor",
-                                args={
-                                    "reduce": "np.sum(x, axis=0)"
-                                    if extensive
-                                    else "np.mean(x, axis=0)",
-                                    "norm": False,
-                                    "epsilon": 1e-10,
-                                },
-                                inputs={"X": "descriptor_atomic.X"},
-                            ),
-                            btf.WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
-                            btf.DoDivideBySize(
-                                tag="input_norm",
-                                args={
-                                    "config_to_size": "lambda c: len(c)",
-                                    "skip_if_not_force": True if extensive else False,
-                                },
-                                inputs={
-                                    "configs": "input.configs",
-                                    "meta": "input.meta",
-                                    "y": "input.y",
-                                },
-                            ),
-                            btf.Ridge(
-                                tag="predictor", inputs={"X": "whiten.X", "y": "input_norm.y"}
-                            ),
-                            btf.UndoDivideBySize(
-                                tag="output",
-                                inputs={"y": "predictor.y", "sizes": "input_norm.sizes"},
-                            ),
-                        ],
-                        hyper=GridHyper(
-                            Hyper({"whiten.centre": whiten_hyper, "whiten.scale": whiten_hyper}),
-                            Hyper(
-                                {
-                                    "predictor.alpha": regularization_range,
-                                }
-                            ),
+                        **get_acsf_rr_kwargs(
+                            scalerange, sharpness, extensive, whiten_hyper, regularization_range
                         ),
-                        broadcast={"meta": "input.meta"},
-                        outputs={"y": "output.y"},
                     ),
                     btf.Module(
                         tag="bxtal_acsf_%s_%s_krr" % (scale, "ext" if extensive else "int"),
@@ -301,7 +252,7 @@ def compile_mbtr(**kwargs):
                 [
                     btf.Module(
                         tag="bxtal_mbtr_%s_rr" % ("ext" if extensive else "int"),
-                        **get_acsf_rr_kwargs(extensive, whiten_hyper, regularization_range),
+                        **get_mbtr_rr_kwargs(extensive, whiten_hyper, regularization_range),
                     ),
                     btf.Module(
                         tag="bxtal_mbtr_%s_krr" % ("ext" if extensive else "int"),

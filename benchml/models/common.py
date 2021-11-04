@@ -620,13 +620,67 @@ def get_acsf_krr_kwargs(scalerange, extensive, regularization_range):
     )
 
 
-def get_acsf_rr_kwargs(extensive, whiten_hyper, regularization_range):
+def get_mbtr_rr_kwargs(extensive, whiten_hyper, regularization_range):
     return dict(
         transforms=[
             btf.ExtXyzInput(tag="input"),
             btf.DscribeMBTR(
                 tag="descriptor_atomic",
                 args={},
+                inputs={"configs": "input.configs"},
+            ),
+            btf.ReduceMatrix(
+                tag="descriptor",
+                args={
+                    "reduce": "np.sum(x, axis=0)" if extensive else "np.mean(x, axis=0)",
+                    "norm": False,
+                    "epsilon": 1e-10,
+                },
+                inputs={"X": "descriptor_atomic.X"},
+            ),
+            btf.WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
+            btf.DoDivideBySize(
+                tag="input_norm",
+                args={
+                    "config_to_size": "lambda c: len(c)",
+                    "skip_if_not_force": True if extensive else False,
+                },
+                inputs={
+                    "configs": "input.configs",
+                    "meta": "input.meta",
+                    "y": "input.y",
+                },
+            ),
+            btf.Ridge(tag="predictor", inputs={"X": "whiten.X", "y": "input_norm.y"}),
+            btf.UndoDivideBySize(
+                tag="output",
+                inputs={"y": "predictor.y", "sizes": "input_norm.sizes"},
+            ),
+        ],
+        hyper=GridHyper(
+            Hyper({"whiten.centre": whiten_hyper, "whiten.scale": whiten_hyper}),
+            Hyper(
+                {
+                    "predictor.alpha": regularization_range,
+                }
+            ),
+        ),
+        broadcast={"meta": "input.meta"},
+        outputs={"y": "output.y"},
+    )
+
+
+def get_acsf_rr_kwargs(scalerange, sharpness, extensive, whiten_hyper, regularization_range):
+    return dict(
+        transforms=[
+            btf.ExtXyzInput(tag="input"),
+            btf.UniversalDscribeACSF(
+                tag="descriptor_atomic",
+                args={
+                    "adjust_to_species": None,  # TODO
+                    "scalerange": scalerange,
+                    "sharpness": sharpness,
+                },
                 inputs={"configs": "input.configs"},
             ),
             btf.ReduceMatrix(
