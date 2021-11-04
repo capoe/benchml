@@ -18,7 +18,7 @@ def disable_ase():
     global ase
     ase = Mock()
     ase.io = None
-    log << log.mb << "[readwrite: Using built-in parser]" << log.endl
+    log << log.mb << "[readwrite: Using built-in parser]" << log.endl  # pylint: disable=W0104
     return ase, ase.io
 
 
@@ -28,7 +28,7 @@ def configure(use_ase):
     if use_ase:
         import ase.io
 
-        log << log.mb << "[readwrite: Using ASE]" << log.endl
+        log << log.mb << "[readwrite: Using ASE]" << log.endl  # pylint: disable=W0104
     else:
         disable_ase()
 
@@ -200,11 +200,7 @@ class ExtendedXyzAtom:
         self.pos = pos
 
 
-def tokenize_extxyz_meta(header, allow_json=True):
-    # Parse header: key1="str1" key2=123 key3="another value" ...
-    header = header.replace("\n", "")
-    if allow_json and header.startswith("{"):
-        return json.loads(header)
+def _parse_line_to_token_list(header):
     tokens = []
     pos0 = 0
     pos1 = 0
@@ -248,6 +244,15 @@ def tokenize_extxyz_meta(header, allow_json=True):
         else:
             assert False
         status = status_out
+    return tokens
+
+
+def tokenize_extxyz_meta(header, allow_json=True):
+    # Parse header: key1="str1" key2=123 key3="another value" ...
+    header = header.replace("\n", "")
+    if allow_json and header.startswith("{"):
+        return json.loads(header)
+    tokens = _parse_line_to_token_list(header)
     kvs = []
     for i in range(len(tokens) // 2):
         kvs.append([tokens[2 * i], tokens[2 * i + 1]])
@@ -357,28 +362,28 @@ def write_xyz(config_file, configs, allow_json=True):
                     )
 
 
-def save(archfile, obj, method=None, embed_git_hash=False, **kwargs):
+def save(arch_file_path, obj, method=None, embed_git_hash=False, **kwargs):
     if method is None:
-        if not isinstance(archfile, str):
+        if not isinstance(arch_file_path, str):
             assert isinstance(obj, str)  # Invalid function call to benchml.save
-            archfile, obj = obj, archfile
+            arch_file_path, obj = obj, arch_file_path
         if embed_git_hash:
             obj = {"git_hash": utils.git_hash(), "bml_object": obj}
-        with open(archfile, "wb") as f:
-            f.write(pickle.dumps(obj))
+        with open(arch_file_path, "wb") as arch_file:
+            arch_file.write(pickle.dumps(obj))
     else:
         if embed_git_hash:
             obj = {"git_hash": utils.git_hash(), "bml_object": obj}
-        method.save(archfile, obj, **kwargs)
+        method.save(arch_file_path, obj, **kwargs)
 
 
-def load(archfile, method=None, **kwargs):
+def load(arch_file_path, method=None, **kwargs):
     res = None
     if method is None:
-        with open(archfile, "rb") as model:
+        with open(arch_file_path, "rb") as model:
             res = pickle.load(model)
     else:
-        res = method.load(archfile, **kwargs)
+        res = method.load(arch_file_path, **kwargs)
     return res
 
 
