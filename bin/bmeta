@@ -45,7 +45,6 @@ def write_meta(configs, extxyz, meta_json):
     if len(configs) < 1:
         log.my << "ERROR - No structures in dataset" << log.endl
         return
-    meta = {}
     fields = sorted(configs[0].info.keys())
     log << log.mg << "Adding metadata:" << log.endl
     log << "Add target:" << log.endl

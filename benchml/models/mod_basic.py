@@ -12,7 +12,6 @@ def compile_null(**kwargs):
 def compile_physchem(custom_fields=None, with_hyper=False, **kwargs):
     if custom_fields is None:
         custom_fields = []
-    hyper = None
     if with_hyper:
         hyper = BayesianHyper(
             Hyper(

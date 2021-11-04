@@ -205,7 +205,6 @@ class ConformalMultiClassifier(ConformalBase):
         Y = []
         Z_pred = []
         # Cross-calibrate
-        classes = []
         for info, train, calibrate in Split(len(inputs["y"]), **self.args["split"]):
             log << log.debug << "Conformal fit %s" % info << log.endl
             params_cal = Params(tag="", tf=base)

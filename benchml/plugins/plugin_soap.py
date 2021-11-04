@@ -98,6 +98,9 @@ class SoapGylmxx(SoapBase):
 
 
 class UniversalSoapBase(SoapBase):
+    def evaluateSingle(self, calc, config, pos_centres):
+        return super().evaluateSingle(self, calc, config, pos_centres)
+
     default_args = {
         "types": None,
         "periodic": None,

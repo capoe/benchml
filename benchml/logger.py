@@ -401,7 +401,7 @@ class ShellInterface(object):
         if c is not None:
             mssg = self.color_dict[c] + mssg + self.color_dict["endcolor"]
         if h:
-            mssg = self.os_generate_header(mssg, t)
+            mssg = self.os_generate_header(mssg, trim=t)
 
     # LOGFILE ADAPTOR
     def ConnectToFile(self, logfile):
@@ -447,7 +447,7 @@ class ShellInterface(object):
         if self.sel_color is not None:
             mssg = self.color_dict[self.sel_color] + mssg + self.color_dict["endcolor"]
         if self.sel_header:
-            mssg = self.os_generate_header(mssg, self.sel_trim)
+            mssg = self.os_generate_header(mssg, trim=self.sel_trim)
         # <LOG MESSAGE HERE>
         sys.stdout.write(mssg)
         return self
@@ -459,7 +459,7 @@ class ShellInterface(object):
         if c is not None:
             mssg = self.color_dict[c] + mssg + self.color_dict["endcolor"]
         if h:
-            mssg = self.os_generate_header(mssg, t)
+            mssg = self.os_generate_header(mssg, trim=t)
         return
 
     def os_print_config(self, c=None, j=None, h=False, t="=", tl=" "):
@@ -478,6 +478,7 @@ class ShellInterface(object):
         self.trail = " "
         return
 
+    @staticmethod
     def os_generate_header(title, trim="="):
         try:
             height, width = os.popen("stty size", "r").read().split()

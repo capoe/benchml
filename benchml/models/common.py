@@ -501,7 +501,7 @@ def make_soap_rr(tag, extensive, regularization_range):
 
 
 def get_compile_gylm(mod_name, whiten_hyper, regularization_range):
-    def customisable_compile_gylm(*args, **kwargs):
+    def customisable_compile_gylm():
         krr_int_settings = GridHyper(
             Hyper({"descriptor_atomic.normalize": [False]}),
             Hyper({"descriptor.reduce_op": ["mean"]}),

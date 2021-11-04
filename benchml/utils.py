@@ -19,6 +19,8 @@ class LineExpansion(object):
         self.epsilon = 1e-10
         self.sigma = sigma
         self.setup()
+        self.res = None
+        self.rbf_centers = None
 
     def setup(self):
         if self.periodic:

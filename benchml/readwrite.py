@@ -378,7 +378,6 @@ def save(arch_file_path, obj, method=None, embed_git_hash=False, **kwargs):
 
 
 def load(arch_file_path, method=None, **kwargs):
-    res = None
     if method is None:
         with open(arch_file_path, "rb") as model:
             res = pickle.load(model)

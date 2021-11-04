@@ -185,8 +185,6 @@ class SplitGrouped(SplitBase):
 
     def next(self):
         info = "%s_i%03d" % (self.tag, self.step)
-        train = []
-        test = []
         g = self.groups[self.step]
         train = np.where(self.index != g)[0]
         test = np.where(self.index == g)[0]

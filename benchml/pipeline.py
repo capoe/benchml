@@ -635,7 +635,7 @@ class Module(Transform):
         transform.updateInputs(self.broadcast)
         self.transforms.append(transform)
         if transform.tag in self.map_transforms:
-            raise ValueError("Transformation with name '%s' already exists" % (transform.tag))
+            raise ValueError(f"Transformation with name '{transform.tag}' already exists")
         self.map_transforms[transform.tag] = transform
         transform.attach(self)
         return self
@@ -926,7 +926,7 @@ class Module(Transform):
         (
             log
             << (log.mg if avail else log.mr)
-            << "Help message for module '%s'" % (self.tag)
+            << f"Help message for module '{self.tag}'"
             << log.endl
         )
         for tf in self.transforms:
@@ -935,7 +935,7 @@ class Module(Transform):
             (
                 log
                 << log.pp
-                << " Hyperparameter optimization: %s" % self.hyper.__class__.__name__
+                << f" Hyperparameter optimization: {self.hyper.__class__.__name__}"
                 << log.endl
             )
             for h in self.hyper.hypers:

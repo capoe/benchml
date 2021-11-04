@@ -105,11 +105,11 @@ class Accumulator(object):
         "bal": "smallest",
     }
 
-    def select(metric, **kwargs):
-        return Accumulator.select_best[metric]
+    def select(self, metric):
+        return self.select_best[metric]
 
-    def score(metric, *args, **kwargs):
-        return __class__.eval_map[metric](*args, **kwargs)
+    def score(self, metric, *args, **kwargs):
+        return self.eval_map[metric](*args, **kwargs)
 
     def __init__(self, jsonfile=None, metric=None, metrics=None):
         self.yp_map = {}
