@@ -149,7 +149,7 @@ class UniversalSoapGylmxx(UniversalSoapBase):
     def updateParams(self, par, meta=None):
         if meta is None:
             meta = {}
-        out = {}
+        out = dict()
         out["types"] = par.pop("species")
         out["nmax"] = par.pop("n")
         out["lmax"] = par.pop("l")
@@ -176,7 +176,7 @@ class UniversalSoapDscribe(UniversalSoapBase):
     def updateParams(self, par, meta=None):
         if meta is None:
             meta = {}
-        out = {}
+        out = dict()
         out["species"] = par.pop("species")
         out["nmax"] = par.pop("n")
         out["lmax"] = par.pop("l")

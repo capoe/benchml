@@ -105,8 +105,9 @@ class Accumulator(object):
         "bal": "smallest",
     }
 
-    def select(self, metric):
-        return self.select_best[metric]
+    @classmethod
+    def select(cls, metric):
+        return cls.select_best[metric]
 
     def score(self, metric, *args, **kwargs):
         return self.eval_map[metric](*args, **kwargs)
