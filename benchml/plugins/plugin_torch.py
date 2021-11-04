@@ -31,7 +31,7 @@ class TorchModuleTransform(Transform, nn.Module):
         for par in self.parameters():
             par.requires_grad = False if freeze else True
 
-    def _parametrize(self, *args):
+    def _parametrize(self, *args, **kwargs):
         return
 
     def _optimizer(self, *args, **kwargs):
