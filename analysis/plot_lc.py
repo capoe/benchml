@@ -10,6 +10,7 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+import math
 
 from bml_analysis_io import parse
 from bml_analysis_func import *
@@ -26,30 +27,42 @@ def read_acronym(filename="bml_name_acronym.list"):
     return acronym_dict
 
 
-def plot_lc_seperate(model_category, best_model_error, lc_by_model, lr_by_model, acronym_dict, num_col, num_row):
+def plot_lc_seperate(model_category, sc_name, best_model_error, lc_by_model, lr_by_model, acronym_dict, num_col, num_row):
     if num_row == 0:
-        num_row = len(model_category)//num_col
-    fig, ax = plt.subplots(nrows=num_row, ncols=num_col,figsize=(12,6),sharex=True,sharey=True)
+        num_row = math.ceil(len(model_category)/num_col)
+    fig, ax = plt.subplots(nrows=num_row, ncols=num_col,figsize=(3*num_col,2*num_row),sharex=True,sharey=True)
 
     for mi, [_, v] in enumerate(dict(sorted(best_model_error.items())).items()):
         i = mi%(num_col*num_row)
         category = v['category']
         best_model = v['model']
+
+        if num_row > 1 and num_col > 1: # 2D subplot
+            ax_now = ax[i//num_col,i%num_col]
+            ax0 = ax[0,0]
+        else:
+            ax_now = ax[i%(num_col*num_row)]
+            ax0 = ax[0]
+        
         for key_now in model_category[category]:
-            ax[i//num_col,i%num_col].errorbar(lc_by_model[key_now][:,0], lc_by_model[key_now][:,1], yerr=lc_by_model[key_now][:,2],
+            ax_now.errorbar(lc_by_model[key_now][:,0], lc_by_model[key_now][:,1], yerr=lc_by_model[key_now][:,2],
                     linestyle='-', c=cm.tab10(mi), alpha=0.5,
                     uplims=True, lolims=True)
     
-        ax[i//num_col,i%num_col].errorbar(lc_by_model[best_model][:,0], lc_by_model[best_model][:,1], yerr=lc_by_model[best_model][:,2],
+        ax_now.errorbar(lc_by_model[best_model][:,0], lc_by_model[best_model][:,1], yerr=lc_by_model[best_model][:,2],
                 linestyle='-',linewidth=4, c=cm.tab10(mi), alpha=1.0, 
                 label=acronym_dict[best_model]+"\n"+"LR="+"{:.1e}".format(lr_by_model[best_model]),
                 uplims=True, lolims=True)    
 
-        ax[i//num_col,i%num_col].legend(loc='lower left') # bbox_to_anchor=(1.3, 0.5))
+        ax_now.legend(loc='lower left') # bbox_to_anchor=(1.3, 0.5))
+        if i//num_col == 0:
+            ax_now.set_xlabel('N',labelpad=-5)
+        if i%num_col == 0:
+            ax_now.set_ylabel('Test {}'.format(sc_name),labelpad=-3)
 
-    return fig, ax, ax[0,0]
+    return fig, ax, ax0
     
-def plot_lc_together(model_category, best_model_error, lc_by_model, lr_by_model, acronym_dict):
+def plot_lc_together(model_category, sc_name, best_model_error, lc_by_model, lr_by_model, acronym_dict):
     fig, ax = plt.subplots(figsize=(8,6))
 
     for i, [_, v] in enumerate(dict(sorted(best_model_error.items())).items()):
@@ -62,10 +75,12 @@ def plot_lc_together(model_category, best_model_error, lc_by_model, lr_by_model,
 
         ax.errorbar(lc_by_model[best_model][:,0], lc_by_model[best_model][:,1], yerr=lc_by_model[best_model][:,2],
                 linestyle='-',linewidth=4, c=cm.tab10(i), alpha=1.0,
-                label=acronym_dict[best_model]+"LR="+"{:.1e}".format(lr_by_model[best_model]),
+                label=acronym_dict[best_model]+" LR="+"{:.1e}".format(lr_by_model[best_model]),
                 uplims=True, lolims=True)
 
     ax.legend(loc='best') # bbox_to_anchor=(1.3, 0.5))
+    ax.set_xlabel('N',labelpad=-10)
+    ax.set_ylabel('Test {}'.format(sc_name),labelpad=-5)
     return fig, ax, ax
 
 def main(filename, prefix, sc_name, ncol, nrow):
@@ -111,20 +126,14 @@ def main(filename, prefix, sc_name, ncol, nrow):
 
     # plot
     if ncol*nrow == 1:
-        fig, ax, ax0 = plot_lc_together(model_category, best_model_error, lc_by_model, lr_by_model, acronym_dict)
-        ax.set_xlabel('N',labelpad=-10)
-        ax.set_ylabel('Test {}'.format(sc_name),labelpad=-5)
+        fig, ax, ax0 = plot_lc_together(model_category, sc_name, best_model_error, lc_by_model, lr_by_model, acronym_dict)
     else:
-        fig, ax, ax0 = plot_lc_seperate(model_category, best_model_error, lc_by_model, lr_by_model, acronym_dict, ncol, nrow)
-        for i in range(len(ax[0,:])):
-            ax[1,i].set_xlabel('N',labelpad=-10)
-        for i in range(len(ax[:,0])):
-            ax[i,0].set_ylabel('Test {}'.format(sc_name),labelpad=-5)
+        fig, ax, ax0 = plot_lc_seperate(model_category, sc_name, best_model_error, lc_by_model, lr_by_model, acronym_dict, ncol, nrow)
 
     ax0.set_ylim([best_error*0.7,worst_error*1.3])
     ax0.set_xscale('log')
     ax0.set_yscale('log')
-    ax0.text(0.5, 0.95, prefix, fontsize=14,
+    ax0.text(0.2, 0.95, prefix, fontsize=14,
          horizontalalignment='left',
          verticalalignment='center',
          transform = ax0.transAxes)
