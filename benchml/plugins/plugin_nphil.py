@@ -1,10 +1,10 @@
 import numpy as np
 
-from benchml.pipeline import Transform
+from benchml.pipeline import FitTransform
 from benchml.plugins.plugin_check import check_nphil_available, nphil
 
 
-class NonlinearFeatureFilter(Transform):
+class NonlinearFeatureFilter(FitTransform):
     default_args = {
         "uops": ["el|sr2"],
         "bops": ["+-:*"],

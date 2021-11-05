@@ -216,7 +216,7 @@ class Params(object):
         self.storage[key] = value
 
 
-class Transform(object):
+class TransformBase(object):
     """Transforms constitute the nodes of a pipeline. Each transforms
     implements at least one of three methods, through which it acts on the data
     stream: map, fit, and feed.
@@ -455,71 +455,6 @@ class Transform(object):
     def _setup(self):
         return
 
-    @abc.abstractmethod
-    def _feed(self, data, stream):
-        """Mandatory method for Input Transforms."""
-        return
-
-    def feed(self, stream, data, verbose=VERBOSE):
-        self.resolveArgs()
-        self.hashState()
-        if self.detached:
-            stream.version(self.getHash())
-            return
-        self.setup()
-        self._feed(data, stream)
-        stream.version(self.getHash())
-
-    @abc.abstractmethod
-    def _map(self, inputs, stream):
-        """Mandatory method for descriptor and trainable Transforms."""
-        return
-
-    def map(self, stream, verbose=VERBOSE):
-        stream = stream.handle.activate(self, stream.tag)
-        self.resolveArgs()
-        self.hashState()
-        if self.detached:
-            stream.version(self.getHash())
-            return
-        inputs = self.resolveInputs(stream)
-        if self.precompute and stream.get("version") == self.getHash():
-            if verbose:
-                log << "[ hash matches, use cache ]" << log.flush
-        else:
-            self.setup()
-            self._map(inputs, stream)
-            self.hashState()
-            stream.version(self.getHash())
-
-    @abc.abstractmethod
-    def _fit(self, inputs, stream, params):
-        """Mandatory method for Trainable/Fittable Transforms."""
-        return
-
-    def fit(self, stream, verbose=VERBOSE):
-        if self._freeze:
-            if verbose:
-                log << "[302->Map]" << log.flush
-            return self.map(stream, verbose=verbose)
-        stream = stream.handle.activate(self, stream.tag)
-        self.resolveArgs()
-        self.hashState()
-        if self.detached:
-            stream.version(self.getHash())
-            return
-        inputs = self.resolveInputs(stream)
-        if self.precompute and stream.get("version") == self.getHash():
-            if verbose:
-                log << "[ hash matches, use cache ]" << log.flush
-        else:
-            params = self.openParams(stream.tag)
-            self.setup()
-            self._fit(inputs, stream, params)
-            self.hashState()
-            self.params().version(self.getHash())
-            stream.version(self.getHash())
-
     # LOGGING
     def __str__(self):
         info = "%s <- %s" % (self.tag, str(self.inputs))
@@ -593,7 +528,78 @@ class Transform(object):
                 log << log.my << " ]" << log.endl
 
 
-class Module(Transform):
+class InputTransform(TransformBase):
+    @abc.abstractmethod
+    def _feed(self, data, stream):
+        """Mandatory method for Input Transforms."""
+        return
+
+    def feed(self, stream, data, verbose=VERBOSE):
+        self.resolveArgs()
+        self.hashState()
+        if self.detached:
+            stream.version(self.getHash())
+            return
+        self.setup()
+        self._feed(data, stream)
+        stream.version(self.getHash())
+
+
+class Transform(TransformBase):
+    @abc.abstractmethod
+    def _map(self, inputs, stream):
+        """Mandatory method for descriptor and trainable Transforms."""
+        return
+
+    def map(self, stream, verbose=VERBOSE):
+        stream = stream.handle.activate(self, stream.tag)
+        self.resolveArgs()
+        self.hashState()
+        if self.detached:
+            stream.version(self.getHash())
+            return
+        inputs = self.resolveInputs(stream)
+        if self.precompute and stream.get("version") == self.getHash():
+            if verbose:
+                log << "[ hash matches, use cache ]" << log.flush
+        else:
+            self.setup()
+            self._map(inputs, stream)
+            self.hashState()
+            stream.version(self.getHash())
+
+
+class FitTransform(Transform):
+    @abc.abstractmethod
+    def _fit(self, inputs, stream, params):
+        """Mandatory method for Trainable/Fittable Transforms."""
+        return
+
+    def fit(self, stream, verbose=VERBOSE):
+        if self._freeze:
+            if verbose:
+                log << "[302->Map]" << log.flush
+            return self.map(stream, verbose=verbose)
+        stream = stream.handle.activate(self, stream.tag)
+        self.resolveArgs()
+        self.hashState()
+        if self.detached:
+            stream.version(self.getHash())
+            return
+        inputs = self.resolveInputs(stream)
+        if self.precompute and stream.get("version") == self.getHash():
+            if verbose:
+                log << "[ hash matches, use cache ]" << log.flush
+        else:
+            params = self.openParams(stream.tag)
+            self.setup()
+            self._fit(inputs, stream, params)
+            self.hashState()
+            self.params().version(self.getHash())
+            stream.version(self.getHash())
+
+
+class Module(TransformBase):
     """A module encapsulates an ML pipeline. It consists of a sequence of
     interdependent transforms.
 
@@ -605,7 +611,7 @@ class Module(Transform):
     """
 
     def __init__(self, tag="module", broadcast=None, transforms=None, hyper=None, **kwargs):
-        Transform.__init__(self, tag=tag, **kwargs)
+        super().__init__(self, tag=tag, **kwargs)
         if broadcast is None:
             broadcast = {}
         if transforms is None:
@@ -736,7 +742,7 @@ class Module(Transform):
                 slice_ax2=slice_ax2,
                 verbose=verbose,
             )
-            if data is not None and hasattr(t, "_feed"):
+            if data is not None and isinstance(t, InputTransform):
                 if verbose:
                     log << " Feed '%s'" % t.tag << log.flush
                 t.feed(stream, data, verbose=verbose)
@@ -763,7 +769,7 @@ class Module(Transform):
             print("Precompute '%s'" % stream.tag)
         self.activateStream(stream)
         for tidx, tf in enumerate(filter(lambda tf: tf.tag in precomps_deps, self.transforms)):
-            do_fit = hasattr(tf, "_fit")
+            do_fit = isinstance(tf, FitTransform)
             method_naming = {True: "Fit", False: "Map"}
             if verbose:
                 msg = " ".join(
@@ -794,6 +800,8 @@ class Module(Transform):
         self.activateStream(stream)
         sweep = self.filter(endpoint=endpoint)
         for tidx, t in enumerate(sweep):
+            if isinstance(t, InputTransform):
+                continue
             if verbose:
                 msg = " ".join([" " * tidx, "Map", t.tag, "using stream", stream.tag])
                 log << msg << log.flush
@@ -811,7 +819,7 @@ class Module(Transform):
         self.activateStream(stream)
         sweep = self.filter(endpoint=endpoint)
         for tidx, t in enumerate(sweep):
-            do_fit = hasattr(t, "_fit")
+            do_fit = isinstance(t, FitTransform)
             method_naming = {True: "Fit", False: "Map"}
             if verbose:
                 msg = " ".join(

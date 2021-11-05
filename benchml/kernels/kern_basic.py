@@ -1,6 +1,6 @@
 import numpy as np
 
-from benchml.pipeline import Transform
+from benchml.pipeline import FitTransform
 
 
 class KernelBase(object):
@@ -33,7 +33,7 @@ class KernelDotDeprecated(KernelBase):
         return k
 
 
-class KernelDot(Transform):
+class KernelDot(FitTransform):
     default_args = {"power": 1, "self_kernel": False}
     req_inputs = ("X",)
     allow_params = {"X"}
@@ -65,7 +65,7 @@ class KernelDot(Transform):
             stream.put("K_self", K_self)
 
 
-class KernelGaussian(Transform):
+class KernelGaussian(FitTransform):
     default_args = {"scale": 1, "self_kernel": False, "epsilon": 1e-10}
     req_inputs = ("X",)
     allow_params = {"X", "sigma"}

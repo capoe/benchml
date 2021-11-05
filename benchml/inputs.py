@@ -1,7 +1,7 @@
-from benchml.pipeline import Transform
+from benchml.pipeline import InputTransform
 
 
-class ExttInput(Transform):
+class ExttInput(InputTransform):
     allow_stream = {"X", "Y", "meta"}
     stream_copy = {
         "meta",
@@ -14,7 +14,7 @@ class ExttInput(Transform):
         stream.put("meta", data.meta)
 
 
-class ExtXyzInput(Transform):
+class ExtXyzInput(InputTransform):
     allow_stream = {"configs", "y", "meta"}
     stream_copy = ("meta",)
     stream_samples = ("configs", "y")

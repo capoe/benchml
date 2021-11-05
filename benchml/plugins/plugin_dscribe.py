@@ -1,14 +1,14 @@
-import abc
+from abc import abstractmethod
 
 import numpy as np
 
 from benchml.logger import log
-from benchml.pipeline import Transform
+from benchml.pipeline import FitTransform
 from benchml.plugins.plugin_check import asaplib, check_asap_available, check_dscribe_available, dd
 from benchml.ptable import lookup
 
 
-class DscribeTransform(Transform):
+class DscribeTransform(FitTransform):
     req_inputs = ("configs",)
     allow_params = ("calc",)
     allow_stream = ("X",)
@@ -20,7 +20,8 @@ class DscribeTransform(Transform):
     def check_available(self, *args, **kwargs):
         return check_dscribe_available(self, *args, **kwargs)
 
-    @abc.abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def CalculatorClass(*args, **kwargs):
         """Mandatory static method for DscribeTransform-based Transforms."""
         return

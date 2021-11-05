@@ -82,7 +82,7 @@ stream = model.open(data)  # < Internally this will call .feed on all
 Below we show an example implementation for an input node (here: ExtXyzInput),
 where .feed is used to release "configs","y" and "meta" into the data stream:
 ```python
-class ExtXyzInput(Transform):                 # < All transforms derive from <Transform>
+class ExtXyzInput(InputTransform):            # < All transforms derive from <TransformBase>
     allow_stream = {"configs", "y", "meta"}   # < Fields permitted in the stream object
     stream_copy = ("meta",)                   # < See section on class attributes
     stream_samples = ("configs", "y")         # < See section on class attributes
@@ -129,7 +129,7 @@ to store predicted targets for the training set.
 The map operation reads model parameters from .params() (e.g. via self.params().get("coeffs")),
 and releases the mapped output into the stream. See below a wrapper around the Ridge predictor from sklearn:
 ```python
-class Ridge(Transform):
+class Ridge(FitTransform):
     default_args = {"alpha": 1.0}
     req_inputs = ("X", "y")
     allow_params = {"model"}
@@ -147,12 +147,12 @@ class Ridge(Transform):
         stream.put("y", y)
 ```
 
-### Transform class attributes
+### TransformBase class attributes
 New transform classes may require us to update their class attributes in order to define default arguments,
 required inputs, or ensure correct handling of their data streams.
-The base Transform class lists the following class attributes:
+The base TransformBase class lists the following class attributes:
 ```python
-class Transform(object):
+class TransformBase(object):
     default_args = {}
     req_args = tuple()
     req_inputs = tuple()
@@ -180,7 +180,7 @@ The stream_copy, stream_samples and stream_kernel attributes inform the streamm
 how to adequately split its member data onto these partitions.
 For example, for ExtXyzInput, we have the following:
 ```python
-class ExtXyzInput(Transform):
+class ExtXyzInput(InputTransform):
     allow_stream = {"configs", "y", "meta"}
     stream_copy = ("meta",)
     stream_samples = ("configs", "y")
@@ -194,7 +194,7 @@ from slicing of, say, a design matrix, as this affects the two axes of the matri
 e.g., K_train = K\[trainset\]\[:,trainset\], where K_test = K\[testset\]\[:,trainset\].
 This is why the kernel matrix computed, e.g.,by the KernelDot transform is listed in a dedicated stream_kernel attribute:
 ```python
-class KernelDot(Transform):
+class KernelDot(FitTransform):
     default_args = {"power": 1}
     req_inputs = ("X",)
     allow_params = {"X"}

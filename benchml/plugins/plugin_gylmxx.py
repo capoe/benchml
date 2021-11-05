@@ -1,15 +1,16 @@
 import multiprocessing as mp
 import time
+from abc import ABC
 
 import numpy as np
 
 from benchml.logger import log
-from benchml.pipeline import Transform
+from benchml.pipeline import FitTransform, Transform
 from benchml.plugins.plugin_check import check_gylmxx_available, gylm
 from benchml.readwrite import write_xyz
 
 
-class KernelSmoothMatch(Transform):
+class KernelSmoothMatch(FitTransform):
     default_args = {"base_kernel": "xi.dot(xj.T)", "base_power": 3, "gamma": 1e-2, "epsilon": 1e-6}
     req_inputs = ("X",)
     allow_stream = ("K",)
@@ -117,7 +118,7 @@ class AttributeKernelSmoothMatchSVM(Transform):
         stream.put("Z", np.array(Z, dtype=object))
 
 
-class GylmTransform(Transform):
+class GylmTransform(FitTransform, ABC):
     default_args = {
         "procs": 1,
         "rcut": 5.0,

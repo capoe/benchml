@@ -2,7 +2,7 @@ import numpy as np
 import scipy
 
 from benchml.logger import log
-from benchml.pipeline import Transform
+from benchml.pipeline import FitTransform
 
 
 def dist_mp(x, gamma):
@@ -71,7 +71,7 @@ def pca_compute(X, norm_div_std=True, norm_sub_mean=True, ddof=1, eps=1e-10):
     return X_norm_pca, X_norm, x_mean, x_std, S, L, U
 
 
-class CleanMatrix(Transform):
+class CleanMatrix(FitTransform):
     req_inputs = {
         "X",
     }
@@ -105,7 +105,7 @@ class CleanMatrix(Transform):
         stream.put("X", inputs["X"][tuple(s)])
 
 
-class MarchenkoPasturFilter(Transform):
+class MarchenkoPasturFilter(FitTransform):
     req_inputs = {
         "X",
     }

@@ -1,10 +1,12 @@
+from abc import ABC
+
 import numpy as np
 
 from benchml.logger import log
-from benchml.pipeline import Params, Transform
+from benchml.pipeline import FitTransform, Params
 
 
-class EnsembleBase(Transform):
+class EnsembleBase(FitTransform, ABC):
     default_args = {
         "size": 100,
         "bootstrap_samples": True,

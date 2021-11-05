@@ -1,6 +1,6 @@
 import numpy as np
 
-from benchml.pipeline import Transform
+from benchml.pipeline import FitTransform, Transform
 
 
 class Reshape(Transform):
@@ -40,7 +40,7 @@ class Concatenate(Transform):
         stream.put("X", X_out)
 
 
-class WhitenMatrix(Transform):
+class WhitenMatrix(FitTransform):
     default_args = {"centre": True, "scale": True, "epsilon": 1e-10}
     req_inputs = ("X",)
     allow_params = ("x_avg", "x_std")
@@ -89,7 +89,7 @@ class ReduceMatrix(Transform):
         stream.put("X", X)
 
 
-class ReduceTypedMatrix(Transform):
+class ReduceTypedMatrix(FitTransform):
     default_args = {
         "reduce_op": "sum",
         "normalize": False,

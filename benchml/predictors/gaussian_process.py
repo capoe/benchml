@@ -1,10 +1,10 @@
 import numpy as np
 
 from benchml.logger import log
-from benchml.pipeline import Params, Transform
+from benchml.pipeline import FitTransform, Params
 
 
-class GaussianProcess(Transform):
+class GaussianProcess(FitTransform):
     req_args = ("alpha",)
     default_args = {"power": 1, "alpha": 1.0, "predict_variance": True}
     req_inputs = ("K", "y")
@@ -79,7 +79,7 @@ class GaussianProcess(Transform):
         return z
 
 
-class ResidualGaussianProcess(Transform):
+class ResidualGaussianProcess(FitTransform):
     req_args = ("alpha",)
     default_args = {"power": 1, "alpha": 1.0, "predict_variance": False, "fit_residuals": False}
     req_inputs = ("K", "y")

@@ -1,12 +1,14 @@
+from abc import ABC
+
 import numpy as np
 
 from benchml.logger import log
-from benchml.pipeline import Transform
+from benchml.pipeline import InputTransform, Transform
 from benchml.plugins.plugin_check import check_torch_available, nn, torch
 from benchml.readwrite import load
 
 
-class TorchModuleTransform(Transform, nn.Module):
+class TorchModuleTransform(Transform, nn.Module, ABC):
     default_args = {"device": "", "reset_parameters": False, "reset_optimizer": False}
 
     def check_available(self, *args, **kwargs):
@@ -84,7 +86,7 @@ class TorchTransformDescriptor(Transform):
         stream.put("X", X)
 
 
-class TorchDevice(TorchModuleTransform):
+class TorchDevice(TorchModuleTransform, InputTransform):
     allow_stream = ("device",)
 
     def _feed(self, data, stream, *args, **kwargs):

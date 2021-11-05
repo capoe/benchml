@@ -1,8 +1,10 @@
+from abc import ABC
+
 import numpy as np
 from scipy.optimize import curve_fit
 
 from benchml.logger import log
-from benchml.pipeline import Params, Transform
+from benchml.pipeline import FitTransform, Params
 from benchml.splits import Split
 
 
@@ -10,7 +12,7 @@ def fsigmoid(x, a, b):
     return 1.0 / (1.0 + np.exp(-a * (x - b)))
 
 
-class ConformalBase(Transform):
+class ConformalBase(FitTransform, ABC):
     default_args = {
         "split": {"method": "random", "n_splits": 10, "train_fraction": 0.9},
         "epsilon": 1e-10,

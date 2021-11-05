@@ -1,10 +1,10 @@
-import abc
 import time
+from abc import abstractmethod
 
 import numpy as np
 
 from benchml.logger import log
-from benchml.pipeline import Transform
+from benchml.pipeline import FitTransform
 from benchml.plugins.plugin_check import (
     asaplib,
     check_asap_available,
@@ -16,7 +16,7 @@ from benchml.plugins.plugin_check import (
 from benchml.ptable import lookup
 
 
-class SoapBase(Transform):
+class SoapBase(FitTransform):
     default_args = {
         "rcut": 5.0,
         "nmax": 9,
@@ -112,7 +112,8 @@ class UniversalSoapBase(SoapBase):
     }
     allow_params = ("calcs",)
 
-    @abc.abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def CalculatorClass(*args, **kwargs):
         """Mandatory method for UniversalSoapBase-based Transforms."""
         return
@@ -122,7 +123,7 @@ class UniversalSoapBase(SoapBase):
             self, *args, **kwargs
         )
 
-    @abc.abstractmethod
+    @abstractmethod
     def updateParams(self, par, meta):
         """Mandatory method for UniversalSoapBase-based Transforms."""
         return

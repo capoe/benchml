@@ -1,6 +1,8 @@
+from abc import ABC
+
 import numpy as np
 
-from benchml.pipeline import Transform
+from benchml.pipeline import FitTransform
 
 try:
     import sklearn
@@ -21,7 +23,7 @@ def check_sklearn_available(obj, require=False):
     return True
 
 
-class SklearnTransform(Transform):
+class SklearnTransform(FitTransform, ABC):
     def check_available(self, *args, **kwargs):
         return check_sklearn_available(self, *args, **kwargs)
 
@@ -125,7 +127,7 @@ class ElasticNetClassifier(SklearnTransform):
         stream.put("z", y)
 
 
-class OMPClassifier(Transform):
+class OMPClassifier(FitTransform):
     default_args = dict(
         n_nonzero_coefs=5,
     )
@@ -253,7 +255,7 @@ class KernelRidge(SklearnTransform):
     allow_stream = {"y"}
 
     def __init__(self, **kwargs):
-        Transform.__init__(self, **kwargs)
+        super().__init__(self, **kwargs)
 
     def _setup(self):
         self.power = self.args["power"]
@@ -402,7 +404,7 @@ class ElasticNet(SklearnTransform):
         stream.put("z", y)
 
 
-class KernelMatern(Transform):
+class KernelMatern(FitTransform):
     default_args = {"length_scale": 1.0, "nu": 1.5}
     req_inputs = ("X",)
     allow_params = {"X"}

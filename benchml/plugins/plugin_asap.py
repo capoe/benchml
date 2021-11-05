@@ -1,3 +1,5 @@
+from abc import ABC
+
 from benchml.logger import Mock
 from benchml.pipeline import Transform
 
@@ -17,7 +19,7 @@ def check_asap_available(obj, require=False):
     return True
 
 
-class AsapTransform(Transform):
+class AsapTransform(Transform, ABC):
     def check_available(self, *args, **kwargs):
         return check_asap_available(self, *args, **kwargs)
 

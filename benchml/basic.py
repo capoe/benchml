@@ -1,6 +1,6 @@
 import numpy as np
 
-from benchml.pipeline import Transform
+from benchml.pipeline import FitTransform, Transform
 
 
 class Add(Transform):
@@ -47,7 +47,7 @@ class Exp(Transform):
         stream.put("X", np.exp(self.args["coeff"] * inputs["X"]))
 
 
-class Delta(Transform):
+class Delta(FitTransform):
     allow_stream = {"y"}
     req_inputs = {"target", "ref"}
     stream_samples = ("y",)
@@ -60,7 +60,7 @@ class Delta(Transform):
         stream.put("y", delta)
 
 
-class RankNorm(Transform):
+class RankNorm(FitTransform):
     req_inputs = {
         "z",
     }
@@ -82,7 +82,7 @@ class RankNorm(Transform):
         stream.put("z", ranked)
 
 
-class SliceMatrix(Transform):
+class SliceMatrix(FitTransform):
     allow_params = {
         "slice",
     }
@@ -110,7 +110,7 @@ class SliceMatrix(Transform):
         stream.put("X", inputs["X"][s])
 
 
-class DoDivideBySize(Transform):
+class DoDivideBySize(FitTransform):
     default_args = {
         "config_to_size": "lambda c: len(c)",
         "skip_if_not_force": False,
