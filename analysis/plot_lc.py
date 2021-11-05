@@ -112,8 +112,8 @@ def main(filename, prefix, sc_name, ncol, nrow):
     for mi, [category, model_key] in enumerate(model_category.items()):
         best_error = 10**20.
         best_model = None
-        try:
-            for key_now in model_key:
+        for key_now in model_key:
+            try:
                 lc_by_model[key_now], _, _ = get_learning_curve(by_model, model_key_now=key_now,
                                                        sc_name=sc_name)
                 #lc_by_model[key_now], lc_by_model_train[key_now], _ = get_learning_curve(by_model, model_key_now=key_now,
@@ -126,13 +126,13 @@ def main(filename, prefix, sc_name, ncol, nrow):
                 # compute learning rate
                 lc_now = lc_by_model[key_now]
                 lr_by_model[key_now] = -(np.log(lc_now[0,1])-np.log(lc_now[-1,1]))/(np.log(lc_now[0,0])-np.log(lc_now[-1,0]))
-            n_category += 1
-        except:
-            lc_by_model[key_now] = None
-            continue
+            except:
+                lc_by_model[key_now] = None
+                continue
+        if best_model is not None: n_category += 1
         best_model_error[best_error] = { "category": category, "model": best_model}
 
-    test_RMSE = [ [k, lc_by_model[k][-1,1]] for k in by_model.keys()]
+    test_RMSE = [ [k, lc_by_model[k][-1,1]] for k in by_model.keys() if lc_by_model[key_now] is not None]
     np.savetxt(prefix+'-test_RMSE.dat', test_RMSE, fmt='%s')
 
     # plot
