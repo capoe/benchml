@@ -45,15 +45,18 @@ The results are then stored in their private stream and/or parameter object. An 
 creates a new transform instance reads as follows:
 ```python
 trafo = RandomProjector(
-  args={
-    "cutoff": 0.1,
-    "epsilon": 0.01,
-    ...},
-  inputs={
-    "X": "descriptor.x",
-    "y": "input.y",
-    "M": "predictor._model",
-    ...})
+    args={
+        "cutoff": 0.1,
+        "epsilon": 0.01,
+        # ...
+    },
+    inputs={
+        "X": "descriptor.x",
+        "y": "input.y",
+        "M": "predictor._model",
+        # ...
+    },
+)
 ```
 - The "args" dictionary supplies the parameters of the transformation, such as a cutoff, a convergence threshold, etc.
   These parameters should not be confused with the *output* parameters (which could, e.g.,
@@ -73,16 +76,17 @@ Which type we are dealing with is determined by which methods (.\_feed, .\_map, 
 
 Input transforms, such as ExtXyzInput, implement the .\_feed method that is called inside .open of a model (= pipeline):
 ```python
-stream = model.open(data) # < Internally this will call .feed on all
-                          #   transforms that implement the ._feed method.
+stream = model.open(data)  # < Internally this will call .feed on all
+                           #   transforms that implement the ._feed method.
 ```
 Below we show an example implementation for an input node (here: ExtXyzInput),
 where .feed is used to release "configs","y" and "meta" into the data stream:
 ```python
 class ExtXyzInput(Transform):                 # < All transforms derive from <Transform>
-    allow_stream = {'configs', 'y', 'meta'}   # < Fields permitted in the stream object
+    allow_stream = {"configs", "y", "meta"}   # < Fields permitted in the stream object
     stream_copy = ("meta",)                   # < See section on class attributes
     stream_samples = ("configs", "y")         # < See section on class attributes
+
     def _feed(self, data, stream):
         stream.put("configs", data)
         stream.put("y", data.y)
@@ -96,15 +100,16 @@ such as the RandomDescriptor class below:
 ```python
 class RandomDescriptor(Transform):
     default_args = {
-      'xmin': -1.,
-      'xmax': +1.,
-      'dim': None
+      "xmin": -1.0,
+      "xmax": +1.0,
+      "dim": None
     }
-    req_args = ('dim',)           # < Required fields to be specified in the constructor "args"
-    req_inputs = ('configs',)     # < Required inputs to be specified in the constructor "inputs"
-    allow_stream = {'X'}
-    stream_samples = ('X',)
+    req_args = ("dim",)           # < Required fields to be specified in the constructor "args"
+    req_inputs = ("configs",)     # < Required inputs to be specified in the constructor "inputs"
+    allow_stream = {"X"}
+    stream_samples = ("X",)
     precompute = True
+
     def _map(self, inputs, stream):       # < The inputs dictionary comes preloaded with the appropriate data
         shape = (
           len(inputs["configs"]),
@@ -125,16 +130,18 @@ The map operation reads model parameters from .params() (e.g. via self.params().
 and releases the mapped output into the stream. See below a wrapper around the Ridge predictor from sklearn:
 ```python
 class Ridge(Transform):
-    default_args = { 'alpha': 1. }
-    req_inputs = ('X', 'y')
-    allow_params = {'model'}
-    allow_stream = {'y'}
+    default_args = {"alpha": 1.0}
+    req_inputs = ("X", "y")
+    allow_params = {"model"}
+    allow_stream = {"y"}
+
     def _fit(self, inputs, stream, params):
         model = sklearn.linear_model.Ridge(**self.args)
         model.fit(X=inputs["X"], y=inputs["y"])
         yp = model.predict(inputs["X"])
         params.put("model", model)
         stream.put("y", yp)
+
     def _map(self, inputs, stream):
         y = self.params().get("model").predict(inputs["X"])
         stream.put("y", y)
@@ -174,7 +181,7 @@ how to adequately split its member data onto these partitions.
 For example, for ExtXyzInput, we have the following:
 ```python
 class ExtXyzInput(Transform):
-    allow_stream = {'configs', 'y', 'meta'}
+    allow_stream = {"configs", "y", "meta"}
     stream_copy = ("meta",)
     stream_samples = ("configs", "y")
 ```
@@ -188,11 +195,11 @@ e.g., K_train = K\[trainset\]\[:,trainset\], where K_test = K\[testset\]\[:,trai
 This is why the kernel matrix computed, e.g.,by the KernelDot transform is listed in a dedicated stream_kernel attribute:
 ```python
 class KernelDot(Transform):
-    default_args = {'power': 1}
-    req_inputs = ('X',)
-    allow_params = {'X'}
-    allow_stream = {'K'}
-    stream_kernel = ('K',)
+    default_args = {"power": 1}
+    req_inputs = ("X",)
+    allow_params = {"X"}
+    allow_stream = {"K"}
+    stream_kernel = ("K",)
     precompute = True
 ```
 
@@ -235,8 +242,8 @@ model = Module(
         convert={
             "KernelRidge.alpha": lambda a: 10**a}),
     broadcast={ "meta": "input.meta" },           # < Data objects referenced here are broadcast to
-    outputs={ "y": "KernelRidge.y" }              #   all transforms, and can be accessed via the
-),                                                #   inputs argument in their .\_map and .\_fit methods.
+    outputs={ "y": "KernelRidge.y" },             #   all transforms, and can be accessed via the
+)                                                 #   inputs argument in their .\_map and .\_fit methods.
 ```
 Note that except for "transforms", all arguments in this constructor are optional.
 Still, most pipelines will typically define some "outputs",
@@ -267,12 +274,12 @@ It is then usually a good idea to call model.precompute before model.hyperfit in
 stream_train = model.open(data_train)
 model.precompute(stream_train)
 model.hyperfit(
-  stream=stream_train,
-  split_args={"method": "random", "n_splits": 5, "train_fraction": 0.75},
-  accu_args={"metric": "mse"},  # < These arguments are handed over to an "accumulator"
-  target="y",                   #   that evaluates the desired metric between the target "y"
-  target_ref="input.y")         #   (read from the model output) and reference "input.y"
-                                #   (read from the stream of the "input" transform).
+    stream=stream_train,
+    split_args={"method": "random", "n_splits": 5, "train_fraction": 0.75},
+    accu_args={"metric": "mse"},  # < These arguments are handed over to an "accumulator"
+    target="y",                   #   that evaluates the desired metric between the target "y"
+    target_ref="input.y")         #   (read from the model output) and reference "input.y"
+                                  #   (read from the stream of the "input" transform).
   ```
 
 ### Accessing data within a stream or module
@@ -300,16 +307,16 @@ class TopologicalKernel(Macro):
     req_inputs = ("descriptor.configs",)
     transforms = [
         {
-          "class": TopologicalFP,
-          "tag": "descriptor",
-          "args": {"length": 1024, "radius": 3},
-          "inputs": {"configs": "?"},
+            "class": TopologicalFP,
+            "tag": "descriptor",
+            "args": {"length": 1024, "radius": 3},
+            "inputs": {"configs": "?"},
         },
         {
-          "class": KernelDot,
-          "tag": "kernel",
-          "args": {},
-          "inputs": {"X": "descriptor.X"}
+            "class": KernelDot,
+            "tag": "kernel",
+            "args": {},
+            "inputs": {"X": "descriptor.X"}
         }
     ]
 ```
@@ -322,17 +329,21 @@ Module(
         TopologicalKernel(
             tag="A",
             args={"descriptor.fp_length": 1024, "descriptor.fp_radius": 2},
-            inputs={"descriptor.configs": "input.configs"}),
+            inputs={"descriptor.configs": "input.configs"},
+        ),
         TopologicalKernel(
             tag="B",
             args={"descriptor.fp_length": 2048, "descriptor.fp_radius": 4},
-            inputs={"descriptor.configs": "input.configs"}),
+            inputs={"descriptor.configs": "input.configs"}
+        ),
         Add(
             args={"coeffs": [ 0.5, 0.5 ]},
-            inputs={"X": ["A/kernel.K", "B/kernel.K"]}),
+            inputs={"X": ["A/kernel.K", "B/kernel.K"]}
+        ),
         KernelRidge(
             args={"alpha": 0.1, "power": 2},
-            inputs={"K": "Add.y", "y": "input.y"})
+            inputs={"K": "Add.y", "y": "input.y"}
+        ),
     ]
 )
 ```
@@ -347,9 +358,9 @@ A grid-based example reads as follows:
 ```python
 model = Module(
     transforms=[
-        ...
+        # ...
         KernelRidge(...)
-        ...
+        # ...
     ],
     hyper=GridHyper(
         Hyper({ "KernelRidge.alpha": np.logspace(-3,+3, 5), }),
@@ -363,9 +374,9 @@ Hyperparameters contained within the same Hyper object, by contrast, are swept o
 ```python
 model = Module(
     transforms=[
-        ...
+        # ...
         KernelRidge(...)
-        ...
+        # ...
     ],
     hyper=GridHyper(
         Hyper({
@@ -380,14 +391,14 @@ Bayesian optimization can then be a more efficient choice:
 ```python
 model = Module(
     transforms=[
-        ...
+        # ...
         KernelRidge(...)
-        ...
+        # ...
     ],
     hyper=BayesianHyper(
         Hyper({
             "KernelRidge.alpha": [ -3, 3 ],
-            "KernelRidge.power": [ 1., 3. ] }),
+            "KernelRidge.power": [ 1.0, 3.0 ] }),
         convert={"KernelRidge.alpha": lambda a: 10**a}),
 ),
 ```
@@ -398,16 +409,16 @@ such that the Bayesian optimization (which is hence applied to the log of the re
 experiences a smoother landscape.
 A similar conversion is necessary when integral or boolean parameters are to be optimized:
 ```python
-   ...
-   hyper=BayesianHyper(
-        Hyper({
-            "trafo.some_boolean": [ 0., 1. ],
-            "trafo.some_integer": [ 128, 512] }),
-        convert={
-            "trafo.some_boolean": lambda b: bool(np.round(b)),
-            "trafo.some_integer": lambda f: int(f)
-        })
-    ...
+# ...
+hyper=BayesianHyper(
+    Hyper({
+        "trafo.some_boolean": [ 0.0, 1.0 ],
+        "trafo.some_integer": [ 128, 512] }),
+    convert={
+        "trafo.some_boolean": lambda b: bool(np.round(b)),
+        "trafo.some_integer": lambda f: int(f)
+    })
+# ...
 ```
 # Development
 ## Tests
