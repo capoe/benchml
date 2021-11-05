@@ -2,6 +2,20 @@
 model classfications for molecular datasets
 """
 
+import matplotlib.cm as cm
+
+color_dict = { 'acsf': cm.tab10(0),
+               'soap': cm.tab10(1),
+               'cm': cm.tab10(2),
+               'gylm': cm.tab10(3),
+               'mbtr': cm.tab10(4),
+               'pdf': cm.tab10(5),
+               'physchem': cm.tab10(6),
+               'esm': cm.tab10(7),
+               'ecfp': cm.tab10(8)
+             }
+
+
 def base2model(base_list, mode_list):
     return [ a+'_'+m for a in base_list for m in mode_list]
 
