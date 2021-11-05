@@ -219,11 +219,6 @@ class OptionsInterface(object):
         except KeyError:
             raise ValueError("CLIO does not know how to convert %s into a boolean." % expr)
 
-    def InterpretAsNumpyArray(self, expr):
-        array = [float(e) for e in expr]
-        array = np.array(array)
-        return array
-
     def InterpretAsList(self, expr):
         array = [self.subtype(e) for e in expr]
         return array
@@ -266,10 +261,6 @@ class OptionsInterface(object):
         elif type is bool:
             type = self.InterpretAsBoolean
             nargs = None
-        elif type is np.array:
-            raise NotImplementedError
-            type = float  # self.InterpretAsNumpyArray
-            nargs = 3
         elif type is list:
             type = str
             nargs = "*"

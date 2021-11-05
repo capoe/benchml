@@ -73,15 +73,6 @@ class SubsampleMatrix(Transform):
 
     def _map(self, inputs, stream):
         raise NotImplementedError()  # TODO Generalize
-        X = inputs["X"]
-        configs = inputs["configs"]
-        X_out = []
-        for i in range(len(configs)):
-            assert len(X[i]) == len(configs[i].symbols)
-            sel = int(configs[i].info[self.args["info_key"]])
-            X_out.append(X[i][sel])
-        X_out = np.array(X_out)
-        stream.put("X", X_out)
 
 
 class ReduceMatrix(Transform):

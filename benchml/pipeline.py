@@ -894,21 +894,6 @@ class Module(Transform):
 
     def compileStream(self, typestr_only=False):
         raise NotImplementedError("Uses old streaming model")
-        output = {}
-
-        def get_typestr(v):
-            if hasattr(v, "shape"):
-                return "<mat, %s>" % repr(v.shape)
-            elif isinstance(v, list):
-                t = ",".join(map(get_typestr, v))
-                return "<list, len=%d, %s>" % (len(v), t)
-            return str(type(v))
-
-        for tf in self.transforms:
-            for key, v in tf.stream().items():
-                type_str = get_typestr(v)
-                output["%s.%s" % (tf.tag, key)] = type_str if typestr_only else [v, type_str]
-        return output
 
     def __str__(self):
         return "Module='%s'" % self.tag + "\n  " + "\n  ".join([str(t) for t in self.transforms])
