@@ -81,7 +81,7 @@ def NamespaceFromDict(tree_dict):
     nspace = ExtendableNamespace()
     for key in tree_dict.keys():
         sections = key.split("/")
-        values = [None for s in sections]
+        values = [None] * len(sections)
         values[-1] = tree_dict[key]
         add_to_nspace = nspace
         for s, v in zip(sections, values):
@@ -154,8 +154,11 @@ class XmlNode(object):
 
 
 class CLIO_HelpFormatter(argparse.HelpFormatter):
-    def _format_usage(self, usage, action, group, prefix):
-        return "%s : Command Line Interface\n" % sys.argv[0]
+    def _format_usage(self, usage, actions, groups, prefix):
+        # default_usage = super()._format_usage(usage, actions, groups, prefix)
+        # res = f"{self._prog} : Command Line Interface\n{default_usage}\n"
+        res = f"{self._prog} : Command Line Interface\n"
+        return res
 
 
 class OptionsInterface(object):
