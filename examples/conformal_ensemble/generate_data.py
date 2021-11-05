@@ -17,14 +17,6 @@ default_config = {
 }
 
 
-class State(object):
-    """Mock object, needs to be finished or removed."""
-
-    def __init__(self, ising_J, ising_B):
-        # TODO
-        pass
-
-
 class IsingModel(object):
     def __init__(self, config):
         self.config = {k: config[k] for k in config}
@@ -67,27 +59,6 @@ class IsingEnsemble(object):
     def append(self, S, E):
         self.states.append(IsingState(config={}, S=S, E=E))
         return
-
-    def exportState(self):
-        # Embed index, label
-        for idx, s in enumerate(self.states):
-            s.info["idx"] = idx
-            s.info["label"] = "ISING%06d" % idx
-        # Descriptor matrix
-        n_samples = len(self.states)
-        n_dim = self.model.config["dim"]
-        IX = np.zeros((n_samples, n_dim), dtype="float64")
-        for i in range(n_samples):
-            IX[i, :] = np.copy(self.states[i].S)
-        # Setup state
-        state = State(ising_J=self.model.J, ising_B=self.model.B)
-        state.register("generate_ising", self.model.config)
-        state["configs"] = self.states
-        state["labels"] = [s.info for s in self.states]
-        state["IX"] = IX
-        state["n_samples"] = n_samples
-        state["n_dim"] = n_dim
-        return state
 
     def pickle(self, pfile="kernel.svmbox.pstr"):
         pstr = pickle.dumps(self)
