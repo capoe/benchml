@@ -1,7 +1,7 @@
 import numpy as np
 
 from benchml.logger import log
-from benchml.pipeline import Transform
+from benchml.pipeline import Params, Transform
 
 
 class GaussianProcess(Transform):
@@ -124,10 +124,9 @@ class ResidualGaussianProcess(Transform):
             args=dict(alpha=self.args["alpha"], power=self.args["power"], predict_variance=False),
             inputs=dict(K=None, y=None),
         )
-        rsd_gp.openPrivateStream("temp")
-        rsd_gp.openParams("temp")
-        rsd_gp._fit({"K": K, "y": residuals})
-        rsd_gp._map({"K": K, "y": residuals})
+        params_s = Params(tag="", tf=rsd_gp)
+        rsd_gp._fit({"K": K, "y": residuals}, stream, params_s)
+        rsd_gp._map({"K": K, "y": residuals}, stream)
         self.params().put("res", residuals)
         self.params().put("res_model", rsd_gp)
 
