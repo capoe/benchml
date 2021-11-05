@@ -527,14 +527,12 @@ class ShellInterface(object):
             self << self.ok << what << self.endl
         self.DisconnectFromFile()
         sys.exit(0)
-        return
 
     def xxquit(self, what=""):
         if what != "":
             self << self.xx << "ERROR" << what << self.endl
         self.DisconnectFromFile()
         sys.exit(1)
-        return
 
     # DIRECTORY NAVIGATION
     def cd(self, d):
