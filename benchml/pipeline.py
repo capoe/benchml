@@ -1,3 +1,4 @@
+import abc
 import copy
 import hashlib
 import inspect
@@ -454,6 +455,11 @@ class Transform(object):
     def _setup(self):
         return
 
+    @abc.abstractmethod
+    def _feed(self, data, stream):
+        """Mandatory method for Input Transforms."""
+        return
+
     def feed(self, stream, data, verbose=VERBOSE):
         self.resolveArgs()
         self.hashState()
@@ -463,6 +469,11 @@ class Transform(object):
         self.setup()
         self._feed(data, stream)
         stream.version(self.getHash())
+
+    @abc.abstractmethod
+    def _map(self, inputs, stream):
+        """Mandatory method for descriptor and trainable Transforms."""
+        return
 
     def map(self, stream, verbose=VERBOSE):
         stream = stream.handle.activate(self, stream.tag)
@@ -481,7 +492,9 @@ class Transform(object):
             self.hashState()
             stream.version(self.getHash())
 
-    def _map(self, inputs, stream):
+    @abc.abstractmethod
+    def _fit(self, inputs, stream, params):
+        """Mandatory method for Trainable/Fittable Transforms."""
         return
 
     def fit(self, stream, verbose=VERBOSE):

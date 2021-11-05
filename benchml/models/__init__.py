@@ -63,17 +63,17 @@ def compile_and_filter(filter_collections=None, filter_models=None, verbose=Fals
         filter_models = [".*"]
     if verbose:
         log << "Compile & filter models" << log.endl
-    filter_models = [re.compile(f) for f in filter_models]
-    filter_collections = [re.compile(c) for c in filter_collections]
+    re_filter_models = [re.compile(f) for f in filter_models]
+    re_filter_collections = [re.compile(c) for c in filter_collections]
     check_added = set()
     filtered_models = []
     for group, collection in sorted(collections.items()):
-        if not np.array([f.match(group) for f in filter_collections]).any():
+        if not np.array([f.match(group) for f in re_filter_collections]).any():
             continue
         models = collection()
         for m in models:
             avail = m.check_available()
-            matches = np.array([f.match(m.tag) for f in filter_models]).any()
+            matches = np.array([f.match(m.tag) for f in re_filter_models]).any()
             if matches and not avail:
                 (
                     log

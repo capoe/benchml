@@ -1,3 +1,4 @@
+import abc
 import time
 
 import numpy as np
@@ -99,7 +100,7 @@ class SoapGylmxx(SoapBase):
 
 class UniversalSoapBase(SoapBase):
     def evaluateSingle(self, calc, config, pos_centres):
-        return super().evaluateSingle(self, calc, config, pos_centres)
+        return super().evaluateSingle(calc, config, pos_centres)
 
     default_args = {
         "types": None,
@@ -110,12 +111,21 @@ class UniversalSoapBase(SoapBase):
         "mode": "minimal",
     }
     allow_params = ("calcs",)
-    CalculatorClass = None
+
+    @abc.abstractstaticmethod
+    def CalculatorClass(*args, **kwargs):
+        """Mandatory method for UniversalSoapBase-based Transforms."""
+        return
 
     def check_available(self, *args, **kwargs):
         return super().check_available(*args, **kwargs) and check_asap_available(
             self, *args, **kwargs
         )
+
+    @abc.abstractmethod
+    def updateParams(self, par, meta):
+        """Mandatory method for UniversalSoapBase-based Transforms."""
+        return
 
     def _fit(self, inputs, stream, params):
         types = self.args["types"] if self.args["types"] is not None else inputs["meta"]["elements"]

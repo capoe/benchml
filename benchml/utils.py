@@ -138,15 +138,15 @@ def smiles_to_pseudo_extxyz(smiles):
     valid = []
     for idx, smi in enumerate(smiles):
         try:
-            mol = chem.MolFromSmiles(smi)
-            mol = chem.AddHs(mol)
+            mol = chem.MolFromSmiles(smi)  # pylint: disable=E1101
+            mol = chem.AddHs(mol)  # pylint: disable=E1101
         except Exception:
             print(f"Smiles problem in idx {idx} ,smiles string {smi}")
             continue
         symbols = [a.GetSymbol() for a in mol.GetAtoms()]
         pos = np.zeros((len(symbols), 3))
         config = readwrite.ExtendedXyz(pos=pos, symbols=symbols)
-        config.info["lmat"] = 1.0 * chem.GetAdjacencyMatrix(mol)
+        config.info["lmat"] = 1.0 * chem.GetAdjacencyMatrix(mol)  # pylint: disable=E1101
         configs.append(config)
         valid.append(idx)
     return configs

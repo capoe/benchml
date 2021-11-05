@@ -31,9 +31,9 @@ class MorganFP(Transform):
     def _map(self, inputs, stream):
         configs = inputs["configs"]
         smiles = [get_smiles(c) for c in configs]
-        mols = [rchem.MolFromSmiles(s) for s in smiles]
+        mols = [rchem.MolFromSmiles(s) for s in smiles]  # pylint: disable=E1101
         fps = [
-            achem.GetMorganFingerprintAsBitVect(
+            achem.GetMorganFingerprintAsBitVect(  # pylint: disable=E1101
                 mol,
                 radius=self.radius,
                 nBits=self.length,

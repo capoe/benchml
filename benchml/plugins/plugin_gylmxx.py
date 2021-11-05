@@ -6,6 +6,7 @@ import numpy as np
 from benchml.logger import log
 from benchml.pipeline import Transform
 from benchml.plugins.plugin_check import check_gylmxx_available, gylm
+from benchml.readwrite import write_xyz
 
 
 class KernelSmoothMatch(Transform):
@@ -109,11 +110,10 @@ class AttributeKernelSmoothMatchSVM(Transform):
             Z.append(z_attr)
         if self.args["write_xyz"] != "":
             assert configs is not None  # Require configs input to produce xyz
-            from benchml.ptable import write
 
             for cidx, config in enumerate(configs):
                 config.info["z_attr"] = list(Z[cidx].tolist())
-            write(self.args["write_xyz"], configs)
+            write_xyz(self.args["write_xyz"], configs)
         stream.put("Z", np.array(Z, dtype=object))
 
 

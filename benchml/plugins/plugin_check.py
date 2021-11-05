@@ -22,6 +22,8 @@ except ImportError:
     gylm = Mock()
     gylm.SoapGtoCalculator = None
     gylm.GylmCalculator = None
+    gylm.smooth_match = None
+    gylm.evaluate_power = None
 
 
 def check_gylmxx_available(obj, require=False):

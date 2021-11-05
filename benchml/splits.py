@@ -1,6 +1,7 @@
 import json
 
 import numpy as np
+from numpy.random import RandomState
 
 SEED = None
 
@@ -105,7 +106,7 @@ class SplitMC(SplitBase):
         SplitBase.__init__(self, dset)
         self.n_reps = kwargs["n_splits"]
         self.f_mccv = kwargs["train_fraction"]
-        self.rng = np.random.RandomState(SEED)
+        self.rng = RandomState(SEED)
         self.n_train = int(self.f_mccv * self.n_samples)
         if self.n_train < 1 or self.n_train > (self.n_samples - 1):
             raise ValueError(
@@ -127,7 +128,7 @@ class SplitSequentialMC(SplitBase):
 
     def __init__(self, dset, **kwargs):
         SplitBase.__init__(self, dset)
-        self.rng = np.random.RandomState(SEED)
+        self.rng = RandomState(SEED)
         self.f_train = eval(kwargs["train_fraction"])
         self.repeat_fct = eval(kwargs["repeat_fraction_fct"])
         self.n_train_sequence = []
@@ -157,7 +158,7 @@ class SplitLambda(SplitBase):
         self.lambda_funcs = kwargs["lambdas"]
         self.n_reps = len(self.lambda_funcs)
         self.dset = dset
-        self.rng = np.random.RandomState(SEED)
+        self.rng = RandomState(SEED)
 
     def next(self):
         info = "%s_i%03d" % (self.tag, self.step)

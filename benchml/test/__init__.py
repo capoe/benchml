@@ -30,6 +30,7 @@ class TestMock(Mock):
         pass
 
     def run(self, create=False):
+        filters_map = {"none": None}
         args = Mock()
         args.seed = 971231
         args.data_folder = os.path.join(self.path, *self.data_dir)
@@ -39,7 +40,7 @@ class TestMock(Mock):
         args.output = os.path.join(self.path, "test_ref.json" if create else "test.json")
         benchml.splits.synchronize(args.seed)
         data = benchml.data.BenchmarkData(
-            root=args.data_folder, filter_fct=benchml.filters[args.filter]
+            root=args.data_folder, filter_fct=filters_map.get(args.filter, None)
         )
         models = benchml.models.compile(args.groups.split())
         bench = benchml.benchmark.evaluate(data, models, log, verbose=args.verbose)

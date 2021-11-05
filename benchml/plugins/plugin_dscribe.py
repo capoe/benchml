@@ -1,3 +1,5 @@
+import abc
+
 import numpy as np
 
 from benchml.logger import log
@@ -12,12 +14,16 @@ class DscribeTransform(Transform):
     allow_stream = ("X",)
     stream_samples = ("X",)
     precompute = True
-    CalculatorClass = None
     verbose = True
     log = log
 
     def check_available(self, *args, **kwargs):
         return check_dscribe_available(self, *args, **kwargs)
+
+    @abc.abstractstaticmethod
+    def CalculatorClass(*args, **kwargs):
+        """Mandatory static method for DscribeTransform-based Transforms."""
+        return
 
     def _prepare(self, inputs):
         args = {}
