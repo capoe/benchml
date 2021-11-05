@@ -573,7 +573,7 @@ class ShellInterface(object):
         return os.path.join(self.cwd(), file)
 
     def mkcd(self, directory):
-        self >> self.assert_zero >> "mkdir -p %s" % directory
+        os.makedirs(directory, exist_ok=True)
         self.cd(directory)
         return directory
 

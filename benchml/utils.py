@@ -7,8 +7,13 @@ import numpy as np
 from benchml import readwrite
 from benchml.logger import log
 
+try:
+    import rdkit.Chem as chem
+except ImportError:
+    chem = None
 
-class LineExpansion(object):
+
+class LineExpansion:
     def __init__(self, interval, periodic, n_bins, sigma, type):
         self.x0 = interval[0]
         self.x1 = interval[1]
@@ -49,7 +54,7 @@ class LineExpansion(object):
         return vals_expand
 
 
-class StagedTimer(object):
+class StagedTimer:
     def __init__(self):
         self.stages = []
         self.times = {}
@@ -79,7 +84,7 @@ class StagedTimer(object):
         )
 
 
-class OneHot(object):
+class OneHot:
     def __init__(self, cats):
         self.cats = cats
         self.index = {c: i for i, c in enumerate(cats)}
@@ -101,12 +106,6 @@ def get_smiles(config):
     for key in try_smiles_key:
         if key in config.info:
             return config.info[key]
-
-
-try:
-    import rdkit.Chem as chem
-except ImportError:
-    chem = None
 
 
 def smiles_to_extxyz(
