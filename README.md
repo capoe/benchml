@@ -409,3 +409,17 @@ A similar conversion is necessary when integral or boolean parameters are to be 
         })
     ...
 ```
+# Development
+## Tests
+
+To run pytest tests (`tests` directory)
+```sh
+python3 -m pytest tests/
+```
+
+To run old tests (`test` directory):
+
+```sh
+pip install .
+python3 test/test_all.py
+```
