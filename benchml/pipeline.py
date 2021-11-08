@@ -799,12 +799,20 @@ class Module(TransformBase):
             print("Map '%s'" % stream.tag)
         self.activateStream(stream)
         sweep = self.filter(endpoint=endpoint)
+
+        def log_transform_map_message(cur_log, tidx, stage, transform, stream):
+            msg_data = [" " * tidx, stage, transform.tag, "using stream", stream.tag]
+            msg = " ".join(msg_data)
+            cur_log << msg << cur_log.flush
+
         for tidx, t in enumerate(sweep):
+
             if isinstance(t, InputTransform):
+                if verbose:
+                    log_transform_map_message(log, tidx, "Input", t, stream)
                 continue
             if verbose:
-                msg = " ".join([" " * tidx, "Map", t.tag, "using stream", stream.tag])
-                log << msg << log.flush
+                log_transform_map_message(log, tidx, "Map", t, stream)
             t0 = time.time()
             t.map(stream, verbose=verbose)
             t1 = time.time()
