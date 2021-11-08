@@ -41,6 +41,12 @@ def deps_from_input(inp):
             yield item.split(".")[0]
 
 
+def log_stage_info_message(cur_log, tidx, stage, transform, stream):
+    msg_data = [" " * tidx, stage, transform.tag, "using stream", stream.tag]
+    msg = " ".join(msg_data)
+    cur_log << msg << cur_log.flush
+
+
 class StreamHandle(object):
     def __init__(self, module):
         self.module = module
@@ -544,6 +550,10 @@ class InputTransform(TransformBase):
         self._feed(data, stream)
         stream.version(self.getHash())
 
+    def map(self, inputs, stream):
+        """A mock method."""
+        return
+
 
 class Transform(TransformBase):
     @abc.abstractmethod
@@ -630,9 +640,7 @@ class Module(TransformBase):
 
     # Status
     def check_available(self, *args, **kwargs):
-        return np.array(
-            [tf.__class__.check_available(*args, **kwargs) for tf in self.transforms]
-        ).all()
+        return np.array([tf.check_available(*args, **kwargs) for tf in self.transforms]).all()
 
     def freeze(self, *tfs, freeze=True):
         for tf in tfs:
@@ -769,20 +777,16 @@ class Module(TransformBase):
             print("Precompute '%s'" % stream.tag)
         self.activateStream(stream)
         for tidx, tf in enumerate(filter(lambda tf: tf.tag in precomps_deps, self.transforms)):
+            if isinstance(tf, InputTransform):
+                if verbose:
+                    log_stage_info_message(log, tidx, "Input (precompute)", tf, stream)
+                continue
             do_fit = isinstance(tf, FitTransform)
             method_naming = {True: "Fit", False: "Map"}
             if verbose:
-                msg = " ".join(
-                    [
-                        " " * tidx,
-                        method_naming[do_fit],
-                        "(precompute)",
-                        tf.tag,
-                        "using stream",
-                        stream.tag,
-                    ]
+                log_stage_info_message(
+                    log, tidx, method_naming[do_fit] + " (precompute)", tf, stream
                 )
-                log << msg << log.flush
             t0 = time.time()
             if do_fit:
                 tf.fit(stream, verbose=verbose)
@@ -799,20 +803,14 @@ class Module(TransformBase):
             print("Map '%s'" % stream.tag)
         self.activateStream(stream)
         sweep = self.filter(endpoint=endpoint)
-
-        def log_transform_map_message(cur_log, tidx, stage, transform, stream):
-            msg_data = [" " * tidx, stage, transform.tag, "using stream", stream.tag]
-            msg = " ".join(msg_data)
-            cur_log << msg << cur_log.flush
-
         for tidx, t in enumerate(sweep):
 
             if isinstance(t, InputTransform):
                 if verbose:
-                    log_transform_map_message(log, tidx, "Input", t, stream)
+                    log_stage_info_message(log, tidx, "Input", t, stream)
                 continue
             if verbose:
-                log_transform_map_message(log, tidx, "Map", t, stream)
+                log_stage_info_message(log, tidx, "Map", t, stream)
             t0 = time.time()
             t.map(stream, verbose=verbose)
             t1 = time.time()
@@ -827,13 +825,14 @@ class Module(TransformBase):
         self.activateStream(stream)
         sweep = self.filter(endpoint=endpoint)
         for tidx, t in enumerate(sweep):
+            if isinstance(t, InputTransform):
+                if verbose:
+                    log_stage_info_message(log, tidx, "Input", t, stream)
+                continue
             do_fit = isinstance(t, FitTransform)
             method_naming = {True: "Fit", False: "Map"}
             if verbose:
-                msg = " ".join(
-                    [" " * tidx, method_naming[do_fit], t.tag, "using stream", stream.tag]
-                )
-                log << msg << log.flush
+                log_stage_info_message(log, tidx, method_naming[do_fit], t, stream)
             t0 = time.time()
             if do_fit:
                 t.fit(stream, verbose=verbose)

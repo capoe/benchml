@@ -4,3 +4,7 @@ see the marchenko_pastur example:
 ```bash
 python ../marchenko_pastur/generate_ising_dataset.py
 ```
+
+OR
+
+you could use example from `tests/data` directory, as in `demo.ipynb`
