@@ -8,15 +8,24 @@ python plot_lc.py -f benchmark_qm7b.json.gz -p qm7b -c 1 -r 1
 import sys
 import argparse
 import numpy as np
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import math
-import warnings
-warnings.filterwarnings("ignore")
+#import warnings
+#warnings.filterwarnings("ignore")
+import json
 
 from bml_analysis_io import parse
 from bml_analysis_func import *
 from bml_analysis_plot import *
 from bml_model_list import bmol, bxtal, color_dict
+
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
 
 def read_acronym(filename="bml_name_acronym.list"):
     # read the acronyms
@@ -47,11 +56,12 @@ def plot_lc_seperate(model_category, sc_name, best_model_error, lc_by_model, lr_
         
         for key_now in model_category[category]:
             if lc_by_model[key_now] is None: continue
-            ax_now.errorbar(lc_by_model[key_now][:,0], lc_by_model[key_now][:,1], yerr=lc_by_model[key_now][:,2],
+            #print(np.asarray(lc_by_model[key_now])[:,2])
+            ax_now.errorbar(np.asarray(lc_by_model[key_now])[:,0], np.asarray(lc_by_model[key_now])[:,1], yerr=np.asarray(lc_by_model[key_now])[:,2],
                     linestyle='-', c=color_dict[category], alpha=0.5,
                     uplims=True, lolims=True)
     
-        ax_now.errorbar(lc_by_model[best_model][:,0], lc_by_model[best_model][:,1], yerr=lc_by_model[best_model][:,2],
+        ax_now.errorbar(np.asarray(lc_by_model[best_model])[:,0], np.asarray(lc_by_model[best_model])[:,1], yerr=np.asarray(lc_by_model[best_model])[:,2],
                 linestyle='-',linewidth=4, c=color_dict[category], alpha=1.0, 
                 label=acronym_dict[best_model]+"\n"+"LR="+"{:.1e}".format(lr_by_model[best_model]),
                 uplims=True, lolims=True)    
@@ -74,11 +84,11 @@ def plot_lc_together(model_category, sc_name, best_model_error, lc_by_model, lr_
 
         for key_now in model_category[category]:
             if lc_by_model[key_now] is None: continue
-            ax.errorbar(lc_by_model[key_now][:,0], lc_by_model[key_now][:,1], yerr=lc_by_model[key_now][:,2],
+            ax.errorbar(np.asarray(lc_by_model[key_now])[:,0], np.asarray(lc_by_model[key_now])[:,1], yerr=np.asarray(lc_by_model[key_now])[:,2],
                     linestyle='-', c=color_dict[category], alpha=0.5,
                     uplims=True, lolims=True)
 
-        ax.errorbar(lc_by_model[best_model][:,0], lc_by_model[best_model][:,1], yerr=lc_by_model[best_model][:,2],
+        ax.errorbar(np.asarray(lc_by_model[best_model])[:,0], np.asarray(lc_by_model[best_model])[:,1], yerr=np.asarray(lc_by_model[best_model])[:,2],
                 linestyle='-',linewidth=4, c=color_dict[category], alpha=1.0,
                 label=acronym_dict[best_model]+" LR="+"{:.1e}".format(lr_by_model[best_model]),
                 uplims=True, lolims=True)
@@ -134,12 +144,14 @@ def main(filename, prefix, sc_name, ncol, nrow):
 
     test_RMSE = [ [k, lc_by_model[k][-1,1]] for k in by_model.keys() if lc_by_model[key_now] is not None]
     np.savetxt(prefix+'-test_RMSE.dat', test_RMSE, fmt='%s')
+    with open(prefix+'-lc.json', 'w') as jd:
+        json.dump(lc_by_model,jd, sort_keys=False, cls=NumpyEncoder)
 
     # plot
     if ncol*nrow == 1:
         fig, ax, ax0 = plot_lc_together(model_category, sc_name, best_model_error, lc_by_model, lr_by_model, acronym_dict, color_dict)
     else:
-        if ncol > n_category: ncol = n_category
+        # if ncol > n_category: ncol = n_category
         fig, ax, ax0 = plot_lc_seperate(model_category, sc_name, best_model_error, lc_by_model, lr_by_model, acronym_dict, color_dict, ncol, math.ceil(n_category/ncol))
 
     ax0.set_ylim([best_error*0.7,worst_error*1.3])
