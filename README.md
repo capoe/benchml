@@ -427,6 +427,12 @@ To run pytest tests (`tests` directory)
 ```sh
 python3 -m pytest tests/
 ```
+To run a Jupyter Notebook code as a test for all the code in it:
+```sh
+pip install nbmake
+python3 -m pytest --nbmake "examples/"
+```
+* `analysis/analysis.ipynb` fails, as input file is missing.
 
 To run old tests (`test` directory):
 
