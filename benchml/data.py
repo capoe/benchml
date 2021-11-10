@@ -78,8 +78,14 @@ class Dataset:
         self.configs = configs
         if ext_xyz is not None:
             self.configs = self.read_data(ext_xyz)
+        default_meta = {"name": "UNNAMED", "task": "UNKNOWN", "metrics": []}
         if meta is None:
-            meta = {"name": "UNNAMED", "task": "UNKNOWN", "metrics": []}
+            meta = default_meta
+        else:
+            # Update meta with default values for missing fields
+            for key, val in default_meta.items():
+                if meta.get(key, None) is None:
+                    meta[key] = val
         self.meta = meta
         self.convert = self.target_converter[self.meta.pop("convert", "")]
         self.y = None  # pylint: disable=C0103
