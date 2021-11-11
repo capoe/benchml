@@ -45,7 +45,6 @@ def plot_lc_category(model_category, sc_name, best_model_error, lc_by_model, lr_
         i = mi%(num_col*num_row)
         category = v['category']
         best_model = v['model']
-        print(i, v)
 
         if best_model is None: continue
 
@@ -91,13 +90,13 @@ def plot_lc_individual(model_category, sc_name, best_model_error, lc_by_model, l
                 print("WARNING: more models in the category " + category + " than the number of rows.")
                 continue
             ax_now = ax[mj,mi]
-            #for key in model_category[category]:
-            #    ax_now.errorbar(np.asarray(lc_by_model[key])[:,0], np.asarray(lc_by_model[key])[:,1], yerr=np.asarray(lc_by_model[key])[:,2],
-            #        linestyle='-', c=color_dict[category], alpha=0.5,
-            #        uplims=True, lolims=True)
+            for key in model_category[category]:
+                ax_now.errorbar(np.asarray(lc_by_model[key])[:,0], np.asarray(lc_by_model[key])[:,1], yerr=np.asarray(lc_by_model[key])[:,2],
+                    linestyle='-', linewidth=0.4, c=color_dict[category], alpha=0.2,
+                    uplims=True, lolims=True)
 
             ax_now.errorbar(np.asarray(lc_by_model[key_now])[:,0], np.asarray(lc_by_model[key_now])[:,1], yerr=np.asarray(lc_by_model[key_now])[:,2],
-                    linestyle='-',linewidth=4, c=color_dict[category], alpha=1.0,
+                    linestyle='-',linewidth=2, c=color_dict[category], alpha=1.0,
                     label=acronym_dict[key_now]+"\n"+"LR="+"{:.1e}".format(lr_by_model[key_now]),
                     uplims=True, lolims=True)
 
