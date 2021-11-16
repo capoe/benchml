@@ -7,6 +7,7 @@ python plot_lc.py -f benchmark_qm7b.json.gz -p qm7b -c 1 -r 1
 
 import sys
 import argparse
+import os
 import numpy as np
 import matplotlib as mpl
 mpl.use('Agg')
@@ -16,16 +17,11 @@ import math
 #warnings.filterwarnings("ignore")
 import json
 
+from asaplib.io import NpEncoder, NpDecoder 
 from bml_analysis_io import parse
 from bml_analysis_func import *
 from bml_analysis_plot import *
 from bml_model_list import bmol, bxtal, color_dict
-
-class NumpyEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        return json.JSONEncoder.default(self, obj)
 
 def read_acronym(filename="bml_name_acronym.list"):
     # read the acronyms
@@ -134,18 +130,6 @@ def plot_lc_together(model_category, sc_name, best_model_error, lc_by_model, lr_
 
 def main(filename, prefix, plot_type, sc_name, ncol, nrow):
 
-    by_model = parse(filename)
-    all_model_keys = list(by_model.keys())
-    print(all_model_keys)
-    acronym_dict = read_acronym()
-
-    if any(all_model_keys[0] in subl for subl in list(bmol.values())):
-        model_category = bmol
-    elif any(all_model_keys[0] in subl for subl in list(bxtal.values())):
-        model_category = bxtal
-    else:
-        raise ValueError("unknown model type.")
-
     lc_by_model = {}
     #lc_by_model_train = {}
     lr_by_model = {}
@@ -156,23 +140,46 @@ def main(filename, prefix, plot_type, sc_name, ncol, nrow):
     sorted_model_category = {}
     best_model_error = {}
 
+    read_lc = os.path.exists(prefix+'-lc.json')
+    if read_lc:
+        with open(prefix+'-lc.json', 'r') as jd:
+            lc_by_model = json.load(jd, cls=NpDecoder)
+        print("load LCs from json file.")
+        all_model_keys = list(lc_by_model.keys())
+    else:
+        by_model = parse(filename, verbose=True)
+        all_model_keys = list(by_model.keys())
+
+    print(all_model_keys)
+    acronym_dict = read_acronym()
+
+    if any(all_model_keys[0] in subl for subl in list(bmol.values())):
+        model_category = bmol
+    elif any(all_model_keys[0] in subl for subl in list(bxtal.values())):
+        model_category = bxtal
+    else:
+        raise ValueError("unknown model type.")
+
     # compute the learning curves and sort the models in each catagory
     for mi, [category, model_key] in enumerate(model_category.items()):
         sorted_model_category[category] = {}
 
         for key_now in model_key:
             try:
-                lc_by_model[key_now], _, _ = get_learning_curve(by_model, model_key_now=key_now,
+                if not read_lc:
+                    lc_by_model[key_now], _, _ = get_learning_curve(by_model, model_key_now=key_now,
                                                        sc_name=sc_name)
-                #lc_by_model[key_now], lc_by_model_train[key_now], _ = get_learning_curve(by_model, model_key_now=key_now,
-                #                                       sc_name=sc_name)
-
+                    #lc_by_model[key_now], lc_by_model_train[key_now], _ = get_learning_curve(by_model, model_key_now=key_now,
+                    #                                       sc_name=sc_name)
+                else:
+                    lc_by_model[key_now] = np.asarray(lc_by_model[key_now])
                 sorted_model_category[category][key_now] = np.min(lc_by_model[key_now][:,1])
 
                 if np.min(lc_by_model[key_now][:,1]) < best_error:
                     best_error = np.min(lc_by_model[key_now][:,1])
                 if lc_by_model[key_now][0,1] > worst_error:
                     worst_error = lc_by_model[key_now][0,1]
+                N_range =  lc_by_model[key_now][-1,0]
 
                 # compute learning rate
                 lc_now = lc_by_model[key_now]
@@ -180,11 +187,12 @@ def main(filename, prefix, plot_type, sc_name, ncol, nrow):
             except:
                 lc_by_model[key_now] = None
                 continue
+        #print(sorted_model_category[category])
 
         try:
             # sort the models in each category
             sorted_model_category[category] = dict(sorted(sorted_model_category[category].items(), key=lambda item: item[1]))
-            #print(sorted_model_category[category])
+            # print(sorted_model_category[category])
             [ best_in_catogory, best_in_catogory_error ] = next(iter( sorted_model_category[category].items() ))
             best_model_error[best_in_catogory_error] = { "category": category, "model": best_in_catogory}
         except:
@@ -192,10 +200,11 @@ def main(filename, prefix, plot_type, sc_name, ncol, nrow):
 
 
     # dumpy the data for the learning curves and learning rates
-    test_RMSE = [ [k, lc_by_model[k][-1,1]] for k in by_model.keys() if lc_by_model[key_now] is not None]
-    np.savetxt(prefix+'-test_RMSE.dat', test_RMSE, fmt='%s')
-    with open(prefix+'-lc.json', 'w') as jd:
-        json.dump(lc_by_model,jd, sort_keys=False, cls=NumpyEncoder)
+    if not read_lc:
+        test_RMSE = [ [k, lc_by_model[k][-1,1]] for k in by_model.keys() if lc_by_model[key_now] is not None]
+        np.savetxt(prefix+'-test_RMSE.dat', test_RMSE, fmt='%s')
+        with open(prefix+'-lc.json', 'w') as jd:
+            json.dump(lc_by_model,jd, sort_keys=False, cls=NpEncoder)
 
     # plot
     if plot_type == 'together':
@@ -207,9 +216,14 @@ def main(filename, prefix, plot_type, sc_name, ncol, nrow):
     else:
         raise ValueError("plot type not recognized.")
 
-    ax0.set_ylim([best_error*0.7,worst_error*1.3])
-    ax0.set_xscale('log')
-    ax0.set_yscale('log')
+    if (worst_error/best_error) > 10:
+        ax0.set_ylim([best_error*0.7,worst_error*1.3])
+        ax0.set_yscale('log')
+    else:
+        ax0.set_ylim([best_error*0.9,worst_error*1.1])
+    if N_range > 100:
+        ax0.set_xscale('log')
+
     ax0.text(0.2, 0.9, prefix, fontsize=14,
          horizontalalignment='left',
          verticalalignment='center',

@@ -72,6 +72,15 @@ def parse(benchfile, verbose=False):
         bench = json.load(zipfile)
     by_model_name = {}
     for section in bench:
-        meta, train_test_output = parse_single(section, verbose)
-        by_model_name[meta["model"]] = train_test_output
+        meta, train_test_output = parse_single(section, verbose=False)
+        train_test_output = dict(sorted(train_test_output.items(), key=lambda item: item[1]['train_fraction']))
+        if meta["model"] not in by_model_name:
+            by_model_name[meta["model"]] = train_test_output
+        else:
+            for i, [key, v] in enumerate(train_test_output.items()):
+                by_model_name_key = list(by_model_name[meta["model"]].keys())[i]
+                #print(i,key,by_model_name_key)
+                by_model_name[meta["model"]][by_model_name_key]['train'] = np.vstack([by_model_name[meta["model"]][by_model_name_key]['train'],v['train']])
+                by_model_name[meta["model"]][by_model_name_key]['test'] = np.vstack([by_model_name[meta["model"]][by_model_name_key]['test'],v['test']])
+                #print(len(by_model_name[meta["model"]][by_model_name_key]['train']))
     return by_model_name
