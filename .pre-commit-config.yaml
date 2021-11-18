@@ -1,0 +1,33 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1  # Use the ref you want to point at
+    hooks:
+      # - id: trailing-whitespace
+      - id: check-ast
+      # - id: check-builtin-literals
+      - id: debug-statements
+  - repo: https://github.com/MarcoGorelli/absolufy-imports
+    rev: v0.3.0
+    hooks:
+    - id: absolufy-imports
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.9.3
+    hooks:
+      - id: isort
+  - repo: https://github.com/psf/black
+    rev: 21.9b0
+    hooks:
+      - id: black
+  - repo: https://github.com/psf/black
+    rev: 21.9b0
+    hooks:
+      - id: black-jupyter
+  - repo: https://github.com/myint/docformatter
+    rev: v1.3.1
+    hooks:
+      - id: docformatter
+        args: [--in-place]
+  - repo: https://github.com/PyCQA/flake8
+    rev: 4.0.1
+    hooks:
+      - id: flake8

@@ -1,2 +1,3 @@
-from .random_matrix import *
+from benchml.filters.random_matrix import CleanMatrix, MarchenkoPasturFilter
 
+__all__ = ["CleanMatrix", "MarchenkoPasturFilter"]

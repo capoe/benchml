@@ -1,49 +1,56 @@
 import numpy as np
-from ..transforms import *
+
+import benchml.transforms as btf
+from benchml.hyper import GridHyper, Hyper
+
 
 def compile_dscribe(**kwargs):
     return [
-        Module(
-            tag=DescriptorClass.__name__+"_ridge",
+        btf.Module(
+            tag=DescriptorClass.__name__ + "_ridge",
             transforms=[
-                ExtXyzInput(tag="input"),
-                DescriptorClass(
-                    tag="descriptor",
-                    inputs={"configs": "input.configs"}),
-                ReduceMatrix(
-                    tag="reduce",
-                    inputs={"X": "descriptor.X"}),
-                Ridge(
-                    tag="predictor",
-                    inputs={"X": "reduce.X", "y": "input.y"}) ],
+                btf.ExtXyzInput(tag="input"),
+                DescriptorClass(tag="descriptor", inputs={"configs": "input.configs"}),
+                btf.ReduceMatrix(tag="reduce", inputs={"X": "descriptor.X"}),
+                btf.Ridge(tag="predictor", inputs={"X": "reduce.X", "y": "input.y"}),
+            ],
             hyper=GridHyper(
-                Hyper({ "predictor.alpha": np.logspace(-5,+5, 7), })),
+                Hyper(
+                    {
+                        "predictor.alpha": np.logspace(-5, +5, 7),
+                    }
+                )
+            ),
             broadcast={"meta": "input.meta"},
-            outputs={ "y": "predictor.y" }) \
-        for DescriptorClass in [ DscribeCM, DscribeACSF, DscribeMBTR, DscribeLMBTR ]
+            outputs={"y": "predictor.y"},
+        )
+        for DescriptorClass in [btf.DscribeCM, btf.DscribeACSF, btf.DscribeMBTR, btf.DscribeLMBTR]
     ]
+
 
 def compile_dscribe_periodic(**kwargs):
     return [
-        Module(
-            tag=DescriptorClass.__name__+"_ridge",
+        btf.Module(
+            tag=DescriptorClass.__name__ + "_ridge",
             transforms=[
-                ExtXyzInput(tag="input"),
-                DescriptorClass(
-                    tag="descriptor",
-                    inputs={"configs": "input.configs"}),
-                ReduceMatrix(
-                    tag="reduce",
-                    inputs={"X": "descriptor.X"}),
-                Ridge(
-                    tag="predictor",
-                    inputs={"X": "reduce.X", "y": "input.y"}) ],
+                btf.ExtXyzInput(tag="input"),
+                DescriptorClass(tag="descriptor", inputs={"configs": "input.configs"}),
+                btf.ReduceMatrix(tag="reduce", inputs={"X": "descriptor.X"}),
+                btf.Ridge(tag="predictor", inputs={"X": "reduce.X", "y": "input.y"}),
+            ],
             hyper=GridHyper(
-                Hyper({ "predictor.alpha": np.logspace(-5,+5, 7), })),
+                Hyper(
+                    {
+                        "predictor.alpha": np.logspace(-5, +5, 7),
+                    }
+                )
+            ),
             broadcast={"meta": "input.meta"},
-            outputs={ "y": "predictor.y" }) \
-        for DescriptorClass in [ DscribeSineMatrix ]
+            outputs={"y": "predictor.y"},
+        )
+        for DescriptorClass in [btf.DscribeSineMatrix]
     ]
+
 
 def register_all():
     return {

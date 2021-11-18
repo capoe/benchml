@@ -1,22 +1,37 @@
-"""BenchML __init__.py
+"""BenchML.
 
 .. moduleauthor:: Carl Poelking <cp605@cam.ac.uk>
-
 """
 
-from . import data
-from . import benchmark
-from . import models
-from . import pipeline
-from . import transforms
-from . import analysis
-from . import splits
-from . import utils
-from .pipeline import stream, sopen, hupdate
-from .logger import log
-from .splits import Split
-from .accumulator import Accumulator
-from .readwrite import read, write, load, save
-from .transforms import Transform
-from .data import load_dataset
+from benchml import analysis, benchmark, data, models, pipeline, splits, transforms, utils
+from benchml.accumulator import Accumulator
+from benchml.data import load_dataset
+from benchml.logger import log
+from benchml.pipeline import hupdate, sopen, stream
+from benchml.readwrite import load, read, save, write
+from benchml.splits import Split
+from benchml.transforms import Transform
 
+__version__ = "0.3.1"
+__all__ = [
+    "analysis",
+    "benchmark",
+    "data",
+    "models",
+    "pipeline",
+    "splits",
+    "transforms",
+    "utils",
+    "Accumulator",
+    "load_dataset",
+    "log",
+    "hupdate",
+    "sopen",
+    "stream",
+    "load",
+    "read",
+    "save",
+    "write",
+    "Split",
+    "Transform",
+]

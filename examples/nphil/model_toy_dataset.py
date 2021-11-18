@@ -1,53 +1,45 @@
 import benchml as bml
-import nphil
-import scipy.stats
-import sklearn.metrics
-import numpy as np
+from benchml.hyper import GridHyper, Hyper
+
 log = bml.log
+
 
 def build_simple_rf():
     return bml.pipeline.Module(
         tag="ExttRandomForest",
         transforms=[
             bml.transforms.ExttInput(tag="input"),
-            bml.transforms.RandomForestRegressor(tag="predictor",
-                inputs={"X": "input.X", "y": "input.Y"}),
+            bml.transforms.RandomForestRegressor(
+                tag="predictor", inputs={"X": "input.X", "y": "input.Y"}
+            ),
         ],
-        hyper=bml.transforms.GridHyper(
-            bml.transforms.Hyper({"predictor.max_depth": [None]})),
+        hyper=GridHyper(Hyper({"predictor.max_depth": [None]})),
         broadcast={},
-        outputs={"y": "predictor.y"})
+        outputs={"y": "predictor.y"},
+    )
 
 
 def build_simple_nphil():
     return bml.pipeline.Module(
         tag="ExttNPhilLinear",
         transforms=[
-            bml.transforms.ExttInput(
-                tag="input"),
+            bml.transforms.ExttInput(tag="input"),
             bml.transforms.NonlinearFeatureFilter(
                 tag="descriptor",
-                args={
-                    "uops": ["el|sr2"],
-                    "bops": ["+-:*"]},
-                inputs={
-                    "X":"input.X", 
-                    "Y":"input.Y", 
-                    "meta":"input.meta"}),
+                args={"uops": ["el|sr2"], "bops": ["+-:*"]},
+                inputs={"X": "input.X", "Y": "input.Y", "meta": "input.meta"},
+            ),
             bml.transforms.LinearRegression(
-                tag="predictor",
-                args={},
-                inputs={
-                    "X": "descriptor.X",
-                    "y": "input.Y"})
+                tag="predictor", args={}, inputs={"X": "descriptor.X", "y": "input.Y"}
+            ),
         ],
-        outputs={"y":"predictor.y"})
+        outputs={"y": "predictor.y"},
+    )
+
 
 def build_models():
-    return [
-        build_simple_rf(),
-        build_simple_nphil()
-    ]
+    return [build_simple_rf(), build_simple_nphil()]
+
 
 if __name__ == "__main__":
     dataset = bml.load_dataset("example.extt")
@@ -64,4 +56,3 @@ if __name__ == "__main__":
             accu.append("test", output_test["y"], stream_test.resolve("input.Y"))
         log << log.endl
         res = accu.evaluateAll(log=bml.log)
-        
