@@ -254,9 +254,6 @@ class KernelRidge(SklearnTransform):
     allow_params = {"model", "y_mean", "y_std", "y"}
     allow_stream = {"y"}
 
-    def __init__(self, **kwargs):
-        super().__init__(self, **kwargs)
-
     def _setup(self):
         self.power = self.args["power"]
 

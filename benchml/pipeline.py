@@ -93,6 +93,13 @@ class StreamHandle(object):
         self.map_active_stream[tf.tag] = active
         return active
 
+    def info(self, tag=None):
+        tags = list(self.stream_tags) if tag is None else [ tag ]
+        for tag in tags:
+            print("Stream tag:", tag)
+            for tf, stream in self.map_stream.items():
+                stream[tag].info()
+
 
 class Stream(object):
     def __init__(self, handle, tag, tf, data=None, parent=None, slice=None, slice_ax2=None):
@@ -141,6 +148,14 @@ class Stream(object):
     def resolve(self, addr):
         tf, field = addr.split(".")
         return self.handle.getStream(tf, self.tag).get(field)
+
+    def select(self, tf):
+        return self.handle.getStream(tf, self.tag)
+
+    def info(self):
+        print("  ", self.tf.tag)
+        for key, val in self.storage.items():
+            print("      %-20s = %10s" % (key, str(type(val))))
 
     def split(self, **kwargs):
         self.split_iterator = Split(self, **kwargs)
@@ -254,7 +269,7 @@ class TransformBase(object):
     def check_available(self, *args, **kwargs):
         return True
 
-    def __init__(self, detached=False, **kwargs):
+    def __init__(self, **kwargs):
         self.tag = kwargs.pop("tag", self.__class__.__name__)
         self.module = None
         self._is_setup = False
@@ -268,6 +283,8 @@ class TransformBase(object):
         self.args_links = self.parseArgsLinks()
         self.inputs = kwargs["inputs"] if "inputs" in kwargs else {}
         self.outputs = kwargs["outputs"] if "outputs" in kwargs else {}
+        # Detached?
+        detached = kwargs["detached"] if "detached" in kwargs else False
         self.detached = True if self.inputs is None else detached
         # Param sets
         self.map_params = {}
@@ -621,7 +638,7 @@ class Module(TransformBase):
     """
 
     def __init__(self, tag="module", broadcast=None, transforms=None, hyper=None, **kwargs):
-        super().__init__(self, tag=tag, **kwargs)
+        super().__init__(tag=tag, **kwargs)
         if broadcast is None:
             broadcast = {}
         if transforms is None:
