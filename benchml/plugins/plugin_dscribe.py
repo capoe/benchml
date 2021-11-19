@@ -178,12 +178,12 @@ class DscribeMBTR(DscribeTransform):
         k2={
             "geometry": {"function": "inverse_distance"},
             "grid": {"min": 0, "max": 1, "n": 10, "sigma": 0.1},
-            "weighting": {"function": "exponential", "scale": 0.5, "cutoff": 1e-3},
+            "weighting": {"function": "exp", "scale": 0.5, "threshold": 1e-3},
         },
         k3={
             "geometry": {"function": "cosine"},
             "grid": {"min": -1, "max": 1, "n": 10, "sigma": 0.1},
-            "weighting": {"function": "exponential", "scale": 0.5, "cutoff": 1e-3},
+            "weighting": {"function": "exp", "scale": 0.5, "threshold": 1e-3},
         },
         flatten=True,
         sparse=False,
@@ -199,12 +199,12 @@ class DscribeLMBTR(DscribeTransform):
         k2={
             "geometry": {"function": "distance"},
             "grid": {"min": 0, "max": 5, "n": 100, "sigma": 0.1},
-            "weighting": {"function": "exponential", "scale": 0.5, "cutoff": 1e-3},
+            "weighting": {"function": "exp", "scale": 0.5, "threshold": 1e-3},
         },
         k3={
             "geometry": {"function": "angle"},
             "grid": {"min": 0, "max": 180, "n": 100, "sigma": 0.1},
-            "weighting": {"function": "exponential", "scale": 0.5, "cutoff": 1e-3},
+            "weighting": {"function": "exp", "scale": 0.5, "threshold": 1e-3},
         },
         periodic=False,
         flatten=True,

@@ -302,8 +302,7 @@ def patch_ase_config(config):
 
 
 def read_ase(config_file, index):
-    if index != ":":
-        raise NotImplementedError()
+    if index is None: index = ":"
     configs = ase.io.read(config_file, index)
     metas = list(read_extxyz_meta_only(config_file))
     assert len(configs) == len(metas)  # File format error?

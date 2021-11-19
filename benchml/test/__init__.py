@@ -3,14 +3,8 @@ import os
 
 import numpy as np
 
-import benchml
+import benchml as bml
 from benchml.logger import Mock, log
-
-
-def assert_equal(x, y, tol):
-    if np.abs(x - y) < tol:
-        return True
-    return False
 
 
 def assert_array_equal(x, y, tol):
@@ -20,7 +14,7 @@ def assert_array_equal(x, y, tol):
 
 
 class TestMock(Mock):
-    group = None
+    model_regex = None
     seed = 971231
     path = os.path.dirname(__file__)
     data_dir = ("..", "test_data")
@@ -29,21 +23,32 @@ class TestMock(Mock):
     def __init__(self):
         pass
 
-    def run(self, create=False):
-        filters_map = {"none": None}
+    def getArgs(self, create):
         args = Mock()
         args.seed = 971231
         args.data_folder = os.path.join(self.path, *self.data_dir)
         args.filter = "none"
-        args.groups = self.group
+        args.model_regex = self.model_regex
         args.verbose = False
         args.output = os.path.join(self.path, "test_ref.json" if create else "test.json")
-        benchml.splits.synchronize(args.seed)
-        data = benchml.data.BenchmarkData(
-            root=args.data_folder, filter_fct=filters_map.get(args.filter, None)
+        return args
+
+    def run(self, create=False):
+        filters_map = {"none": None}
+        args = self.getArgs(create=create)
+        bml.splits.synchronize(args.seed)
+        data = bml.data.BenchmarkData(
+            root=args.data_folder, 
+            filter_fct=filters_map.get(args.filter, None)
         )
-        models = benchml.models.compile(args.groups.split())
-        bench = benchml.benchmark.evaluate(data, models, log, verbose=args.verbose)
+        models = bml.models.compile_and_filter(filter_models=self.model_regex)
+        bench = bml.benchmark.evaluate(
+            data=data, 
+            models=models, 
+            log=log, 
+            verbose=args.verbose, 
+            detailed=True
+        )
         json.dump(bench, open(args.output, "w"), indent=1, sort_keys=True)
         return self
 
@@ -76,5 +81,8 @@ class TestMock(Mock):
                     success = success and check
                     if check:
                         log << "+" << log.flush
+                    else:
+                        log << "-" << log.flush
                 log << log.endl
         return success
+

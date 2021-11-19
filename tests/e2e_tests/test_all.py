@@ -5,19 +5,21 @@ import re
 import sys
 
 import numpy as np
-from test_asap import *  # noqa: F401, F403
-from test_dscribe import *  # noqa: F401, F403
-from test_gylm import *  # noqa: F401, F403
-from test_morgan import *  # noqa: F401, F403
-from test_soap import *  # noqa: F401, F403
+from test_ecfp import * 
+from test_physchem import *
+from test_acsf import *
+from test_mbtr import *
+from test_gylm import *  
+from test_soap import *  
 
-import benchml
+import benchml as bml
 from benchml.logger import log
 from benchml.test import TestMock
 
 # NOTE Independent random seeds used in
 # - Split
 # - BayesianHyper
+# - Accumulator bootstrap
 np.random.seed(712311)
 
 
@@ -61,8 +63,10 @@ if __name__ == "__main__":
     )
     args, _ = parser.parse_args()
     if args.verbose:
-        benchml.pipeline.VERBOSE = True
-    benchml.readwrite.configure(use_ase=not args.noase)
+        bml.pipeline.VERBOSE = True
+    bml.readwrite.configure(use_ase=not args.noase)
+
+    summary = []
     for mock in get_all_mocks():
         run = bool(re.match(re.compile(args.filter), mock.__name__))
         colour = log.mg
@@ -71,11 +75,19 @@ if __name__ == "__main__":
         log << colour << "[%s] Test <%s>" % ("Run" if run else "---", mock.__name__) << log.endl
         if args.list or not run:
             continue
-        # result = mock().run(create=args.create)
-        result = mock()
+        result = mock().run(create=args.create)
         if not args.create:
             success = result.validate()
             if not success:
                 log << log.mr << "Test <%s> failed" % mock.__name__ << log.endl
             else:
                 log << log.mg << "Test <%s> success" % mock.__name__ << log.endl
+            summary.append({ "name": mock.__name__, "success": success })
+
+    log << log.endl << log.mg << ("Summary " + "="*23) << log.endl
+    for result in summary:
+        log << (log.mg if result["success"] else log.mr) \
+            << "Test %-20s  [%s]" % (
+                "<%s>" % result["name"], "OK" if result["success"] else "XX"
+            ) << log.endl
+

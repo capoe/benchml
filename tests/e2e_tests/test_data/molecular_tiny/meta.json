@@ -4,13 +4,13 @@
  "targets": {
      "pactivity": {
          "task": "regression",
-         "scaling": "extensive",
+         "scaling": "additive",
          "metrics": [ "mae", "r2", "rhop", "rmse", "rhor" ],
          "per_atom": false
      }
  },
- "_splits": [ {"method": "random", "n_splits": 2, "train_fraction": 0.7 } ],
- "splits": [ {"method": "sequential", "train_fraction": "np.arange(0.1, 1.0, 0.1)", "repeat_fraction_fct": "lambda s,t,p,f: 2*int(1./(f*(1-f))**0.5)" } ],
+ "splits": [ {"method": "random", "n_splits": 2, "train_fraction": 0.7 } ],
+ "_splits": [ {"method": "sequential", "train_fraction": "np.arange(0.1, 1.0, 0.1)", "repeat_fraction_fct": "lambda s,t,p,f: 2*int(1./(f*(1-f))**0.5)" } ],
  "elements": [ "C", "N", "O", "S", "H", "F", "Cl", "Br", "I", "P", "B", "Si" ],
  "override": {
     "Physchem2D.select": [
@@ -20,10 +20,7 @@
     ]
  },
  "has_smiles": true,
- "periodic": false,
  "datasets": [
-  "set_1.xyz",
-  "set_2.xyz",
-  "set_3.xyz"
+  "set_1.xyz"
   ]
 }

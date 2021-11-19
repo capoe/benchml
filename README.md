@@ -423,10 +423,13 @@ hyper=BayesianHyper(
 # Development
 ## Tests
 
-To run pytest tests (`tests` directory)
+The tests are split onto unit and end-to-end (e2e) tests:
 ```sh
-python3 -m pytest tests/
+python3 -m pytest tests/unit_tests
+python3 tests/e2d_tests/test_all.py
 ```
+Adding --create to the second command will generate reference results.
+
 To run a Jupyter Notebook code as a test for all the code in it:
 ```sh
 pip install nbmake
