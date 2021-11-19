@@ -430,16 +430,9 @@ python3 tests/e2d_tests/test_all.py
 ```
 Adding --create to the second command will generate reference results.
 
-To run a Jupyter Notebook code as a test for all the code in it:
+To run a juypter notebook as a test, do
 ```sh
 pip install nbmake
 python3 -m pytest --nbmake "examples/"
 ```
-* `analysis/analysis.ipynb` fails, as input file is missing.
 
-To run old tests (`test` directory):
-
-```sh
-pip install .
-python3 test/test_all.py
-```
