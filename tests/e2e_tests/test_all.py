@@ -5,12 +5,12 @@ import re
 import sys
 
 import numpy as np
-from test_ecfp import * 
-from test_physchem import *
-from test_acsf import *
-from test_mbtr import *
-from test_gylm import *  
-from test_soap import *  
+from test_acsf import *  # noqa: F401,F403
+from test_ecfp import *  # noqa: F401,F403
+from test_gylm import *  # noqa: F401,F403
+from test_mbtr import *  # noqa: F401,F403
+from test_physchem import *  # noqa: F401,F403
+from test_soap import *  # noqa: F401,F403
 
 import benchml as bml
 from benchml.logger import log
@@ -82,12 +82,13 @@ if __name__ == "__main__":
                 log << log.mr << "Test <%s> failed" % mock.__name__ << log.endl
             else:
                 log << log.mg << "Test <%s> success" % mock.__name__ << log.endl
-            summary.append({ "name": mock.__name__, "success": success })
+            summary.append({"name": mock.__name__, "success": success})
 
-    log << log.endl << log.mg << ("Summary " + "="*23) << log.endl
+    log << log.endl << log.mg << ("Summary " + "=" * 23) << log.endl
     for result in summary:
-        log << (log.mg if result["success"] else log.mr) \
-            << "Test %-20s  [%s]" % (
-                "<%s>" % result["name"], "OK" if result["success"] else "XX"
-            ) << log.endl
-
+        (
+            log
+            << (log.mg if result["success"] else log.mr)
+            << "Test %-20s  [%s]" % ("<%s>" % result["name"], "OK" if result["success"] else "XX")
+            << log.endl
+        )
