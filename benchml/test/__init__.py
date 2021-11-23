@@ -38,16 +38,11 @@ class TestMock(Mock):
         args = self.getArgs(create=create)
         bml.splits.synchronize(args.seed)
         data = bml.data.BenchmarkData(
-            root=args.data_folder, 
-            filter_fct=filters_map.get(args.filter, None)
+            root=args.data_folder, filter_fct=filters_map.get(args.filter, None)
         )
         models = bml.models.compile_and_filter(filter_models=self.model_regex)
         bench = bml.benchmark.evaluate(
-            data=data, 
-            models=models, 
-            log=log, 
-            verbose=args.verbose, 
-            detailed=True
+            data=data, models=models, log=log, verbose=args.verbose, detailed=True
         )
         json.dump(bench, open(args.output, "w"), indent=1, sort_keys=True)
         return self
@@ -85,4 +80,3 @@ class TestMock(Mock):
                         log << "-" << log.flush
                 log << log.endl
         return success
-

@@ -94,7 +94,7 @@ class StreamHandle(object):
         return active
 
     def info(self, tag=None):
-        tags = list(self.stream_tags) if tag is None else [ tag ]
+        tags = list(self.stream_tags) if tag is None else [tag]
         for tag in tags:
             print("Stream tag:", tag)
             for tf, stream in self.map_stream.items():

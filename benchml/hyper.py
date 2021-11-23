@@ -1,5 +1,6 @@
 import copy
 import itertools
+
 import numpy as np
 
 from benchml.accumulator import Accumulator
