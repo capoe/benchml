@@ -426,7 +426,7 @@ hyper=BayesianHyper(
 The tests are split onto unit and end-to-end (e2e) tests:
 ```sh
 python3 -m pytest tests/unit_tests
-python3 tests/e2d_tests/test_all.py
+python3 tests/e2e_tests/test_all.py
 ```
 Adding --create to the second command will generate reference results.
 

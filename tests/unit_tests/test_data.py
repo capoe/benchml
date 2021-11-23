@@ -13,7 +13,7 @@ def info_method_tester(d):
 
 
 def test_extt_load_dataset():
-    d = load_dataset("tests/data/ising.extt")
+    d = load_dataset("tests/unit_tests/data/ising.extt")
 
     # Test slicing
     assert isinstance(d[0], np.ndarray)
@@ -32,7 +32,7 @@ def test_extt_load_dataset():
 
 
 def test_xyz_load_dataset():
-    d = load_dataset("test/test_data/molecular/set_1.xyz")
+    d = load_dataset("tests/e2e_tests/test_data/molecular/set_1.xyz")
 
     assert isinstance(d, Dataset)
 
@@ -64,6 +64,6 @@ def test_ExttDataset():
 
 def test_ase():
     bml.readwrite.configure(use_ase=True)
-    d = load_dataset("test/test_data/molecular/set_1.xyz", index=":")
+    d = load_dataset("tests/e2e_tests/test_data/molecular/set_1.xyz", index=":")
     assert len(d) == 420
     assert len(list(d)) == 420

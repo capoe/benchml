@@ -7,4 +7,4 @@ python ../marchenko_pastur/generate_ising_dataset.py
 
 OR
 
-you could use example from `tests/data` directory, as in `demo.ipynb`
+you could use example from `tests/unit_tests/data` directory, as in `demo.ipynb`
