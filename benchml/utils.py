@@ -102,10 +102,22 @@ class OneHot:
 try_smiles_key = ["smiles", "SMILES", "canonical_smiles", "CANONICAL_SMILES"]
 
 
-def get_smiles(config):
+def get_smiles_key(dict_to_check, verbose=False):
+    keys = []
     for key in try_smiles_key:
-        if key in config.info:
-            return config.info[key]
+        if key in dict_to_check:
+            keys.append(key)
+    if len(keys) >= 1:
+        if len(keys) > 1 and verbose:
+            msg = f"WARNING: several 'smiles' fields are found, chosen {keys[0]}"
+            log << msg << log.endl << log.flush
+        return keys[0]
+    else:
+        raise ValueError("No 'smiles' field was found")
+
+
+def get_smiles(config):
+    return config.info[get_smiles_key(config.info)]
 
 
 def smiles_to_extxyz(
@@ -154,7 +166,7 @@ def smiles_to_pseudo_extxyz(smiles):
 
 def dataframe_to_extxyz(
     data,
-    smiles_from="smiles",
+    smiles_from=None,
     tmpfolder="tmp",
     gen3d=False,
     corina="/path/to/corina",
@@ -162,6 +174,9 @@ def dataframe_to_extxyz(
 ):
     if chem is None:
         raise ImportError("csv_to_extxyz requires rdkit")
+    if smiles_from is None:
+        row = next(data.iterrows())[1]
+        smiles_from = get_smiles_key(row, True)
     errors = []
     configs = []
     log.debug = False
