@@ -10,6 +10,8 @@ data filtering and feature generation routines, regressors and classifiers, etc.
 can be efficiently optimized using grid-based or Bayesian protocols that minimise recomputation
 by dependency hashing.
 
+See also our recent manuscript https://arxiv.org/abs/2112.02287, which details an application of BenchML to benchmarking of chemical representations.
+
 # Installation
 For a minimal installation without plugins, simply
 ```bash
