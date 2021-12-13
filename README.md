@@ -26,6 +26,13 @@ pip install benchml # (or: pip install . for latest version)
 pip install nphil
 ```
 
+# Getting started
+In the examples folder, the demo notebook (examples/demo) illustrates how to build simple model pipelines for generic non-molecular datasets. Other examples include ligand activity predictions (examples/ecfp_binding) and a benchmarking workflow (examples/benchmark).
+
+Note that BenchML is being actively developed and still in an alpha state. I.e., the API has not fully equilibrated yet, but we will work on keeping the examples up-to-date as well as making a more detailed documentation available soon. 
+
+See the remainder of this page for a description of the key concepts underlying the BenchML framework.
+
 # BenchML pipelines
 
 <div align="center">
