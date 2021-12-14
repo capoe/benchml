@@ -25,7 +25,6 @@ cd benchml
 conda env create -n py3benchml -f env.yml
 conda activate py3benchml
 pip install benchml # (or: pip install . for latest version)
-pip install nphil
 ```
 
 # Getting started
