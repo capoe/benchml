@@ -5,3 +5,5 @@ A detailed description of the method is available on [arXiv](https://arxiv.org/a
 See `build_example.py` for a basic example, including model definition, training/benchmarking and application.
 
 The example in the data directory was compiled using XChem data, as obtained from the [fragalysis website](https://fragalysis.diamond.ac.uk/viewer/react/landing).
+
+Before running the example (`python build_example.py`), make sure that BenchML's `gylm` plugin is installed (`pip install gylm`).
