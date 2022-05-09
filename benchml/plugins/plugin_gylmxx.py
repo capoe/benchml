@@ -115,7 +115,7 @@ class AttributeKernelSmoothMatchSVM(Transform):
             for cidx, config in enumerate(configs):
                 config.info["z_attr"] = list(Z[cidx].tolist())
             write_xyz(self.args["write_xyz"], configs)
-        stream.put("Z", np.array(Z, dtype=object))
+        stream.put("Z", as_object_array(Z))
 
 
 class GylmTransform(FitTransform, ABC):
@@ -282,7 +282,7 @@ def gylm_evaluate_mp(
     t1 = time.time()
     if log:
         log << "[MP: Finished in %fs]" % (t1 - t0) << log.flush
-    X = np.array(X, dtype="object")
+    X = as_object_array(X)
     return X
 
 
@@ -311,7 +311,7 @@ def gylm_evaluate(
     t1 = time.time()
     if log:
         log << "[Finished in %fs]" % (t1 - t0) << log.flush
-    X = np.array(X, dtype="object")
+    X = as_object_array(X)
     return X
 
 
@@ -344,3 +344,15 @@ class GylmReduceConvolve(Transform):
             X = (X.T * z).T
         # Store
         stream.put("X", X)
+
+
+def as_object_array(X):
+    if len(X) > 0:
+        sub_dtype = X[0].dtype
+    else:
+        sub_dtype = 'object'
+    X = np.array(X, dtype='object')
+    if len(X.shape) > 1:
+        X = X.astype(sub_dtype)
+    return X
+
