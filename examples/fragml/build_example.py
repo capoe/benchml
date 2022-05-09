@@ -161,7 +161,7 @@ if __name__ == "__main__":
     bml.save("model_example.arch", model)
 
     smi = "CCn1cc(NC(=O)C2CCC2)cn1"
-    label, score, attribution = test_on_smiles(model, smi=smi_test)
+    label, score, attribution = test_on_smiles(model, smi=smi)
     print("Prediction on", smi)
     print("  Label, score =", label, score)
     print("  Attribution  =", attribution)
