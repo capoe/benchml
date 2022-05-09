@@ -1,0 +1,47 @@
+{
+ "comment": "",
+ "datasets": [
+  "structures_example.xyz"
+ ],
+ "elements": [
+  "B",
+  "Br",
+  "C",
+  "Cl",
+  "F",
+  "H",
+  "I",
+  "N",
+  "O",
+  "P",
+  "S"
+ ],
+ "has_smiles": true,
+ "hypersplit": {
+  "method": "random",
+  "n_splits": 10,
+  "train_fraction": 0.75
+ },
+ "name": [
+  "tbxta_site_00"
+ ],
+ "periodic": false,
+ "splits": [
+  {
+   "method": "random",
+   "n_splits": 10,
+   "train_fraction": 0.9
+  }
+ ],
+ "targets": {
+  "activity": {
+   "convert": "",
+   "metrics": [
+    "auc"
+   ],
+   "per_atom": false,
+   "scaling": "unknown",
+   "task": "classification"
+  }
+ }
+}

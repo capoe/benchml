@@ -71,6 +71,7 @@ class AttributeKernelSmoothMatchSVM(Transform):
         "base_kernel": "@kernel.base_kernel",
         "base_power": "@kernel.base_power",
         "power": "@predictor.power",
+        "pass": False
     }
     allow_stream = ("Z",)
     verbose = True
@@ -80,7 +81,7 @@ class AttributeKernelSmoothMatchSVM(Transform):
         model = inputs["model"]
         X_probe = inputs["X_probe"]
         X = inputs["X"]
-        if stream.parent is not None:
+        if self.args["pass"] or stream.parent is not None:
             stream.put("Z", None)
             return
         Z = []
