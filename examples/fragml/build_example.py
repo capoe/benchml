@@ -1,34 +1,29 @@
 import numpy as np
+import rdkit.Chem as chem
+from rdkit.Chem import rdDistGeom
+
 import benchml as bml
 import benchml.transforms as btf
-import rdkit.Chem as chem
-log = bml.log
-
-from rdkit.Chem import rdDistGeom
-from benchml.hyper import Hyper, GridHyper
 from benchml.accumulator import Accumulator
+from benchml.hyper import GridHyper, Hyper
+
+log = bml.log
 
 
 def build_model():
     """Model architecture as described in https://arxiv.org/abs/2204.06348.
-    (Note that the pipeline does not include any attribution rank-filtering 
-    techniques.)
+
+    (Note that the pipeline does not include any attribution rank-
+    filtering techniques.)
     """
     return btf.Module(
         tag="bmol_gylm_match_class_attr",
         transforms=[
-            btf.ExtXyzInput(
-                tag="input"
-            ),
+            btf.ExtXyzInput(tag="input"),
             btf.GylmAtomic(
-                tag="descriptor", 
-                args={"heavy_only": True}, 
-                inputs={"configs": "input.configs"}
+                tag="descriptor", args={"heavy_only": True}, inputs={"configs": "input.configs"}
             ),
-            btf.KernelSmoothMatch(
-                tag="kernel", 
-                inputs={"X": "descriptor.X"}
-            ),
+            btf.KernelSmoothMatch(tag="kernel", inputs={"X": "descriptor.X"}),
             btf.SupportVectorClassifier(
                 tag="predictor",
                 args={"C": None, "power": 2},
@@ -50,23 +45,13 @@ def build_model():
             Hyper({"predictor.power": [2.0]}),
         ),
         broadcast={"meta": "input.meta"},
-        outputs={
-            "z": "predictor.z", 
-            "y": "predictor.y", 
-            "Z": "attribute.Z"
-        },
+        outputs={"z": "predictor.z", "y": "predictor.y", "Z": "attribute.Z"},
     )
 
 
-def benchmark_model(
-        model,
-        datafile,
-        split=None,
-        hypersplit=None
-):
-    """A barebone benchmarking routine (AUC only) with a 
-    nested grid-based hyperparameter search
-    """
+def benchmark_model(model, datafile, split=None, hypersplit=None):
+    """A barebone benchmarking routine (AUC only) with a nested grid-based
+    hyperparameter search."""
     data = list(bml.data.DatasetIterator(meta_json=datafile)).pop(0)
 
     if split is None:
@@ -87,7 +72,7 @@ def benchmark_model(
             accu_args=dict(metric=data["metrics"][0]),
             target="y",
             target_ref="input.y",
-            log=log
+            log=log,
         )
         output_train = model.map(train)
         output_test = model.map(test)
@@ -95,18 +80,13 @@ def benchmark_model(
         accu.append("train", output_train["z"], train.resolve("input.y"))
 
     log << log.mg << "Performance" << log.endl
-    perf = accu.evaluateAll(metrics=data["metrics"], bootstrap=100, log=log)
+    accu.evaluateAll(metrics=data["metrics"], bootstrap=100, log=log)
     model.close(stream, check=False)
+    return model
 
 
-
-def train_model(
-        model,
-        datafile,
-        hypersplit_args=None
-):
-    """Training routine with basic hyperparameter search
-    """
+def train_model(model, datafile, hypersplit_args=None):
+    """Training routine with basic hyperparameter search."""
     data = list(bml.data.DatasetIterator(meta_json=datafile)).pop(0)
     model = build_model()
     if hypersplit_args is None:
@@ -114,38 +94,35 @@ def train_model(
     log << log.mg << "Fit" << log.endl
     with bml.stream(model, data) as stream:
         # vvv To bypass attribution during training
-        with bml.hupdate(model, {"attribute.pass": True}): 
+        with bml.hupdate(model, {"attribute.pass": True}):
             model.hyperfit(
                 stream=stream,
                 split_args=hypersplit_args,
                 accu_args=dict(metric=data["metrics"][0]),
                 target="y",
                 target_ref="input.y",
-                log=log
+                log=log,
             )
     return model
 
 
 def test_on_smiles(model, smi, num_confs=1):
-    """Applies model to a molecule in a test setting
-    """
+    """Applies model to a molecule in a test setting."""
     # Generate conformer
     mol = chem.MolFromSmiles(smi)
     mol = chem.AddHs(mol)
     conf_gen = rdDistGeom.ETKDGv3()
-    conf_gen.randomSeed = 0xf00d
-    cids = rdDistGeom.EmbedMultipleConfs(mol, num_confs, conf_gen)
+    conf_gen.randomSeed = 0xF00D
+    rdDistGeom.EmbedMultipleConfs(mol, num_confs, conf_gen)
 
     # Mol to data
     configs = []
-    syms = [ _.GetSymbol() for _ in mol.GetAtoms() ]
+    syms = [_.GetSymbol() for _ in mol.GetAtoms()]
     for conf in mol.GetConformers():
         config = bml.readwrite.ExtendedXyz(symbols=syms, pos=conf.GetPositions())
         configs.append(config)
-    
-    data = bml.data.Dataset(
-        meta={}, configs=configs
-    )
+
+    data = bml.data.Dataset(meta={}, configs=configs)
 
     with bml.stream(model, data) as stream:
         out = model.map(stream)
@@ -165,4 +142,3 @@ if __name__ == "__main__":
     print("Prediction on", smi)
     print("  Label, score =", label, score)
     print("  Attribution  =", attribution)
-

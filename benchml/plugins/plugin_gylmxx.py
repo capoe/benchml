@@ -71,7 +71,7 @@ class AttributeKernelSmoothMatchSVM(Transform):
         "base_kernel": "@kernel.base_kernel",
         "base_power": "@kernel.base_power",
         "power": "@predictor.power",
-        "pass": False
+        "pass": False,
     }
     allow_stream = ("Z",)
     verbose = True
@@ -351,9 +351,8 @@ def as_object_array(X):
     if len(X) > 0:
         sub_dtype = X[0].dtype
     else:
-        sub_dtype = 'object'
-    X = np.array(X, dtype='object')
+        sub_dtype = "object"
+    X = np.array(X, dtype="object")
     if len(X.shape) > 1:
         X = X.astype(sub_dtype)
     return X
-
