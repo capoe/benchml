@@ -234,15 +234,11 @@ def compile_gylm_match_class(**kwargs):
                 ),
             ],
             hyper=GridHyper(
-                Hyper(
-                    {
-                        "predictor.C": np.logspace(-9, +7, 17),
-                    }
-                ),
+                Hyper({"predictor.C": np.logspace(-9, +7, 17)}),
                 Hyper({"predictor.power": [2.0]}),
             ),
             broadcast={"meta": "input.meta"},
-            outputs={"y_attr": "attribute.Z"},
+            outputs={"y": "predictor.y", "z": "predictor.z", "Z": "attribute.Z"},
         ),
     ]
 
