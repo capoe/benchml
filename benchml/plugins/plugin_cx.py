@@ -1,3 +1,4 @@
+import os
 from shutil import which
 
 import numpy as np
@@ -31,10 +32,14 @@ class CxCalcTransform(Transform):
         else:
             cxcalc_path = None
         if cxcalc_path is None:
-            msg = " ".join(
-                ["Did not find path of Chemaxon Calculator 'cxcalc';", f"given path: {given_path}"]
-            )
+            msg = f"Did not find path of Chemaxon Calculator 'cxcalc'; given path: {given_path}"
             raise IOError(msg)
+        if os.environ.get("CHEMAXON_LICENSE_URL") is None:
+            msg_l = "CHEMAXON_LICENSE_URL environment variable is not set, cxcalc will likely fail."
+            if os.environ.get("CHEMAXON_HOME") is None:
+                msg_h = "CHEMAXON_HOME environment variable is not set."
+                log << UserWarning(msg_h) << log.endl
+            log << UserWarning(msg_l) << log.endl
 
     def _map(self, inputs, stream):
         configs = inputs["configs"]
