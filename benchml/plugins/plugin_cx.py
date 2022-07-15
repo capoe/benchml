@@ -1,4 +1,4 @@
-import os
+from shutil import which
 
 import numpy as np
 
@@ -12,7 +12,7 @@ def get_smiles(c):
 
 class CxCalcTransform(Transform):
     default_args = {
-        "cxcalc": "/path/to/cxcalc",
+        "cxcalc": "cxcalc",
         "cmd": "logp --method consensus",
         "tmpdir": "tmp",
         "reshape_as_matrix": False,
@@ -25,8 +25,16 @@ class CxCalcTransform(Transform):
     precompute = True
 
     def _setup(self, *args, **kwargs):
-        if not os.path.isfile(self.args["cxcalc"]):
-            raise IOError("Invalid cxcalc path")
+        given_path = self.args.get("cxcalc")
+        if given_path:
+            cxcalc_path = which(given_path)
+        else:
+            cxcalc_path = None
+        if cxcalc_path is None:
+            msg = " ".join(
+                ["Did not find path of Chemaxon Calculator 'cxcalc';", f"given path: {given_path}"]
+            )
+            raise IOError(msg)
 
     def _map(self, inputs, stream):
         configs = inputs["configs"]
