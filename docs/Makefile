@@ -7,6 +7,8 @@ SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
+PY_APP_PATH   = $(shell cd ../ && pwd)
+PY_APP_NAME   = benchml
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -14,6 +16,16 @@ help:
 
 .PHONY: help Makefile
 
+apidoc:
+	sphinx-apidoc -o $(SOURCEDIR)/api/ -f -e $(PY_APP_PATH)/$(PY_APP_NAME)
+
+html-apidoc: apidoc
+	PYTHONPATH="${PYTHONPATH}:$(PY_APP_PATH)" make html
+
+clean:
+	@$(SPHINXBUILD) -M clean "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	@echo "Removing everything under '$(SOURCEDIR)/api/'..."
+	@rm $(SOURCEDIR)/api/ -Rf
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
