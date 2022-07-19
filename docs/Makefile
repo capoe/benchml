@@ -18,6 +18,7 @@ help:
 
 apidoc:
 	sphinx-apidoc -o $(SOURCEDIR)/api/ -f -e $(PY_APP_PATH)/$(PY_APP_NAME)
+	rm $(SOURCEDIR)/api/modules.rst
 
 html-apidoc: apidoc
 	PYTHONPATH="${PYTHONPATH}:$(PY_APP_PATH)" make html
