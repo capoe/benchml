@@ -1,7 +1,3 @@
-@import url("theme.css");
-
 .wy-side-nav-search {
-  !background-color: #e5ff80;
-  background-color: #343131;
-  !background-color: #55dfd0;
+  background-color: #333333 !important;
 }
