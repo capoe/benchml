@@ -148,7 +148,70 @@ class Dataset:
 
 
 class ExttDataset:
+    """An EXTendedTxt Dataset.
+
+    This is an EXTendedTxt Dataset, it consists of arrays and metadata.
+    It is one of the two dataset types BenchML accepts.
+
+    Attributes
+    ----------
+    meta : dict
+        Dictionary of metadata as name:value pairs.
+    arrays : :obj:`dict` of :obj:`np.ndarray`
+        Dictionary of named NumPy arrays as name:np.array([]) pairs.
+
+    See Also
+    --------
+    benchml.data.Dataset : XYZ dataset type, the OTHER supported dataset type.
+
+    Notes
+    -----
+    ExtendedTxt (``.extt``) format description::
+
+        ln 1: Array specification in the form array_name:(n_rows,n_cols). Example:
+          X:(100,10) Y:(100,)
+        ln 2: Json string with metadata. Example:
+          {"description": "Wow, this dataset is *really* noisy"}
+        ln 3 onwards: Arrays in numpy txt format, in order corresponding to header. Example:
+          0.00 1.00 2.00 3.00 4.00 5.00 6.00 7.00 8.00 9.00
+          0.01 1.01 2.01 3.01 4.01 5.01 6.01 7.01 8.01 9.01
+          ...
+          ...
+          0.99 1.99 2.99 3.99 4.99 5.99 6.99 7.99 8.99 9.99
+          0.00
+          0.01
+          ...
+          ...
+          0.99
+
+    Example dataset file: `tests/unit_tests/data/ising.extt
+    <https://github.com/capoe/benchml/blob/master/tests/unit_tests/data/ising.extt>`_
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from benchml.data import ExttDataset
+    >>> from benchml.readwrite import ExtendedTxt
+    >>> arrays = {
+    ...     "X": np.array([[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]]),
+    ...     "Y": np.array([45.0]),
+    ... }
+    >>> meta = {"description": "Y = sum(X)"}
+    >>> dataset = ExttDataset(extt=ExtendedTxt(arrays=arrays, meta=meta))
+    >>> dataset.info()
+    'ExttDataset with 2 arrays: Array[X(1, 10)] Array[Y(1,)]'
+    """
+
     def __init__(self, extt=None, meta=None):
+        """Initialise ExttDataset.
+
+        Parameters
+        ----------
+        extt : :obj:`ExtendedTxt`, required
+            An ExtendedTxt object with values from ``.extt`` file, by default None.
+        meta : dict, optional
+            Dictionary with metadata, by default None.
+        """
         if extt is None:
             extt = ExtendedTxt()
         self.meta = extt.meta if meta is None else meta
@@ -191,10 +254,29 @@ class ExttDataset:
         return key in self.meta
 
     def slice(self, idcs):
+        """Returns a slice of the dataset using "idcs" array indexes.
+
+        Parameters
+        ----------
+        idcs : :obj:`list` of :obj:`int`
+            List of array indexes to select for the new dataset.
+
+        Returns
+        -------
+        ExttDataset
+            The new ExttDataset.
+        """
         arrays_sliced = {k: v[idcs] for k, v in self.arrays.items()}
         return ExttDataset(extt=ExtendedTxt(arrays=arrays_sliced, meta=self.meta))
 
     def info(self):
+        """Return a text summary of the dataset.
+
+        Returns
+        -------
+        str
+            Summary of the dataset.
+        """
         tmpl = f"ExttDataset with {len(self.arrays)} arrays:"
         arr_info = [f"Array[{name}{repr(arr.shape)}]" for name, arr in self.arrays.items()]
         return " ".join([tmpl, *arr_info])
