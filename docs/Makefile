@@ -16,9 +16,12 @@ help:
 
 .PHONY: help Makefile
 
-apidoc:
+models:
+	python3 $(SOURCEDIR)/make_model_docs.py > $(SOURCEDIR)/models.rst
+
+apidoc: models
 	sphinx-apidoc -o $(SOURCEDIR)/api/ -f -e $(PY_APP_PATH)/$(PY_APP_NAME)
-	rm $(SOURCEDIR)/api/modules.rst
+	rm -f $(SOURCEDIR)/api/modules.rst
 
 html-apidoc: apidoc
 	PYTHONPATH="${PYTHONPATH}:$(PY_APP_PATH)" make html
@@ -26,7 +29,8 @@ html-apidoc: apidoc
 clean:
 	@$(SPHINXBUILD) -M clean "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 	@echo "Removing everything under '$(SOURCEDIR)/api/'..."
-	@rm $(SOURCEDIR)/api/ -Rf
+	@rm -Rf $(SOURCEDIR)/api/
+	@rm -f $(SOURCEDIR)/models.rst
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile

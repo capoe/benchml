@@ -69,6 +69,11 @@ def compile_ecfp_class():
             ),
             broadcast={"meta": "input.meta"},
             outputs={"y": "predictor.z"},
+            doc=dict(
+                summary="SVM Classifier",
+                extended_summary="SVM Classifier with MorganFP.",
+                model_category=btf.Module.categories.classification,
+            ),
         ),
         btf.Module(
             tag="bmol_ecfp_lr_class",
