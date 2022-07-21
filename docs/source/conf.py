@@ -13,7 +13,7 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
-
+from benchml import __version__
 
 # -- Project information -----------------------------------------------------
 
@@ -22,8 +22,7 @@ copyright = "2022, Carl Poelking"
 author = "Carl Poelking"
 
 # The full version, including alpha/beta/rc tags
-release = "0.4.0"
-
+release = __version__
 
 # -- General configuration ---------------------------------------------------
 
@@ -58,3 +57,6 @@ html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 html_logo = "../../web/bml.png"
 html_css_files = ["style.css"]
+
+# For rendering Mermaid graphs during build; requires mermaid-cli
+# mermaid_output_format = "svg"
