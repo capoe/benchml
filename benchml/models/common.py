@@ -93,7 +93,7 @@ def make_gylm_rr(
                     "types": None,
                     "epsilon": 1e-10,
                 },
-                inputs={"X": "descriptor_atomic.X", "T": None},
+                inputs={"X": "descriptor_atomic.X"},
             ),
             btf.WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
             btf.DoDivideBySize(
@@ -153,7 +153,7 @@ def make_gylm_krr(tag, minimal, extensive, regularization_range):
                     "types": None,
                     "epsilon": 1e-10,
                 },
-                inputs={"X": "descriptor_atomic.X", "T": None},
+                inputs={"X": "descriptor_atomic.X"},
             ),
             btf.KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
             btf.DoDivideBySize(

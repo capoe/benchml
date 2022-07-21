@@ -38,7 +38,7 @@ def compile_logd_extensive(**kwargs):
                         "types": None,
                         "epsilon": 1e-10,
                     },
-                    inputs={"X": "descriptor_atomic.X", "T": None},
+                    inputs={"X": "descriptor_atomic.X"},
                 ),
                 btf.WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
                 btf.Ridge(
@@ -86,7 +86,7 @@ def compile_logd_extensive(**kwargs):
                         "types": None,
                         "epsilon": 1e-10,
                     },
-                    inputs={"X": "descriptor_atomic.X", "T": None},
+                    inputs={"X": "descriptor_atomic.X"},
                 ),
                 btf.CxCalcTransform(
                     tag="cx", args={"reshape_as_matrix": True}, inputs={"configs": "input.configs"}
@@ -138,7 +138,7 @@ def compile_logd_extensive(**kwargs):
                         "types": None,
                         "epsilon": 1e-10,
                     },
-                    inputs={"X": "descriptor_atomic.X", "T": None},
+                    inputs={"X": "descriptor_atomic.X"},
                 ),
                 btf.WhitenMatrix(tag="whiten", inputs={"X": "descriptor.X"}),
                 btf.Ridge(

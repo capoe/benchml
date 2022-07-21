@@ -52,7 +52,7 @@ def build_gylm_krr():
                     "types": None,
                     "epsilon": 1e-10,
                 },
-                inputs={"X": "descriptor_atomic.X", "T": None},
+                inputs={"X": "descriptor_atomic.X"},
             ),
             btf.KernelDot(tag="kernel", inputs={"X": "descriptor.X"}),
             btf.DoDivideBySize(
