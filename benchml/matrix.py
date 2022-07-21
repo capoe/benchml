@@ -1,5 +1,6 @@
 import numpy as np
 
+from benchml.logger import log
 from benchml.pipeline import FitTransform, Transform
 
 
@@ -98,6 +99,7 @@ class ReduceTypedMatrix(FitTransform):
         "epsilon": 1e-10,
     }
     req_inputs = ("X",)
+    optional_inputs = ("T",)
     allow_stream = ("X",)
     allow_params = ("types",)
     allow_ops = {"sum": np.sum, "mean": np.mean}
@@ -107,6 +109,10 @@ class ReduceTypedMatrix(FitTransform):
         assert self.args["reduce_op"] in self.allow_ops.keys()  # Only 'sum' and 'mean' allowed
         if self.args["reduce_by_type"]:
             assert "T" in self.inputs  # Require input T if reduce_by_type = True
+        else:
+            # Warn if unused input is given
+            if "T" in self.inputs:
+                log << "Warning: ReduceTypedMatrix received unused 'T' input" << log.endl
 
     def _fit(self, inputs, stream, params):
         if self.args["reduce_by_type"]:
