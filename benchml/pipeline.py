@@ -658,7 +658,7 @@ Model Category: {model_category}
     def_doc = dict(
         summary="'No summary'",
         extended_summary="'No extended summary'",
-        model_category="'Not Specified",
+        model_category="'Not Specified'",
     )
 
     def __init__(
