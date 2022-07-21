@@ -37,9 +37,9 @@ class KernelDot(FitTransform):
     default_args = {"power": 1, "self_kernel": False}
     req_inputs = ("X",)
     allow_params = {"X"}
-    allow_stream = {"K", "K_self"}
+    allow_stream = {"K", "K_diag"}
     stream_kernel = ("K",)
-    stream_samples = ("K_self",)
+    stream_samples = ("K_diag",)
     precompute = True
 
     def evaluate(self, x1, x2=None, diagonal_only=False):
@@ -55,23 +55,23 @@ class KernelDot(FitTransform):
         params.put("X", np.copy(inputs["X"]))
         stream.put("K", K)
         if self.args["self_kernel"]:
-            stream.put("K_self", K.diagonal())
+            stream.put("K_diag", K.diagonal())
 
     def _map(self, inputs, stream):
         K = self.evaluate(inputs["X"], self.params().get("X"))
         stream.put("K", K)
         if self.args["self_kernel"]:
-            K_self = self.evaluate(inputs["X"], inputs["X"], diagonal_only=True)
-            stream.put("K_self", K_self)
+            K_diag = self.evaluate(inputs["X"], inputs["X"], diagonal_only=True)
+            stream.put("K_diag", K_diag)
 
 
 class KernelGaussian(FitTransform):
     default_args = {"scale": 1, "self_kernel": False, "epsilon": 1e-10}
     req_inputs = ("X",)
     allow_params = {"X", "sigma"}
-    allow_stream = {"K", "K_self"}
+    allow_stream = {"K", "K_diag"}
     stream_kernel = ("K",)
-    stream_samples = ("K_self",)
+    stream_samples = ("K_diag",)
     precompute = True
 
     def evaluate(self, x1, x2=None, sigma=None, diagonal_only=False):
@@ -99,7 +99,7 @@ class KernelGaussian(FitTransform):
         params.put("X", np.copy(inputs["X"]))
         stream.put("K", K)
         if self.args["self_kernel"]:
-            stream.put("K_self", K.diagonal())
+            stream.put("K_diag", K.diagonal())
 
     def _map(self, inputs, stream):
         K = self.evaluate(
@@ -107,7 +107,7 @@ class KernelGaussian(FitTransform):
         )
         stream.put("K", K)
         if self.args["self_kernel"]:
-            K_self = self.evaluate(
+            K_diag = self.evaluate(
                 x1=inputs["X"], x2=inputs["X"], sigma=self.params().get("sigma"), diagonal_only=True
             )
-            stream.put("K_self", K_self)
+            stream.put("K_diag", K_diag)

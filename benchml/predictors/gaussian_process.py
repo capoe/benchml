@@ -43,7 +43,7 @@ class GaussianProcess(FitTransform):
         stream.put("y", mean)
         # Variance
         if self.args["predict_variance"]:
-            dy = self.predictError(k, inputs["K_self"])
+            dy = self.predictError(k, inputs["K_diag"])
             dr = self.rankError(dy)
             dz = self.zscoreError(dy)
         else:
@@ -55,9 +55,9 @@ class GaussianProcess(FitTransform):
         stream.put("dy_zscore", dz)
         return mean, dy, dr, dz
 
-    def predictError(self, k, k_self):
+    def predictError(self, k, k_diag):
         p = self.args["power"]
-        var = k_self ** p - np.einsum(
+        var = k_diag ** p - np.einsum(
             "ab,bc,ac->a", k ** p, self.params().get("K_inv"), k ** p, optimize="greedy"
         )
         dy = self.params().get("y_std") * var ** 0.5
@@ -160,8 +160,8 @@ class ResidualGaussianProcess(FitTransform):
         stream.put("y", mean)
         # Variance
         if self.args["predict_variance"]:
-            k_self = inputs["K_self"]
-            var = k_self ** p - np.einsum(
+            k_diag = inputs["K_diag"]
+            var = k_diag ** p - np.einsum(
                 "ab,bc,ac->a", k ** p, self.params().get("K_inv"), k ** p, optimize="greedy"
             )
             dy = self.params().get("y_std") * var ** 0.5

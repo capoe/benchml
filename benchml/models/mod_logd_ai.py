@@ -32,13 +32,13 @@ def compile_logd_ai(*args, **kwargs):
                     inputs={"X": ["kern_gaussian.K", "kern.K"]},
                 ),
                 btf.Add(
-                    tag="add_k_self",
+                    tag="add_k_diag",
                     args={"coeffs": [0.5, 0.5]},
-                    inputs={"X": ["kern_gaussian.K_self", "kern.K_self"]},
+                    inputs={"X": ["kern_gaussian.K_diag", "kern.K_diag"]},
                 ),
                 btf.GaussianProcess(
                     args={"alpha": 1e-5, "power": 2},
-                    inputs={"K": "add_k.y", "K_self": "add_k_self.y", "y": "input.y"},
+                    inputs={"K": "add_k.y", "K_diag": "add_k_diag.y", "y": "input.y"},
                 ),
             ],
             hyper=GridHyper(
@@ -49,7 +49,7 @@ def compile_logd_ai(*args, **kwargs):
                     }
                 ),
                 Hyper({"kern_gaussian.scale": [1.0, 2.0]}),
-                Hyper({"add_k.coeffs": [[0.25, 0.75]], "add_k_self.coeffs": [[0.25, 0.75]]}),
+                Hyper({"add_k.coeffs": [[0.25, 0.75]], "add_k_diag.coeffs": [[0.25, 0.75]]}),
                 Hyper({"GaussianProcess.power": [2.0]})
                 # Hyper({ "desc.radius": [ 2 ] }),
                 # Hyper({ "GaussianProcess.alpha": [ 0.1 ], }),
@@ -57,7 +57,7 @@ def compile_logd_ai(*args, **kwargs):
                 # Hyper(
                 #    {
                 #      "add_k.coeffs": [ [0.25,0.75] ],
-                #      "add_k_self.coeffs": [ [0.25,0.75] ]
+                #      "add_k_diag.coeffs": [ [0.25,0.75] ]
                 #    }
                 # ),
                 # Hyper({ "GaussianProcess.power": [ 2. ] })

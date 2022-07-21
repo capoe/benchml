@@ -351,14 +351,14 @@ def compile_logd(custom_fields=None, **kwargs):
                     inputs={"X": ["kern_gaussian.K", "kern.K"]},
                 ),
                 btf.Add(
-                    tag="add_k_self",
+                    tag="add_k_diag",
                     args={"coeffs": [0.5, 0.5]},
-                    inputs={"X": ["kern_gaussian.K_self", "kern.K_self"]},
+                    inputs={"X": ["kern_gaussian.K_diag", "kern.K_diag"]},
                 ),
                 btf.ResidualGaussianProcess(
                     tag="gp",
                     args={"alpha": 1e-5, "power": 2},
-                    inputs={"K": "add_k.y", "K_self": "add_k_self.y", "y": "input.y"},
+                    inputs={"K": "add_k.y", "K_diag": "add_k_diag.y", "y": "input.y"},
                 ),
             ],
             hyper=GridHyper(
@@ -369,7 +369,7 @@ def compile_logd(custom_fields=None, **kwargs):
                         "gp.alpha": np.logspace(-5, +1, 7),
                     }
                 ),
-                Hyper({"add_k.coeffs": [[0.25, 0.75]], "add_k_self.coeffs": [[0.25, 0.75]]}),
+                Hyper({"add_k.coeffs": [[0.25, 0.75]], "add_k_diag.coeffs": [[0.25, 0.75]]}),
                 Hyper({"gp.power": [2.0]}),
             ),
             broadcast={"meta": "input.meta"},
