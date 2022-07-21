@@ -132,6 +132,9 @@ class BayesianHyper(object):
         self.init_points = init_points
         self.n_iter = n_iter
 
+    def getFields(self):
+        return GridHyper(*self.hypers).getFields()
+
     def findBounds(self):
         all_updates = [upd for upd in GridHyper(*self.hypers)]
         bounds = copy.deepcopy(all_updates[0])
