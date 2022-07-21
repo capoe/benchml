@@ -628,8 +628,9 @@ class FitTransform(Transform):
 
 
 class ModelCategory(enum.Enum):
-    classification = 0
-    regression = 1
+    classification = "Classification"
+    regression = "Regression"
+    na = "'Not Specified'"
 
 
 class Module(TransformBase):
@@ -647,7 +648,7 @@ class Module(TransformBase):
     docstring_template = """{doc_header}
 {summary}
 
-Model Category: {model_category}
+Model Category: {model_category.value}
 
 {extended_summary}
 
@@ -658,7 +659,7 @@ Model Category: {model_category}
     def_doc = dict(
         summary="'No summary'",
         extended_summary="'No extended summary'",
-        model_category="'Not Specified'",
+        model_category=categories.na,
     )
 
     def __init__(
