@@ -24,3 +24,7 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+# Documentation: Sphinx-autodoc generated files
+api/
+docs/source/models/

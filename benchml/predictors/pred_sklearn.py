@@ -405,9 +405,9 @@ class KernelMatern(FitTransform):
     default_args = {"length_scale": 1.0, "nu": 1.5}
     req_inputs = ("X",)
     allow_params = {"X"}
-    allow_stream = {"K", "K_self"}
+    allow_stream = {"K", "K_diag"}
     stream_kernel = ("K",)
-    stream_samples = ("K_self",)
+    stream_samples = ("K_diag",)
     precompute = True
 
     def evaluate(self, x1, x2=None, diagonal_only=False):
@@ -423,13 +423,13 @@ class KernelMatern(FitTransform):
         K = self.evaluate(inputs["X"])
         params.put("X", np.copy(inputs["X"]))
         stream.put("K", K)
-        stream.put("K_self", K.diagonal())
+        stream.put("K_diag", K.diagonal())
 
     def _map(self, inputs, stream):
         K = self.evaluate(inputs["X"], self.params().get("X"))
         stream.put("K", K)
-        K_self = self.evaluate(inputs["X"], inputs["X"], diagonal_only=True)
-        stream.put("K_self", K_self)
+        K_diag = self.evaluate(inputs["X"], inputs["X"], diagonal_only=True)
+        stream.put("K_diag", K_diag)
 
 
 class OrthogonalMatchingPursuit(SklearnTransform):

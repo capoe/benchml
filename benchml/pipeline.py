@@ -1,5 +1,6 @@
 import abc
 import copy
+import enum
 import hashlib
 import inspect
 import json
@@ -626,6 +627,12 @@ class FitTransform(Transform):
             stream.version(self.getHash())
 
 
+class ModelCategory(enum.Enum):
+    classification = "Classification"
+    regression = "Regression"
+    na = "'Not Specified'"
+
+
 class Module(TransformBase):
     """A module encapsulates an ML pipeline. It consists of a sequence of
     interdependent transforms.
@@ -637,7 +644,27 @@ class Module(TransformBase):
         hyper (object): Hyper-optimization controller
     """
 
-    def __init__(self, tag="module", broadcast=None, transforms=None, hyper=None, **kwargs):
+    categories = ModelCategory
+    docstring_template = """{doc_header}
+{summary}
+
+Model Category: {model_category.value}
+
+{extended_summary}
+
+{pipeline_graph}
+
+{transforms}
+"""
+    def_doc = dict(
+        summary="'No summary'",
+        extended_summary="'No extended summary'",
+        model_category=categories.na,
+    )
+
+    def __init__(
+        self, tag="module", broadcast=None, transforms=None, hyper=None, doc=None, **kwargs
+    ):
         super().__init__(tag=tag, **kwargs)
         if broadcast is None:
             broadcast = {}
@@ -654,6 +681,97 @@ class Module(TransformBase):
             else:
                 self.append(t)
         self.updateDependencies()
+        # Automated documentation ('docstring') section
+        self._provided_doc = doc
+        if doc is None:
+            doc = self.def_doc.copy()
+        else:
+            doc = {**self.def_doc, **doc}
+        self._autodoc = {}
+        self._autodoc.update(dict(doc_header=self.make_doc_header()))
+        self._autodoc.update(dict(graph=self.create_mermaid_graph(self, self.transforms)))
+        self._autodoc.update(
+            dict(
+                transforms=self.make_transforms_section(),
+                pipeline_graph=self.make_pipeline_section(),
+            )
+        )
+        self.__doc__ = self.docstring_template.format(tag=self.tag, **doc, **self._autodoc)
+
+    def make_doc_header(self):
+        return "\n".join([self.tag, "=" * len(self.tag)])
+
+    def make_transforms_section(self):
+        header = "Transforms\n----------"
+        body = "{name} : {type}\n    {description}\n"  # "Info:\n    {info}\n"
+        t_docs = [body.format(**self.document_transform(t)) for t in self.transforms]
+        return "\n".join([header, *t_docs])
+
+    def make_pipeline_section(self):
+        header = "Pipeline Graph\n--------------\n.. mermaid::\n"
+        graph = self._autodoc.get("graph") or self.create_mermaid_graph(self, self.transforms)
+        return "\n    ".join([header, *graph, "\n"])
+
+    @staticmethod
+    def create_mermaid_graph(model, transforms):
+        g_header = """flowchart TD"""
+        graph = [g_header]
+        i = "    "  # Indent, for readability
+        en_t = {t.tag: (idx, t) for idx, t in enumerate(transforms)}
+
+        def name(t):
+            return type(t).__name__
+
+        def add_line(source_tag):
+            source_ind, source_t = en_t[source_tag]
+            graph.append(
+                (
+                    f"{i}{source_ind}"
+                    f"[{name(source_t)}: '{source_tag}']"
+                    f" -- {input_name} --> "
+                    f"{idx}[{name(t)}: '{tag}']"
+                )
+            )
+
+        graph.append(f"subgraph Model [{model.tag}]")
+        for tag, (idx, t) in en_t.items():
+            for input_name, input_source in t.inputs.items():
+                if input_source is None:
+                    # ReduceTypedMatrix has optional 'T' input
+                    continue
+                if type(input_source) is list:
+                    for input_source_1 in input_source:
+                        source_tag = input_source_1.split(".")[0]
+                        add_line(source_tag)
+                else:
+                    source_tag = input_source.split(".")[0]
+                    add_line(source_tag)
+        graph.append("end")
+        hyper_name = type(model.hyper).__name__
+        graph.append(f"subgraph Hyper [{hyper_name}]")
+        for hyper_field in model.hyper.getFields():
+            dest_tag, dest_param = hyper_field.split(".")
+            dest_ind, dest_t = en_t[dest_tag]
+            graph.append(
+                (
+                    f"{i}HyperParams --- "
+                    f"{dest_param} ---> {dest_ind}"
+                    f"[{name(dest_t)}: '{dest_tag}']"
+                )
+            )
+        graph.append("end")
+        return graph
+
+    @staticmethod
+    def document_transform(t):
+        name = type(t).__name__
+        tt = str([c.__name__ for c in t.__class__.__bases__])
+        info = str(t)
+        if t.__doc__ is not None:
+            desc = t.__doc__.split("\n")[0]
+        else:
+            desc = "'No description'"
+        return dict(name=name, type=tt, description=desc, info=info)
 
     # Status
     def check_available(self, *args, **kwargs):
