@@ -1,4 +1,4 @@
-#!/tmp_mnt/filer1/unix/cpoelking/nomad/ccdc_rev/venv/bin/python
+#! /usr/bin/env python3
 import csv
 
 import numpy as np
