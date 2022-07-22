@@ -21,18 +21,6 @@ class KernelBase(object):
         return self.evaluate(X, self.X_fit, symmetric=False, **kwargs)
 
 
-class KernelDotDeprecated(KernelBase):
-    def __init__(self, **kwargs):
-        KernelBase.__init__(self, **kwargs)
-        self.power = kwargs["power"]
-        self.name = "dot"
-
-    def evaluate(self, X1, X2, symmetric="not_used", **kwargs):
-        k = X1.dot(X2.T)
-        k = k ** self.power
-        return k
-
-
 class KernelDot(FitTransform):
     default_args = {"power": 1, "self_kernel": False}
     req_inputs = ("X",)
