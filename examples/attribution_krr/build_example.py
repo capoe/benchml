@@ -30,7 +30,7 @@ def build_model():
             ),
             btf.AttributeSmoothMatchKernelRidge(
                 tag="attribute",
-                args={"write_xyz": "attribution.xyz"},
+                args={"write_xyz": ""},
                 inputs={
                     "configs": "input.configs",
                     "X": "kernel._X",
