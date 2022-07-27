@@ -128,7 +128,7 @@ class AttributeSmoothMatchKernelRidge(Transform):
         "base_kernel": "@kernel.base_kernel",
         "base_power": "@kernel.base_power",
         "power": "@predictor.power",
-        "pass": False
+        "pass": False,
     }
     allow_stream = ("Z",)
     verbose = True
@@ -169,7 +169,7 @@ class AttributeSmoothMatchKernelRidge(Transform):
             # >>> y = y*y_std + y_mean
             w = k ** (self.args["power"] - 1) * model.dual_coef_
             z_attr = k_attr.dot(w)
-            z_attr = z_attr*y_std + y_mean/z_attr.shape[0]
+            z_attr = z_attr * y_std + y_mean / z_attr.shape[0]
             Z.append(z_attr)
 
         if self.args["write_xyz"] != "":

@@ -1,11 +1,12 @@
 import numpy as np
 import rdkit.Chem as chem
+from rdkit.Chem import rdDistGeom
+
 import benchml as bml
 import benchml.transforms as btf
-
-from rdkit.Chem import rdDistGeom
 from benchml.accumulator import Accumulator
 from benchml.hyper import GridHyper, Hyper
+
 log = bml.log
 
 
@@ -15,14 +16,9 @@ def build_model():
         transforms=[
             btf.ExtXyzInput(tag="input"),
             btf.GylmAtomic(
-                tag="descriptor", 
-                args={"heavy_only": True}, 
-                inputs={"configs": "input.configs"}
+                tag="descriptor", args={"heavy_only": True}, inputs={"configs": "input.configs"}
             ),
-            btf.KernelSmoothMatch(
-                tag="kernel", 
-                inputs={"X": "descriptor.X"}
-            ),
+            btf.KernelSmoothMatch(tag="kernel", inputs={"X": "descriptor.X"}),
             btf.KernelRidge(
                 tag="predictor",
                 args={"alpha": None, "power": 2},
@@ -37,7 +33,7 @@ def build_model():
                     "X_probe": "descriptor.X",
                     "model": "predictor._model",
                     "y_mean": "predictor._y_mean",
-                    "y_std": "predictor._y_std"
+                    "y_std": "predictor._y_std",
                 },
             ),
         ],
@@ -135,6 +131,5 @@ if __name__ == "__main__":
     value, attribution = apply_model(model, smi=smi)
     print("Prediction on", smi)
     print("  Value (total)     =", value[0])
-    print("  Attribution       =", attribution[0,0:3], "...")
+    print("  Attribution       =", attribution[0, 0:3], "...")
     print("  Attribution (sum) =", attribution.sum())
-
