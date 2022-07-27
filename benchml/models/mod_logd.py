@@ -163,7 +163,7 @@ def compile_logd(custom_fields=None, **kwargs):
         custom_fields = []
     return [
         btf.Module(
-            tag="logp_linear",
+            tag="logp_lr",
             transforms=[
                 btf.ExtXyzInput(tag="input"),
                 btf.CxCalcTransform(
@@ -175,7 +175,7 @@ def compile_logd(custom_fields=None, **kwargs):
             outputs={"y": "LinearRegression.y"},
         ),
         btf.Module(
-            tag="logd_physchem_rf",
+            tag="logd_physchem_rfr",
             transforms=[
                 btf.ExtXyzInput(tag="input"),
                 btf.Physchem2D(tag="Physchem2D", inputs={"configs": "input.configs"}),

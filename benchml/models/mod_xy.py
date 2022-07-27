@@ -5,7 +5,7 @@ from benchml.hyper import GridHyper, Hyper
 def compile_xy_regressors(*args, **kwargs):
     return [
         btf.Module(
-            tag="xy_rf_regressor",
+            tag="xy_rfr",
             transforms=[
                 btf.ExttInput(tag="input"),
                 btf.RandomForestRegressor(tag="predictor", inputs={"X": "input.X", "y": "input.Y"}),
@@ -20,7 +20,7 @@ def compile_xy_regressors(*args, **kwargs):
 def compile_xy_classifiers(*args, **kwargs):
     return [
         btf.Module(
-            tag="xy_rf_classifier",
+            tag="xy_rf_class",
             transforms=[
                 btf.ExttInput(tag="input"),
                 btf.RandomForestClassifier(
@@ -30,6 +30,9 @@ def compile_xy_classifiers(*args, **kwargs):
             hyper=GridHyper(Hyper({"predictor.max_depth": [None]})),
             broadcast={},
             outputs={"y": "predictor.y"},
+            doc=dict(
+                model_category=btf.Module.categories.classification,
+            ),
         ),
     ]
 

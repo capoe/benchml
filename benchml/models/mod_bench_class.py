@@ -35,6 +35,9 @@ def compile_physchem_class(custom_fields=None, with_hyper=False, **kwargs):
                     hyper=GridHyper(Hyper({"predictor.max_depth": [None]})),
                     broadcast={"meta": "input.meta"},
                     outputs={"y": "predictor.z"},
+                    doc=dict(
+                        model_category=btf.Module.categories.classification,
+                    ),
                 ),
             ]
         )
@@ -100,6 +103,9 @@ def compile_ecfp_class():
             ),
             broadcast={"meta": "input.meta"},
             outputs={"y": "predictor.z"},
+            doc=dict(
+                model_category=btf.Module.categories.classification,
+            ),
         ),
         btf.Module(
             tag="bmol_ecfp_rf_class",
@@ -123,6 +129,9 @@ def compile_ecfp_class():
             ),
             broadcast={"meta": "input.meta"},
             outputs={"y": "predictor.z"},
+            doc=dict(
+                model_category=btf.Module.categories.classification,
+            ),
         ),
         btf.Module(
             tag="bmol_ecfp_mplr_class",
@@ -157,6 +166,9 @@ def compile_ecfp_class():
             ),
             broadcast={"meta": "input.meta"},
             outputs={"y": "predictor.z"},
+            doc=dict(
+                model_category=btf.Module.categories.classification,
+            ),
         ),
     ]
 
@@ -187,6 +199,9 @@ def compile_gylm_match_class(**kwargs):
             ),
             broadcast={"meta": "input.meta"},
             outputs={"y": "predictor.z"},
+            doc=dict(
+                model_category=btf.Module.categories.classification,
+            ),
         ),
         btf.Module(
             tag="bmol_gylm_match_class_norm",
@@ -213,6 +228,9 @@ def compile_gylm_match_class(**kwargs):
             ),
             broadcast={"meta": "input.meta"},
             outputs={"y": "ranker.z"},
+            doc=dict(
+                model_category=btf.Module.categories.classification,
+            ),
         ),
         btf.Module(
             tag="bmol_gylm_match_class_attr",
@@ -244,6 +262,9 @@ def compile_gylm_match_class(**kwargs):
             ),
             broadcast={"meta": "input.meta"},
             outputs={"y": "predictor.y", "z": "predictor.z", "Z": "attribute.Z"},
+            doc=dict(
+                model_category=btf.Module.categories.classification,
+            ),
         ),
     ]
 

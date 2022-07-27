@@ -28,7 +28,7 @@ def compile_physchem(custom_fields=None, with_hyper=False, **kwargs):
         hyper = GridHyper(Hyper({"pred.max_depth": [None]}))
     return [
         btf.Module(
-            tag="physchem",
+            tag="physchem_rfr",
             transforms=[
                 btf.ExtXyzInput(tag="input"),
                 btf.Physchem2D(tag="Physchem2D", inputs={"configs": "input.configs"}),
@@ -105,36 +105,6 @@ def compile_soap(basic=False, **kwargs):
     return models
 
 
-def compile_morgan_krr(**kwargs):
-    return [
-        btf.Module(
-            tag="morgan_krr",
-            transforms=[
-                btf.ExtXyzInput(tag="input"),
-                btf.MorganFP(
-                    tag="desc",
-                    args={"length": 4096, "radius": 2, "normalize": True},
-                    inputs={"configs": "input.configs"},
-                ),
-                btf.KernelDot(tag="kern", inputs={"X": "desc.X"}),
-                btf.KernelRidge(
-                    args={"alpha": 1e-5, "power": 2}, inputs={"K": "kern.K", "y": "input.y"}
-                ),
-            ],
-            hyper=GridHyper(
-                Hyper(
-                    {
-                        "KernelRidge.alpha": np.logspace(-6, +1, 8),
-                    }
-                ),
-                Hyper({"KernelRidge.power": [2.0]}),
-            ),
-            broadcast={"meta": "input.meta"},
-            outputs={"y": "KernelRidge.y"},
-        )
-    ]
-
-
 def compile_morgan(**kwargs):
     return [
         # Macro example
@@ -171,6 +141,31 @@ def compile_morgan(**kwargs):
         # >>>     broadcast={ "meta": "input.meta" },
         # >>>     outputs={ "y": "KernelRidge.y" },
         # >>> ),
+        btf.Module(
+            tag="morgan_krr",
+            transforms=[
+                btf.ExtXyzInput(tag="input"),
+                btf.MorganFP(
+                    tag="desc",
+                    args={"length": 4096, "radius": 2, "normalize": True},
+                    inputs={"configs": "input.configs"},
+                ),
+                btf.KernelDot(tag="kern", inputs={"X": "desc.X"}),
+                btf.KernelRidge(
+                    args={"alpha": 1e-5, "power": 2}, inputs={"K": "kern.K", "y": "input.y"}
+                ),
+            ],
+            hyper=GridHyper(
+                Hyper(
+                    {
+                        "KernelRidge.alpha": np.logspace(-6, +1, 8),
+                    }
+                ),
+                Hyper({"KernelRidge.power": [2.0]}),
+            ),
+            broadcast={"meta": "input.meta"},
+            outputs={"y": "KernelRidge.y"},
+        ),
         btf.Module(
             tag="morgan_krr_ext",
             transforms=[
@@ -234,7 +229,7 @@ def compile_morgan(**kwargs):
 def compile_gylm_match(**kwargs):
     return [
         btf.Module(
-            tag="gylm_smooth_match",
+            tag="gylm_smooth_match_krr",
             transforms=[
                 btf.ExtXyzInput(tag="input"),
                 btf.GylmAtomic(tag="desc", inputs={"configs": "input.configs"}),
@@ -261,7 +256,7 @@ def compile_gylm_match(**kwargs):
 def compile_gylm(**kwargs):
     return [
         btf.Module(
-            tag="gylm",
+            tag="gylm_average_krr",
             transforms=[
                 btf.ExtXyzInput(tag="input"),
                 btf.GylmAverage(tag="desc", inputs={"configs": "input.configs"}),
@@ -290,7 +285,7 @@ def compile_gylm(**kwargs):
 def compile_gylm_grid(**kwargs):
     return [
         btf.Module(
-            tag="gylm_grid",
+            tag="gylm_average_krr_grid",
             transforms=[
                 btf.ExtXyzInput(tag="input"),
                 btf.GylmAverage(tag="desc", inputs={"configs": "input.configs"}),
@@ -324,7 +319,6 @@ def register_all():
         "gylm": compile_gylm,
         "gylm_match": compile_gylm_match,
         "gylm_grid": compile_gylm_grid,
-        "morgan_krr": compile_morgan_krr,
         "null": compile_null,
         "physchem": compile_physchem,
         "soap": compile_soap,

@@ -111,11 +111,6 @@ def compile_physchem(custom_fields=None, with_hyper=False, **kwargs):
     return models
 
 
-def compile_ecfp(**kwargs):
-    # TODO
-    return []
-
-
 def compile_esm(*args, **kwargs):
     models = []
     for permutation in ["sorted_l2", "eigenspectrum"]:
@@ -401,7 +396,6 @@ def make_pdf_rr(minimal):
 def register_all():
     return {
         "bxtal_physchem": compile_physchem,
-        "bxtal_ecfp": compile_ecfp,
         "bxtal_esm": compile_esm,
         "bxtal_acsf": compile_acsf,
         "bxtal_mbtr": compile_mbtr,
