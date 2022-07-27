@@ -934,6 +934,9 @@ Model Category: {model_category.value}
         return stream
 
     def map(self, stream, endpoint=None, verbose=VERBOSE):
+        if not isinstance(stream, (Stream,)):
+            with sopen(self, stream) as stream:
+                return self.map(stream)
         if verbose:
             print("Map '%s'" % stream.tag)
         self.activateStream(stream)

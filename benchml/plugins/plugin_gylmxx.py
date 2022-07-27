@@ -119,6 +119,68 @@ class AttributeKernelSmoothMatchSVM(Transform):
         stream.put("Z", as_object_array(Z))
 
 
+class AttributeSmoothMatchKernelRidge(Transform):
+    req_inputs = ("configs", "X", "X_probe", "model", "y_mean", "y_std")
+    default_args = {
+        "write_xyz": "",
+        "gamma": "@kernel.gamma",
+        "epsilon": "@kernel.epsilon",
+        "base_kernel": "@kernel.base_kernel",
+        "base_power": "@kernel.base_power",
+        "power": "@predictor.power",
+        "pass": False
+    }
+    allow_stream = ("Z",)
+    verbose = True
+
+    def _map(self, inputs, stream):
+        configs = inputs["configs"]
+        model = inputs["model"]
+        X_probe = inputs["X_probe"]
+        X = inputs["X"]
+        y_mean = inputs["y_mean"]
+        y_std = inputs["y_std"]
+        if self.args["pass"] or stream.parent is not None:
+            stream.put("Z", None)
+            return
+        Z = []
+        log << log.endl
+        for i in range(len(X_probe)):
+            log << "Attribute %d/%d" % (i + 1, len(X_probe)) << log.endl
+            xi = X_probe[i]
+            k_attr = np.zeros((len(xi), len(X)))
+            for j in range(len(X)):
+                xj = X[j]  # noqa: F841
+                kij = eval(self.args["base_kernel"]) ** self.args["base_power"]
+                pij = np.zeros_like(kij)
+                gylm.smooth_match(
+                    pij,
+                    kij,
+                    kij.shape[0],
+                    kij.shape[1],
+                    self.args["gamma"],
+                    self.args["epsilon"],
+                    False,
+                )
+                k_attr[:, j] = np.sum(kij * pij, axis=1)
+            k = np.sum(k_attr, axis=0)
+            # Check against:
+            # >>> y = model.predict(k.reshape(1,-1)**self.args["power"])
+            # >>> y = y*y_std + y_mean
+            w = k ** (self.args["power"] - 1) * model.dual_coef_
+            z_attr = k_attr.dot(w)
+            z_attr = z_attr*y_std + y_mean/z_attr.shape[0]
+            Z.append(z_attr)
+
+        if self.args["write_xyz"] != "":
+            assert configs is not None  # Require configs input to produce xyz
+
+            for cidx, config in enumerate(configs):
+                config.info["z_attr"] = list(Z[cidx].tolist())
+            write_xyz(self.args["write_xyz"], configs)
+        stream.put("Z", as_object_array(Z))
+
+
 class GylmTransform(FitTransform, ABC):
     default_args = {
         "procs": 1,
