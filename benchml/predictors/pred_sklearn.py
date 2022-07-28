@@ -251,7 +251,7 @@ class KernelRidge(SklearnTransform):
     req_args = ("alpha",)
     default_args = {"power": 1}
     req_inputs = ("K", "y")
-    allow_params = {"model", "y_mean", "y_std", "y"}
+    allow_params = {"model", "w", "y_mean", "y_std", "y"}
     allow_stream = {"y"}
 
     def _setup(self):
@@ -267,6 +267,7 @@ class KernelRidge(SklearnTransform):
         params.put("model", model)
         params.put("y_mean", y_mean)
         params.put("y_std", y_std)
+        params.put("w", model.dual_coef_)
         stream.put("y", y_pred)
 
     def _map(self, inputs, stream):

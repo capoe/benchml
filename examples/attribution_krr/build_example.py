@@ -16,13 +16,19 @@ def build_model():
         transforms=[
             btf.ExtXyzInput(tag="input"),
             btf.GylmAtomic(
-                tag="descriptor", args={"heavy_only": True}, inputs={"configs": "input.configs"}
+                tag="descriptor", 
+                args={"heavy_only": True}, 
+                inputs={"configs": "input.configs"}
             ),
-            btf.KernelSmoothMatch(tag="kernel", inputs={"X": "descriptor.X"}),
-            btf.KernelRidge(
+            btf.KernelSmoothMatch(
+                tag="kernel", 
+                args={"self_kernel": True},
+                inputs={"X": "descriptor.X"}
+            ),
+            btf.GaussianProcess(
                 tag="predictor",
                 args={"alpha": None, "power": 2},
-                inputs={"K": "kernel.K", "y": "input.y"},
+                inputs={"K": "kernel.K", "K_diag": "kernel.K_diag", "y": "input.y"}
             ),
             btf.AttributeSmoothMatchKernelRidge(
                 tag="attribute",
@@ -31,7 +37,7 @@ def build_model():
                     "configs": "input.configs",
                     "X": "kernel._X",
                     "X_probe": "descriptor.X",
-                    "model": "predictor._model",
+                    "w": "predictor._w",
                     "y_mean": "predictor._y_mean",
                     "y_std": "predictor._y_std",
                 },
@@ -42,7 +48,7 @@ def build_model():
             Hyper({"predictor.power": [2.0]}),
         ),
         broadcast={"meta": "input.meta"},
-        outputs={"y": "predictor.y", "Z": "attribute.Z"},
+        outputs={"y": "predictor.y", "dy": "predictor.dy", "Z": "attribute.Z"},
     )
 
 
@@ -117,7 +123,7 @@ def apply_model(model, smi, num_confs=1):
         configs.append(config)
     data = bml.data.Dataset(meta={}, configs=configs)
     out = model.map(data)
-    return out["y"], out["Z"]
+    return out["y"], out["dy"], out["Z"]
 
 
 if __name__ == "__main__":
@@ -127,9 +133,10 @@ if __name__ == "__main__":
     model = train_model(model, "data/dataset_example.json")
     bml.save("model_example.arch", model)
 
+    model = bml.load("model_example.arch")
     smi = "CCn1cc(NC(=O)C2CCC2)cn1"
-    value, attribution = apply_model(model, smi=smi)
+    value, error, attribution = apply_model(model, smi=smi)
     print("Prediction on", smi)
-    print("  Value (total)     =", value[0])
-    print("  Attribution       =", attribution[0, 0:3], "...")
+    print("  Value (total)     =", value[0], "+/-", error[0])
+    print("  Attribution       =", attribution[0,0:3], "...")
     print("  Attribution (sum) =", attribution.sum())

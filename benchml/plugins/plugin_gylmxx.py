@@ -11,11 +11,12 @@ from benchml.readwrite import write_xyz
 
 
 class KernelSmoothMatch(FitTransform):
-    default_args = {"base_kernel": "xi.dot(xj.T)", "base_power": 3, "gamma": 1e-2, "epsilon": 1e-6}
+    default_args = {"base_kernel": "xi.dot(xj.T)", "self_kernel": False, "base_power": 3, "gamma": 1e-2, "epsilon": 1e-6}
     req_inputs = ("X",)
-    allow_stream = ("K",)
+    allow_stream = ("K", "K_diag")
     allow_params = ("X",)
     stream_kernel = ("K",)
+    stream_samples = ("K_diag",)
     precompute = True
     verbose = True
     log = log
@@ -23,11 +24,12 @@ class KernelSmoothMatch(FitTransform):
     def check_available(self, *args, **kwargs):
         return check_gylmxx_available(self, *args, **kwargs)
 
-    def evaluate(self, X1, X2, symmetric):
+    def evaluate(self, X1, X2, symmetric=False, diagonal_only=False):
         K = np.zeros((X1.shape[0], X2.shape[0]))
         for i in range(X1.shape[0]):
             xi = X1[i]  # noqa: F841
-            for j in range(i if symmetric else 0, X2.shape[0]):
+            j_range = range(i if symmetric else 0, X2.shape[0]) if not diagonal_only else [i]
+            for j in j_range:
                 xj = X2[j]  # noqa: F841
                 if self.verbose:
                     log << log.back << " Match %4d/%-4d   " % (i, j) << log.flush
@@ -54,12 +56,17 @@ class KernelSmoothMatch(FitTransform):
         K = self.evaluate(X, X, True)
         stream.put("K", K)
         params.put("X", np.copy(inputs["X"]))
+        if self.args["self_kernel"]:
+            stream.put("K_diag", K.diagonal())
 
     def _map(self, inputs, stream):
         X1 = inputs["X"]
         X2 = self.params().get("X")
         K = self.evaluate(X1, X2, False)
         stream.put("K", K)
+        if self.args["self_kernel"]:
+            K_diag = self.evaluate(X1, X1, diagonal_only=True)
+            stream.put("K_diag", K_diag)
 
 
 class AttributeKernelSmoothMatchSVM(Transform):
@@ -120,7 +127,7 @@ class AttributeKernelSmoothMatchSVM(Transform):
 
 
 class AttributeSmoothMatchKernelRidge(Transform):
-    req_inputs = ("configs", "X", "X_probe", "model", "y_mean", "y_std")
+    req_inputs = ("configs", "X", "X_probe", "w", "y_mean", "y_std")
     default_args = {
         "write_xyz": "",
         "gamma": "@kernel.gamma",
@@ -135,7 +142,7 @@ class AttributeSmoothMatchKernelRidge(Transform):
 
     def _map(self, inputs, stream):
         configs = inputs["configs"]
-        model = inputs["model"]
+        dual_coeffs = inputs["w"]
         X_probe = inputs["X_probe"]
         X = inputs["X"]
         y_mean = inputs["y_mean"]
@@ -167,7 +174,7 @@ class AttributeSmoothMatchKernelRidge(Transform):
             # Check against:
             # >>> y = model.predict(k.reshape(1,-1)**self.args["power"])
             # >>> y = y*y_std + y_mean
-            w = k ** (self.args["power"] - 1) * model.dual_coef_
+            w = k ** (self.args["power"] - 1) * dual_coeffs
             z_attr = k_attr.dot(w)
             z_attr = z_attr * y_std + y_mean / z_attr.shape[0]
             Z.append(z_attr)

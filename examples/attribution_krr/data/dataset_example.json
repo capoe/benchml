@@ -37,14 +37,15 @@
   "activity": {
    "convert": "",
    "metrics": [
-    "rhop",
-    "mae",
     "rmse",
+    "mae",
+    "rhop",
     "r2"
    ],
+   "convert": "",
    "per_atom": false,
    "scaling": "unknown",
-   "task": "classification"
+   "task": "regression"
   }
  }
 }
