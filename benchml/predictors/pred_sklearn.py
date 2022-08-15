@@ -349,6 +349,35 @@ class SupportVectorClassifier(SklearnTransform):
             stream.put("p", p_pred)
 
 
+class SupportVectorRegressor(SklearnTransform):
+    default_args = dict(
+        kernel='rbf',
+        degree=3,
+        gamma='scale',
+        coef0=0.0,
+        tol=0.001,
+        C=1.0,
+        epsilon=0.1,
+        shrinking=True,
+        cache_size=200,
+        verbose=False,
+        max_iter=-1
+    )
+    req_inputs = {"X", "y"}
+    allow_params = {"model"}
+    allow_stream = {"y",}
+
+    def _fit(self, inputs, stream, params):
+        model = sklearn.svm.SVR(**self.args)
+        model.fit(X=inputs["X"], y=inputs["y"])
+        params.put("model", model)
+        self._map(inputs, stream)
+
+    def _map(self, inputs, stream):
+        y = self.params().get("model").predict(inputs["X"])
+        stream.put("y", y)
+
+
 class LogisticRegression(SklearnTransform):
     default_args = dict(
         penalty="l2",
