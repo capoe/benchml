@@ -354,9 +354,9 @@ class Physchem2D(Transform):
     def _map(self, inputs, stream):
         configs = inputs["configs"]
         smiles = [get_smiles(c) for c in configs]
-        mols = [rchem.MolFromSmiles(s) for s in smiles]  # pylint: disable=E1101
         X = []
-        for mol in mols:
+        for idx, smi in enumerate(smiles):
+            mol = rchem.MolFromSmiles(smi)
             x = [1.0 * eval(d[1])(mol) for d in self.descriptors_active]
             X.append(x)
         X = np.array(X)

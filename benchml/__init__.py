@@ -6,7 +6,7 @@
 from benchml import analysis, benchmark, data, models, pipeline, splits, transforms, utils
 from benchml.accumulator import Accumulator
 from benchml.data import load_dataset
-from benchml.logger import log
+from benchml.logger import log, Args
 from benchml.pipeline import hupdate, sopen, stream
 from benchml.readwrite import load, read, save, write
 from benchml.splits import Split
@@ -34,4 +34,5 @@ __all__ = [
     "write",
     "Split",
     "Transform",
+    "Args"
 ]

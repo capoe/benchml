@@ -1130,6 +1130,7 @@ class Macro(object):
 class Standalone(object):
     def __init__(self, TransformClass, **kwargs):
         self.base = TransformClass(detached=True, args=kwargs)
+        self.base.setup()
 
     def fit(self, **kwargs):
         stream = Stream(handle=None, tag="", tf=self.base)
