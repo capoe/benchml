@@ -96,7 +96,7 @@ class RidgeClassifier(SklearnTransform):
 
 
 class ElasticNetClassifier(SklearnTransform):
-    default_args = dict(alpha=1.0, l1_ratio=0.5, epsilon=1e-10)
+    default_args = dict(alpha=1.0, l1_ratio=0.5, epsilon=1e-20)
     req_inputs = {"X", "y"}
     allow_params = {"model"}
     allow_stream = {"y", "z"}
