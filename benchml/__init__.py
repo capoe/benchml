@@ -6,13 +6,13 @@
 from benchml import analysis, benchmark, data, models, pipeline, splits, transforms, utils
 from benchml.accumulator import Accumulator
 from benchml.data import load_dataset
-from benchml.logger import log, Args
+from benchml.logger import Args, log
 from benchml.pipeline import hupdate, sopen, stream
 from benchml.readwrite import load, read, save, write
 from benchml.splits import Split
 from benchml.transforms import Transform
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 __all__ = [
     "analysis",
     "benchmark",
@@ -34,5 +34,5 @@ __all__ = [
     "write",
     "Split",
     "Transform",
-    "Args"
+    "Args",
 ]
