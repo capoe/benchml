@@ -247,33 +247,6 @@ def compile_morgan(**kwargs):
     ]
 
 
-def compile_gylm_match(**kwargs):
-    return [
-        btf.Module(
-            tag="gylm_smooth_match_krr",
-            transforms=[
-                btf.ExtXyzInput(tag="input"),
-                btf.GylmAtomic(tag="desc", inputs={"configs": "input.configs"}),
-                btf.KernelSmoothMatch(inputs={"X": "desc.X"}),
-                btf.KernelRidge(
-                    args={"alpha": 1e-5, "power": 2},
-                    inputs={"K": "KernelSmoothMatch.K", "y": "input.y"},
-                ),
-            ],
-            hyper=GridHyper(
-                Hyper(
-                    {
-                        "KernelRidge.alpha": np.logspace(-5, +1, 7),
-                    }
-                ),
-                Hyper({"KernelRidge.power": [2.0]}),
-            ),
-            broadcast={"meta": "input.meta"},
-            outputs={"y": "KernelRidge.y"},
-        ),
-    ]
-
-
 def compile_gylm(**kwargs):
     return [
         btf.Module(
@@ -300,11 +273,6 @@ def compile_gylm(**kwargs):
             broadcast={"meta": "input.meta"},
             outputs={"y": "KernelRidge.y"},
         ),
-    ]
-
-
-def compile_gylm_grid(**kwargs):
-    return [
         btf.Module(
             tag="gylm_average_krr_grid",
             transforms=[
@@ -329,6 +297,28 @@ def compile_gylm_grid(**kwargs):
             broadcast={"meta": "input.meta"},
             outputs={"y": "KernelRidge.y"},
         ),
+        btf.Module(
+            tag="gylm_smooth_match_krr",
+            transforms=[
+                btf.ExtXyzInput(tag="input"),
+                btf.GylmAtomic(tag="desc", inputs={"configs": "input.configs"}),
+                btf.KernelSmoothMatch(inputs={"X": "desc.X"}),
+                btf.KernelRidge(
+                    args={"alpha": 1e-5, "power": 2},
+                    inputs={"K": "KernelSmoothMatch.K", "y": "input.y"},
+                ),
+            ],
+            hyper=GridHyper(
+                Hyper(
+                    {
+                        "KernelRidge.alpha": np.logspace(-5, +1, 7),
+                    }
+                ),
+                Hyper({"KernelRidge.power": [2.0]}),
+            ),
+            broadcast={"meta": "input.meta"},
+            outputs={"y": "KernelRidge.y"},
+        ),
     ]
 
 
@@ -338,8 +328,6 @@ def register_all():
         "dscribe_periodic": compile_dscribe_periodic,
         "ecfp": compile_morgan,
         "gylm": compile_gylm,
-        "gylm_match": compile_gylm_match,
-        "gylm_grid": compile_gylm_grid,
         "null": compile_null,
         "physchem": compile_physchem,
         "soap": compile_soap,
