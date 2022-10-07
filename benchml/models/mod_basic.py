@@ -9,47 +9,6 @@ def compile_null(**kwargs):
     return []
 
 
-def compile_physchem(custom_fields=None, **kwargs):
-    if custom_fields is None:
-        custom_fields = []
-    hypers = {
-        "bayesian": BayesianHyper(
-            Hyper(
-                {
-                    "pred.n_estimators": [10, 200],
-                    "pred.max_depth": [2, 16],
-                }
-            ),
-            convert={"pred.n_estimators": "lambda x: int(x)", "pred.max_depth": "lambda x: int(x)"},
-            init_points=10,
-            n_iter=30,
-        ),
-        "grid": GridHyper(Hyper({"pred.max_depth": [None]})),
-    }
-    models = []
-    for hyper_label, hyper in hypers.items():
-        models.append(
-            btf.Module(
-                tag="physchem_rfr_" + hyper_label,
-                transforms=[
-                    btf.ExtXyzInput(tag="input"),
-                    btf.Physchem2D(tag="Physchem2D", inputs={"configs": "input.configs"}),
-                    btf.PhyschemUser(
-                        tag="PhyschemUser",
-                        args={"fields": custom_fields},
-                        inputs={"configs": "input.configs"},
-                    ),
-                    btf.Concatenate(tag="desc", inputs={"X": ["Physchem2D.X", "PhyschemUser.X"]}),
-                    btf.RandomForestRegressor(tag="pred", inputs={"X": "desc.X", "y": "input.y"}),
-                ],
-                hyper=hyper,
-                broadcast={"meta": "input.meta"},
-                outputs={"y": "pred.y"},
-            )
-        )
-    return models
-
-
 def make_soap_krr(tag):
     return btf.Module(
         tag=tag,
@@ -331,6 +290,5 @@ def register_all():
         "ecfp": compile_morgan,
         "gylm": compile_gylm,
         "null": compile_null,
-        "physchem": compile_physchem,
         "soap": compile_soap,
     }
