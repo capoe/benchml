@@ -163,7 +163,7 @@ def compile_logd(custom_fields=None, **kwargs):
         custom_fields = []
     return [
         btf.Module(
-            tag="logp_lr",
+            tag="logd_lr",
             transforms=[
                 btf.ExtXyzInput(tag="input"),
                 btf.CxCalcTransform(
@@ -297,7 +297,7 @@ def compile_logd(custom_fields=None, **kwargs):
             outputs={"y": "out.y"},
         ),
         btf.Module(
-            tag="hybrid_logd_topo",
+            tag="logd_hybrid_topo_krr",
             transforms=[
                 btf.ExtXyzInput(tag="input"),
                 btf.CxCalcTransform(
@@ -330,7 +330,7 @@ def compile_logd(custom_fields=None, **kwargs):
             outputs={"y": "KernelRidge.y"},
         ),
         btf.Module(
-            tag="logd_topo_gp",
+            tag="logd_hybrid_topo_rgp",
             transforms=[
                 btf.ExtXyzInput(tag="input"),
                 btf.CxCalcTransform(
@@ -451,7 +451,7 @@ def compile_logd(custom_fields=None, **kwargs):
             outputs={"y": "Add.y"},
         ),
         btf.Module(
-            tag="delta_logd_topo",
+            tag="logd_delta_topo_krr",
             transforms=[
                 btf.ExtXyzInput(tag="input"),
                 btf.CxCalcTransform(tag="cx", inputs={"configs": "input.configs"}),
