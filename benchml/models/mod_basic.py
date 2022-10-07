@@ -223,6 +223,27 @@ def compile_morgan(**kwargs):
             hyper=GridHyper(Hyper({"GradientBoosting.max_depth": [1, 3, 5]})),
             outputs={"y": "GradientBoosting.y"},
         ),
+        btf.Module(
+            tag="morgan_rfr",
+            transforms=[
+                btf.ExtXyzInput(tag="input"),
+                btf.MorganFP(
+                    tag="descriptor",
+                    args={"length": 4096, "radius": 2, "normalize": True},
+                    inputs={"configs": "input.configs"},
+                ),
+                btf.RandomForestRegressor(
+                    tag="predictor", inputs={"X": "descriptor.X", "y": "input.y"}
+                ),
+            ],
+            hyper=GridHyper(
+                Hyper({"descriptor.length": [2048, 4096]}),
+                Hyper({"descriptor.radius": [1, 2, 3, 4]}),
+                Hyper({"predictor.max_depth": [None]}),
+            ),
+            broadcast={"meta": "input.meta"},
+            outputs={"y": "predictor.y"},
+        ),
     ]
 
 

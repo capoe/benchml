@@ -435,6 +435,8 @@ The tests are split onto unit and end-to-end (e2e) tests:
 ```sh
 python3 -m pytest tests/unit_tests
 python3 tests/e2e_tests/test_all.py
+# A simple test of fit and hyperfit of a particular model e.g. "morgan_rfr"
+python3 tests/e2e_tests/test_model.py -m "morgan_rfr"
 ```
 Adding --create to the second command will generate reference results.
 
