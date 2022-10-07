@@ -262,6 +262,30 @@ will be performed within model.hyperfit(stream, ...).
 Calls to model.fit(stream) on the other hand would only consider the transform args
 specified in the "transforms" section of the constructor.
 
+Note about usual tag naming:
+
+Tags, which start with:
+* `bmol` mean "**B**enchmark **MOL**ecular"
+* `bxtal` mean "**B**enchmark crys(**X**)**TAL**"
+* `xy` mean "Generic Model"
+
+Tags that end with (or contain):
+* `class` mean "**C**lassifier"
+* `krr` mean "**K**ernel **R**idge **R**egressor"
+* `rr` mean "**R**idge **R**egressor"
+* `rfr` mean "**R**andom **F**orest **R**egressor"
+* `rf_class` mean "**R**andom **F**orest **C**lassifier"
+* `gp` mean "**G**aussian **P**rocess"
+* `rr` mean "**R**idge **R**egressor"
+* `gb` mean "**G**radient **B**oosting"
+* `gp` mean "**G**aussian **P**rocess"
+* `rgp` mean "**R**esidual **G**aussian **P**rocess"
+* `lr` mean "**L**inear **R**egression"
+* `lr_class` mean "**L**ogistic **R**egression"
+* `grid` mean "**G**rid Hyper"
+* `norm` mean "Rank **N**orm"
+
+
 ### Using the module
 
 In the simpler .fit case, where a model is to be parametrized on some predefined training data,

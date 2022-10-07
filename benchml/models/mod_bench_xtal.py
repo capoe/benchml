@@ -28,7 +28,7 @@ def compile_physchem(custom_fields=None, **kwargs):
         models.extend(
             [
                 btf.Module(
-                    tag="bxtal_physchem_s%02d_rf" % bins,
+                    tag="bxtal_physchem_s%02d_rfr" % bins,
                     transforms=[
                         btf.ExtXyzInput(tag="input"),
                         btf.PhyschemXtal(
