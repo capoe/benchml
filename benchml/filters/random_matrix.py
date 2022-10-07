@@ -16,9 +16,9 @@ def dist_mp(x, gamma):
 
 def dist_mp_bounds(gamma):
     if gamma > 1.0:
-        return 0.0, (1.0 + gamma ** 0.5) ** 2
+        return 0.0, (1.0 + gamma**0.5) ** 2
     else:
-        return (1.0 - gamma ** 0.5) ** 2, (1.0 + gamma ** 0.5) ** 2
+        return (1.0 - gamma**0.5) ** 2, (1.0 + gamma**0.5) ** 2
 
 
 def dist_mp_sample(xs, gamma):
@@ -144,5 +144,5 @@ class MarchenkoPasturFilter(FitTransform):
         X = inputs["X"]
         X_proj = div0(X - self.params().get("x_mean"), self.params().get("x_std"))
         X_proj = X_proj.dot(self.params().get("V_upper"))
-        X_proj = np.concatenate([X_proj ** p for p in self.args["monomials"]], axis=1)
+        X_proj = np.concatenate([X_proj**p for p in self.args["monomials"]], axis=1)
         stream.put("X", X_proj)

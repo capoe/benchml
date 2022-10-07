@@ -11,7 +11,13 @@ from benchml.readwrite import write_xyz
 
 
 class KernelSmoothMatch(FitTransform):
-    default_args = {"base_kernel": "xi.dot(xj.T)", "self_kernel": False, "base_power": 3, "gamma": 1e-2, "epsilon": 1e-6}
+    default_args = {
+        "base_kernel": "xi.dot(xj.T)",
+        "self_kernel": False,
+        "base_power": 3,
+        "gamma": 1e-2,
+        "epsilon": 1e-6,
+    }
     req_inputs = ("X",)
     allow_stream = ("K", "K_diag")
     allow_params = ("X",)
@@ -399,7 +405,7 @@ class GylmReduceConvolve(Transform):
         nmax = self.args["nmax"]
         lmax = self.args["lmax"]
         dim_orig = nmax * (lmax + 1) ** 2 * n_types
-        dim_conv = nmax ** 2 * (lmax + 1) * n_types * (n_types + 1) // 2
+        dim_conv = nmax**2 * (lmax + 1) * n_types * (n_types + 1) // 2
         # Convolve
         Q_list = inputs["Q"]
         Q_red = list(map(lambda Q: np.sum(Q, axis=0).reshape((1, -1)), Q_list))
@@ -410,7 +416,7 @@ class GylmReduceConvolve(Transform):
         gylm.evaluate_power(X, Q_red, n_src, n_types, nmax, lmax)
         # Normalize
         if self.args["normalize"]:
-            z = 1.0 / (np.sum(X ** 2, axis=1) + self.args["epsilon"]) ** 0.5
+            z = 1.0 / (np.sum(X**2, axis=1) + self.args["epsilon"]) ** 0.5
             X = (X.T * z).T
         # Store
         stream.put("X", X)

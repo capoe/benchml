@@ -20,7 +20,7 @@ from benchml.predictors.pred_sklearn import (
     RidgeClassifier,
     SklearnTransform,
     SupportVectorClassifier,
-    SupportVectorRegressor
+    SupportVectorRegressor,
 )
 
 __all__ = [
@@ -46,5 +46,5 @@ __all__ = [
     "RidgeClassifier",
     "SklearnTransform",
     "SupportVectorClassifier",
-    "SupportVectorRegressor"
+    "SupportVectorRegressor",
 ]

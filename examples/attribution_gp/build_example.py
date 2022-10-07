@@ -16,19 +16,15 @@ def build_model():
         transforms=[
             btf.ExtXyzInput(tag="input"),
             btf.GylmAtomic(
-                tag="descriptor", 
-                args={"heavy_only": True}, 
-                inputs={"configs": "input.configs"}
+                tag="descriptor", args={"heavy_only": True}, inputs={"configs": "input.configs"}
             ),
             btf.KernelSmoothMatch(
-                tag="kernel", 
-                args={"self_kernel": True},
-                inputs={"X": "descriptor.X"}
+                tag="kernel", args={"self_kernel": True}, inputs={"X": "descriptor.X"}
             ),
             btf.GaussianProcess(
                 tag="predictor",
                 args={"alpha": None, "power": 2},
-                inputs={"K": "kernel.K", "K_diag": "kernel.K_diag", "y": "input.y"}
+                inputs={"K": "kernel.K", "K_diag": "kernel.K_diag", "y": "input.y"},
             ),
             btf.AttributeSmoothMatchKernelRidge(
                 tag="attribute",
@@ -138,5 +134,5 @@ if __name__ == "__main__":
     value, error, attribution = apply_model(model, smi=smi)
     print("Prediction on", smi)
     print("  Value (total)     =", value[0], "+/-", error[0])
-    print("  Attribution       =", attribution[0,0:3], "...")
+    print("  Attribution       =", attribution[0, 0:3], "...")
     print("  Attribution (sum) =", attribution.sum())

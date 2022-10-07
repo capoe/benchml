@@ -356,9 +356,9 @@ class SupportVectorClassifier(SklearnTransform):
 
 class SupportVectorRegressor(SklearnTransform):
     default_args = dict(
-        kernel='rbf',
+        kernel="rbf",
         degree=3,
-        gamma='scale',
+        gamma="scale",
         coef0=0.0,
         tol=0.001,
         C=1.0,
@@ -366,11 +366,11 @@ class SupportVectorRegressor(SklearnTransform):
         shrinking=True,
         cache_size=200,
         verbose=False,
-        max_iter=-1
+        max_iter=-1,
     )
     req_inputs = {"X", "y"}
     allow_params = {"model"}
-    allow_stream = {"y",}
+    allow_stream = {"y"}
 
     def _fit(self, inputs, stream, params):
         model = sklearn.svm.SVR(**self.args)

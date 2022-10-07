@@ -47,7 +47,7 @@ class LineExpansion:
         if self.type == "heaviside":
             vals_expand = np.heaviside(-np.abs(vals_expand) + 1e-10 + 0.5 * self.res, 0.0)
         elif self.type == "gaussian":
-            vals_expand = np.exp(-0.5 * vals_expand ** 2 / self.sigma ** 2)
+            vals_expand = np.exp(-0.5 * vals_expand**2 / self.sigma**2)
         else:
             raise ValueError(self.type)
         vals_expand = (vals_expand.T / (np.sum(vals_expand, axis=1) + self.epsilon)).T

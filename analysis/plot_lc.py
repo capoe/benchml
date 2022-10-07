@@ -217,12 +217,11 @@ def plot_lc_together(
 
 
 def main(filename, prefix, plot_type, sc_name, ncol, nrow):
-
     lc_by_model = {}
     # lc_by_model_train = {}
     lr_by_model = {}
 
-    best_error = 10 ** 20.0  # just for setting the range of the plot
+    best_error = 10**20.0  # just for setting the range of the plot
     worst_error = 0.0
 
     sorted_model_category = {}

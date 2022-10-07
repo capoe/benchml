@@ -64,13 +64,13 @@ class KernelGaussian(FitTransform):
 
     def evaluate(self, x1, x2=None, sigma=None, diagonal_only=False):
         x1s = x1 / (sigma + self.args["epsilon"])
-        z1 = np.sum(x1s ** 2, axis=1)
+        z1 = np.sum(x1s**2, axis=1)
         if x2 is None:
             x2s = x1s
             z2 = z1
         else:
             x2s = x2 / sigma
-            z2 = np.sum(x2s ** 2, axis=1)
+            z2 = np.sum(x2s**2, axis=1)
         if diagonal_only:
             zz = -0.5 * (z1 + z2)
             xx = np.einsum("ai,ai->a", x1s, x2s, optimize="greedy")

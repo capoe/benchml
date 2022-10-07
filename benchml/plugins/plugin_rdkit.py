@@ -44,7 +44,7 @@ class MorganFP(Transform):
         ]
         fps = np.array(fps, dtype="float64")
         if self.normalize:
-            z = 1.0 / (np.sum(fps ** 2, axis=1) + 1e-10) ** 0.5
+            z = 1.0 / (np.sum(fps**2, axis=1) + 1e-10) ** 0.5
             fps = (fps.T * z).T
         stream.put("X", fps)
 

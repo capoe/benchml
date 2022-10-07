@@ -117,7 +117,6 @@ def all_model_correlation_matrix(
 
 
 def fit_hybrid_lc(by_model, all_model_list, alpha=0.1, sc_name="RMSE", verbose=False):
-
     lc_scores = LC_SCOREBOARD([])
 
     clf = linear_model.Ridge(alpha, max_iter=10000, fit_intercept=False)
