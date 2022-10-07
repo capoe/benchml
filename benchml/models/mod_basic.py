@@ -163,7 +163,7 @@ def compile_morgan(**kwargs):
             outputs={"y": "KernelRidge.y"},
         ),
         btf.Module(
-            tag="morgan_ridge",
+            tag="morgan_rr",
             transforms=[
                 btf.ExtXyzInput(tag="input"),
                 btf.MorganFP(args={"length": 2048}, inputs={"configs": "input.configs"}),
