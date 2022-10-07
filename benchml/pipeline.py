@@ -760,6 +760,19 @@ Model Category: {model_category.value}
                 )
             )
         graph.append("end")
+        graph.append("subgraph Outputs [Outputs]")
+        for idx, (o_name, o_label) in enumerate(model.outputs.items()):
+            source_tag, input_name = o_label.split(".")
+            source_ind, source_t = en_t[source_tag]
+            graph.append(
+                (
+                    f"{i}{source_ind}"
+                    f"[{name(source_t)}: '{source_tag}']"
+                    f" -- {input_name} --> "
+                    f"{o_name}[{o_name}]"
+                )
+            )
+        graph.append("end")
         return graph
 
     @staticmethod
