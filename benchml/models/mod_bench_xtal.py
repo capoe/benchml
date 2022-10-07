@@ -20,7 +20,7 @@ whiten_hyper = [False]  # NOTE: False = no whitening in ridge models
 regularization_range = np.logspace(-9, +7, 17)
 
 
-def compile_physchem(custom_fields=None, with_hyper=False, **kwargs):
+def compile_physchem(custom_fields=None, **kwargs):
     if custom_fields is None:
         custom_fields = []
     models = []
