@@ -24,7 +24,7 @@ def compile_physchem(custom_fields=None, **kwargs):
     if custom_fields is None:
         custom_fields = []
     hypers = {
-        "bayesian": BayesianHyper(
+        "": BayesianHyper(
             Hyper(
                 {
                     "pred.n_estimators": [10, 200],
@@ -35,13 +35,13 @@ def compile_physchem(custom_fields=None, **kwargs):
             init_points=10,
             n_iter=30,
         ),
-        "grid": GridHyper(Hyper({"pred.max_depth": [None]})),
+        "_grid": GridHyper(Hyper({"pred.max_depth": [None]})),
     }
     models = []
     for hyper_label, hyper in hypers.items():
         models.append(
             btf.Module(
-                tag="bmol_physchem_rfr_" + hyper_label,
+                tag="bmol_physchem_rfr" + hyper_label,
                 transforms=[
                     btf.ExtXyzInput(tag="input"),
                     btf.Physchem2D(tag="Physchem2D", inputs={"configs": "input.configs"}),
