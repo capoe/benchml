@@ -2,7 +2,7 @@ import numpy as np
 
 import benchml.transforms as btf
 from benchml.hyper import BayesianHyper, GridHyper, Hyper
-from benchml.models.mod_dscribe import compile_dscribe, compile_dscribe_periodic
+from benchml.models.mod_dscribe import compile_dscribe
 
 
 def compile_null(**kwargs):
@@ -325,7 +325,6 @@ def compile_gylm(**kwargs):
 def register_all():
     return {
         "dscribe": compile_dscribe,
-        "dscribe_periodic": compile_dscribe_periodic,
         "ecfp": compile_morgan,
         "gylm": compile_gylm,
         "null": compile_null,
