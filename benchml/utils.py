@@ -147,20 +147,19 @@ def smiles_to_extxyz(
 
 def smiles_to_pseudo_extxyz(smiles):
     configs = []
-    valid = []
     for idx, smi in enumerate(smiles):
         try:
             mol = chem.MolFromSmiles(smi)  # pylint: disable=E1101
             mol = chem.AddHs(mol)  # pylint: disable=E1101
         except Exception:
             print(f"Smiles problem in idx {idx} ,smiles string {smi}")
+            configs.append(None)
             continue
         symbols = [a.GetSymbol() for a in mol.GetAtoms()]
         pos = np.zeros((len(symbols), 3))
         config = readwrite.ExtendedXyz(pos=pos, symbols=symbols)
         config.info["lmat"] = 1.0 * chem.GetAdjacencyMatrix(mol)  # pylint: disable=E1101
         configs.append(config)
-        valid.append(idx)
     return configs
 
 
@@ -190,10 +189,10 @@ def dataframe_to_extxyz(
                 corina=corina,
                 babel=babel,
             )
-            config.info.update(row)
             if config is None:
                 errors.append(row)
             else:
+                config.info.update(row)
                 configs.append(config)
         log << log.endl
     except KeyboardInterrupt:
