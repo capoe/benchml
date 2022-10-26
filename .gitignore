@@ -28,3 +28,7 @@ MANIFEST
 # Documentation: Sphinx-autodoc generated files
 api/
 docs/source/models/
+
+# IDE files
+.idea/
+.vscode/
