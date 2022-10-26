@@ -747,19 +747,20 @@ Model Category: {model_category.value}
                     source_tag = input_source.split(".")[0]
                     add_line(source_tag)
         graph.append("end")
-        hyper_name = type(model.hyper).__name__
-        graph.append(f"subgraph Hyper [{hyper_name}]")
-        for hyper_field in model.hyper.getFields():
-            dest_tag, dest_param = hyper_field.split(".")
-            dest_ind, dest_t = en_t[dest_tag]
-            graph.append(
-                (
-                    f"{i}HyperParams --- "
-                    f"{dest_param} ---> {dest_ind}"
-                    f"[{name(dest_t)}: '{dest_tag}']"
+        if model.hyper is not None:
+            hyper_name = type(model.hyper).__name__
+            graph.append(f"subgraph Hyper [{hyper_name}]")
+            for hyper_field in model.hyper.getFields():
+                dest_tag, dest_param = hyper_field.split(".")
+                dest_ind, dest_t = en_t[dest_tag]
+                graph.append(
+                    (
+                        f"{i}HyperParams --- "
+                        f"{dest_param} ---> {dest_ind}"
+                        f"[{name(dest_t)}: '{dest_tag}']"
+                    )
                 )
-            )
-        graph.append("end")
+            graph.append("end")
         graph.append("subgraph Outputs [Outputs]")
         for idx, (o_name, o_label) in enumerate(model.outputs.items()):
             source_tag, input_name = o_label.split(".")
