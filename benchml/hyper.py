@@ -96,9 +96,9 @@ class GridHyper(object):
                 new_best = False
             if log:
                 if new_best:
-                    log_colour = log.pp
+                    log_colour = log.pp if log else None
                 else:
-                    log_colour = log.ww
+                    log_colour = log.ww if log else None
                 (
                     log
                     << log_colour
@@ -118,7 +118,7 @@ class GridHyper(object):
         best = (
             update_cache[0] if (Accumulator.select(**accu_args) == "smallest") else update_cache[-1]
         )
-        return best["updates"]
+        return best["updates"], best["metric"]
 
 
 class BayesianHyper(object):
@@ -201,4 +201,5 @@ class BayesianHyper(object):
             init_points=self.init_points,
             n_iter=self.n_iter,
         )
-        return self.convertUpdates(self.joinArrays(optimizer.max["params"]))
+        best_metric = None # TODO
+        return self.convertUpdates(self.joinArrays(optimizer.max["params"])), best_metric

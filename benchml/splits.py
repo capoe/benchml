@@ -35,6 +35,19 @@ class SplitBase(object):
             yield self._next()
 
 
+class SplitExplicit(SplitBase):
+    tag = "explicit"
+
+    def __init__(self, dset, **kwargs):
+        super().__init__(dset)
+        self.index = kwargs["index"]
+        self.n_reps = len(self.index)
+
+    def next(self):
+        info = "%s_i%03d" % (self.tag, self.step)
+        return info, self.index[self.step]["train"], self.index[self.step]["test"]
+
+
 class SplitJson(SplitBase):
     tag = "json"
 
@@ -200,6 +213,7 @@ split_generators = {
     "loo": SplitLOO,
     "mc": SplitMC,
     "json": SplitJson,
+    "explicit": SplitExplicit,
     "lambda": SplitLambda,
     "chrono": SplitChronological,
     "kfold": SplitKfold,

@@ -1025,9 +1025,10 @@ Model Category: {model_category.value}
             raise ValueError("<Module.hyperfit>: Hyper configuration is missing")
         if log:
             log << "Hyperfit" << self.tag << "on stream" << stream.tag << log.endl
-        updates = self.hyper.optimize(self, stream, log=log, **kwargs)
+        updates, metric = self.hyper.optimize(self, stream, log=log, **kwargs)
         self.hyperUpdate(updates)
-        return self.fit(stream, verbose=verbose)
+        self.fit(stream, verbose=verbose)
+        return updates, metric
 
     def hyperEval(self, stream, updates, split_args, accu_args, target, target_ref, verbose=None):
         if verbose is None:

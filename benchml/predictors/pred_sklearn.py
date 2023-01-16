@@ -96,14 +96,14 @@ class RidgeClassifier(SklearnTransform):
 
 
 class ElasticNetClassifier(SklearnTransform):
-    default_args = dict(alpha=1.0, l1_ratio=0.5, epsilon=1e-20)
+    default_args = dict(alpha=1.0, l1_ratio=0.5, margin=1e-5)
     req_inputs = {"X", "y"}
     allow_params = {"model"}
     allow_stream = {"y", "z"}
 
     def _setup(self):
-        if "epsilon" in self.args:
-            self.epsilon = self.args.pop("epsilon")
+        if "margin" in self.args:
+            self.margin = self.args.pop("margin")
 
     def _fit(self, inputs, stream, params):
         y = inputs["y"]
@@ -125,7 +125,7 @@ class ElasticNetClassifier(SklearnTransform):
 
     def _map(self, inputs, stream):
         z = self.params().get("model").predict(inputs["X"])
-        z[np.where(np.abs(z) < self.epsilon)] = 0
+        z[np.where(np.abs(z) < self.margin)] = 0
         y = np.zeros_like(z)
         y[np.where(z > 0.0)] = 1.0
         stream.put("y", y)
