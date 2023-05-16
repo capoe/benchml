@@ -201,5 +201,5 @@ class BayesianHyper(object):
             init_points=self.init_points,
             n_iter=self.n_iter,
         )
-        best_metric = None # TODO
+        best_metric = None  # TODO
         return self.convertUpdates(self.joinArrays(optimizer.max["params"])), best_metric
