@@ -36,7 +36,7 @@ def compile_physchem_class(custom_fields=None, **kwargs):
                     broadcast={"meta": "input.meta"},
                     outputs={"y": "predictor.z"},
                     doc=dict(
-                        model_category=btf.Module.categories.classification,
+                        model_type=btf.Module.model_types.classification,
                     ),
                 ),
             ]
@@ -75,7 +75,7 @@ def compile_ecfp_class():
             doc=dict(
                 summary="SVM Classifier",
                 extended_summary="SVM Classifier with MorganFP.",
-                model_category=btf.Module.categories.classification,
+                model_type=btf.Module.model_types.classification,
             ),
         ),
         btf.Module(
@@ -104,7 +104,7 @@ def compile_ecfp_class():
             broadcast={"meta": "input.meta"},
             outputs={"y": "predictor.z"},
             doc=dict(
-                model_category=btf.Module.categories.classification,
+                model_type=btf.Module.model_types.classification,
             ),
         ),
         btf.Module(
@@ -130,7 +130,7 @@ def compile_ecfp_class():
             broadcast={"meta": "input.meta"},
             outputs={"y": "predictor.z"},
             doc=dict(
-                model_category=btf.Module.categories.classification,
+                model_type=btf.Module.model_types.classification,
             ),
         ),
         btf.Module(
@@ -167,7 +167,7 @@ def compile_ecfp_class():
             broadcast={"meta": "input.meta"},
             outputs={"y": "predictor.z"},
             doc=dict(
-                model_category=btf.Module.categories.classification,
+                model_type=btf.Module.model_types.classification,
             ),
         ),
     ]
@@ -200,7 +200,7 @@ def compile_gylm_match_class(**kwargs):
             broadcast={"meta": "input.meta"},
             outputs={"y": "predictor.z"},
             doc=dict(
-                model_category=btf.Module.categories.classification,
+                model_type=btf.Module.model_types.classification,
             ),
         ),
         btf.Module(
@@ -229,7 +229,7 @@ def compile_gylm_match_class(**kwargs):
             broadcast={"meta": "input.meta"},
             outputs={"y": "ranker.z"},
             doc=dict(
-                model_category=btf.Module.categories.classification,
+                model_type=btf.Module.model_types.classification,
             ),
         ),
         btf.Module(
@@ -263,7 +263,7 @@ def compile_gylm_match_class(**kwargs):
             broadcast={"meta": "input.meta"},
             outputs={"y": "predictor.y", "z": "predictor.z", "Z": "attribute.Z"},
             doc=dict(
-                model_category=btf.Module.categories.classification,
+                model_type=btf.Module.model_types.classification,
             ),
         ),
     ]

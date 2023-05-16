@@ -627,7 +627,7 @@ class FitTransform(Transform):
             stream.version(self.getHash())
 
 
-class ModelCategory(enum.Enum):
+class ModelType(enum.Enum):
     classification = "Classification"
     regression = "Regression"
     na = "'Not Specified'"
@@ -644,11 +644,11 @@ class Module(TransformBase):
         hyper (object): Hyper-optimization controller
     """
 
-    categories = ModelCategory
+    model_types = ModelType
     docstring_template = """{doc_header}
 {summary}
 
-Model Category: {model_category.value}
+Model Type: {model_type.value}
 
 {extended_summary}
 
@@ -659,7 +659,7 @@ Model Category: {model_category.value}
     def_doc = dict(
         summary="'No summary'",
         extended_summary="'No extended summary'",
-        model_category=categories.na,
+        model_type=model_types.na,
     )
 
     def __init__(

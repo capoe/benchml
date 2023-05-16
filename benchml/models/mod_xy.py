@@ -31,7 +31,7 @@ def compile_xy_classifiers(*args, **kwargs):
             broadcast={},
             outputs={"y": "predictor.y"},
             doc=dict(
-                model_category=btf.Module.categories.classification,
+                model_type=btf.Module.model_types.classification,
             ),
         ),
     ]
