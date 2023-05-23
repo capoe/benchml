@@ -24,6 +24,7 @@ Pipeline Graph
     end
     subgraph Outputs [Outputs]
         1[RandomForestClassifier: 'predictor'] -- y --> y[y]
+        1[RandomForestClassifier: 'predictor'] -- z --> z[z]
     end
     
 

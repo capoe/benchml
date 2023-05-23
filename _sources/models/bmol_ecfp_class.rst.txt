@@ -30,7 +30,8 @@ Pipeline Graph
         HyperParams --- power ---> 3[SupportVectorClassifier: 'predictor']
     end
     subgraph Outputs [Outputs]
-        3[SupportVectorClassifier: 'predictor'] -- z --> y[y]
+        3[SupportVectorClassifier: 'predictor'] -- y --> y[y]
+        3[SupportVectorClassifier: 'predictor'] -- z --> z[z]
     end
     
 
@@ -77,7 +78,8 @@ Pipeline Graph
         HyperParams --- C ---> 2[LogisticRegression: 'predictor']
     end
     subgraph Outputs [Outputs]
-        2[LogisticRegression: 'predictor'] -- z --> y[y]
+        2[LogisticRegression: 'predictor'] -- y --> y[y]
+        2[LogisticRegression: 'predictor'] -- z --> z[z]
     end
     
 
@@ -120,7 +122,8 @@ Pipeline Graph
         HyperParams --- normalize ---> 1[MorganFP: 'descriptor']
     end
     subgraph Outputs [Outputs]
-        2[RandomForestClassifier: 'predictor'] -- z --> y[y]
+        2[RandomForestClassifier: 'predictor'] -- y --> y[y]
+        2[RandomForestClassifier: 'predictor'] -- z --> z[z]
     end
     
 
@@ -168,7 +171,8 @@ Pipeline Graph
         HyperParams --- C ---> 4[LogisticRegression: 'predictor']
     end
     subgraph Outputs [Outputs]
-        4[LogisticRegression: 'predictor'] -- z --> y[y]
+        4[LogisticRegression: 'predictor'] -- y --> y[y]
+        4[LogisticRegression: 'predictor'] -- z --> z[z]
     end
     
 

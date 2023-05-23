@@ -30,7 +30,8 @@ Pipeline Graph
         HyperParams --- power ---> 3[SupportVectorClassifier: 'predictor']
     end
     subgraph Outputs [Outputs]
-        3[SupportVectorClassifier: 'predictor'] -- z --> y[y]
+        3[SupportVectorClassifier: 'predictor'] -- y --> y[y]
+        3[SupportVectorClassifier: 'predictor'] -- z --> z[z]
     end
     
 
@@ -79,7 +80,8 @@ Pipeline Graph
         HyperParams --- power ---> 3[SupportVectorClassifier: 'predictor']
     end
     subgraph Outputs [Outputs]
-        4[RankNorm: 'ranker'] -- z --> y[y]
+        3[SupportVectorClassifier: 'predictor'] -- y --> y[y]
+        4[RankNorm: 'ranker'] -- z --> z[z]
     end
     
 

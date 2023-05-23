@@ -32,7 +32,8 @@ Pipeline Graph
         HyperParams --- max_depth ---> 4[RandomForestClassifier: 'predictor']
     end
     subgraph Outputs [Outputs]
-        4[RandomForestClassifier: 'predictor'] -- z --> y[y]
+        4[RandomForestClassifier: 'predictor'] -- y --> y[y]
+        4[RandomForestClassifier: 'predictor'] -- z --> z[z]
     end
     
 
@@ -84,7 +85,8 @@ Pipeline Graph
         HyperParams --- max_depth ---> 4[RandomForestClassifier: 'predictor']
     end
     subgraph Outputs [Outputs]
-        4[RandomForestClassifier: 'predictor'] -- z --> y[y]
+        4[RandomForestClassifier: 'predictor'] -- y --> y[y]
+        4[RandomForestClassifier: 'predictor'] -- z --> z[z]
     end
     
 
@@ -136,7 +138,8 @@ Pipeline Graph
         HyperParams --- max_depth ---> 4[RandomForestClassifier: 'predictor']
     end
     subgraph Outputs [Outputs]
-        4[RandomForestClassifier: 'predictor'] -- z --> y[y]
+        4[RandomForestClassifier: 'predictor'] -- y --> y[y]
+        4[RandomForestClassifier: 'predictor'] -- z --> z[z]
     end
     
 
@@ -188,7 +191,8 @@ Pipeline Graph
         HyperParams --- max_depth ---> 4[RandomForestClassifier: 'predictor']
     end
     subgraph Outputs [Outputs]
-        4[RandomForestClassifier: 'predictor'] -- z --> y[y]
+        4[RandomForestClassifier: 'predictor'] -- y --> y[y]
+        4[RandomForestClassifier: 'predictor'] -- z --> z[z]
     end
     
 
