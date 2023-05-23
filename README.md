@@ -462,6 +462,19 @@ hyper=BayesianHyper(
 # ...
 ```
 # Development
+## Building documentation
+```sh
+# For exact, working environment:
+conda env create -f build-docs.pinned.yml
+# For updating environment:
+conda env create -f build-docs.yml
+conda env export -n benchml-build-docs > build-docs.pinned.yml
+# Building the docs:
+conda activate benchml-build-docs
+pip install .
+cd docs && make clean && make html-apidoc && cd ..
+
+```
 ## Tests
 
 The tests are split onto unit and end-to-end (e2e) tests:
