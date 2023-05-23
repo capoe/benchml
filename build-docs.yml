@@ -1,0 +1,18 @@
+name: benchml-build-docs
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.7
+  # Main dependencies (setup.py) for BenchML
+  - numpy
+  - scipy
+  - scikit-learn
+  - bayesian-optimization
+  # Dependencies for building docs
+  - sphinx
+  - sphinx_rtd_theme  # sphinx-rtd-theme
+  - sphinxcontrib-apidoc  # sphinx-apidoc
+  - sphinxcontrib-mermaid
+  # For installing BenchML from the directory
+  - pip
