@@ -34,7 +34,7 @@ def compile_physchem_class(custom_fields=None, **kwargs):
                     ],
                     hyper=GridHyper(Hyper({"predictor.max_depth": [None]})),
                     broadcast={"meta": "input.meta"},
-                    outputs={"y": "predictor.z"},
+                    outputs={"y": "predictor.y", "z": "predictor.z"},
                     doc=dict(
                         model_type=btf.Module.model_types.classification,
                     ),
@@ -71,7 +71,7 @@ def compile_ecfp_class():
                 Hyper({"predictor.power": [2.0]}),
             ),
             broadcast={"meta": "input.meta"},
-            outputs={"y": "predictor.z"},
+            outputs={"y": "predictor.y", "z": "predictor.z"},
             doc=dict(
                 summary="SVM Classifier",
                 extended_summary="SVM Classifier with MorganFP.",
@@ -102,7 +102,7 @@ def compile_ecfp_class():
                 ),
             ),
             broadcast={"meta": "input.meta"},
-            outputs={"y": "predictor.z"},
+            outputs={"y": "predictor.y", "z": "predictor.z"},
             doc=dict(
                 model_type=btf.Module.model_types.classification,
             ),
@@ -128,7 +128,7 @@ def compile_ecfp_class():
                 Hyper({"descriptor.normalize": [False, True]}),
             ),
             broadcast={"meta": "input.meta"},
-            outputs={"y": "predictor.z"},
+            outputs={"y": "predictor.y", "z": "predictor.z"},
             doc=dict(
                 model_type=btf.Module.model_types.classification,
             ),
@@ -165,7 +165,7 @@ def compile_ecfp_class():
                 ),
             ),
             broadcast={"meta": "input.meta"},
-            outputs={"y": "predictor.z"},
+            outputs={"y": "predictor.y", "z": "predictor.z"},
             doc=dict(
                 model_type=btf.Module.model_types.classification,
             ),
@@ -198,7 +198,7 @@ def compile_gylm_match_class(**kwargs):
                 Hyper({"predictor.power": [1.0, 2.0, 3.0, 4.0]}),
             ),
             broadcast={"meta": "input.meta"},
-            outputs={"y": "predictor.z"},
+            outputs={"y": "predictor.y", "z": "predictor.z"},
             doc=dict(
                 model_type=btf.Module.model_types.classification,
             ),
@@ -227,7 +227,10 @@ def compile_gylm_match_class(**kwargs):
                 Hyper({"predictor.power": [1.0, 2.0, 3.0, 4.0]}),
             ),
             broadcast={"meta": "input.meta"},
-            outputs={"y": "ranker.z"},
+            outputs={
+                "y": "predictor.y",
+                "z": "ranker.z",
+            },
             doc=dict(
                 model_type=btf.Module.model_types.classification,
             ),

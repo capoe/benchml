@@ -29,7 +29,7 @@ def compile_xy_classifiers(*args, **kwargs):
             ],
             hyper=GridHyper(Hyper({"predictor.max_depth": [None]})),
             broadcast={},
-            outputs={"y": "predictor.y"},
+            outputs={"y": "predictor.y", "z": "predictor.z"},
             doc=dict(
                 model_type=btf.Module.model_types.classification,
             ),

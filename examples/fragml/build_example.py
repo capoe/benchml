@@ -45,7 +45,10 @@ def build_model():
             Hyper({"predictor.power": [2.0]}),
         ),
         broadcast={"meta": "input.meta"},
-        outputs={"z": "predictor.z", "y": "predictor.y", "Z": "attribute.Z"},
+        outputs={"y": "predictor.y", "z": "predictor.z", "Z": "attribute.Z"},
+        doc=dict(
+            model_type=btf.Module.model_types.classification,
+        ),
     )
 
 
