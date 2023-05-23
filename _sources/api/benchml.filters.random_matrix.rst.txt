@@ -1,0 +1,7 @@
+benchml.filters.random\_matrix module
+=====================================
+
+.. automodule:: benchml.filters.random_matrix
+   :members:
+   :undoc-members:
+   :show-inheritance:

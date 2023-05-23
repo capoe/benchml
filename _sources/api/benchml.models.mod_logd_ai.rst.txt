@@ -1,0 +1,7 @@
+benchml.models.mod\_logd\_ai module
+===================================
+
+.. automodule:: benchml.models.mod_logd_ai
+   :members:
+   :undoc-members:
+   :show-inheritance:

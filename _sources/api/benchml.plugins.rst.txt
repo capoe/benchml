@@ -1,0 +1,27 @@
+benchml.plugins package
+=======================
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   benchml.plugins.plugin_asap
+   benchml.plugins.plugin_check
+   benchml.plugins.plugin_cx
+   benchml.plugins.plugin_dscribe
+   benchml.plugins.plugin_gylmxx
+   benchml.plugins.plugin_nphil
+   benchml.plugins.plugin_physchem
+   benchml.plugins.plugin_rdkit
+   benchml.plugins.plugin_soap
+   benchml.plugins.plugin_torch
+
+Module contents
+---------------
+
+.. automodule:: benchml.plugins
+   :members:
+   :undoc-members:
+   :show-inheritance:

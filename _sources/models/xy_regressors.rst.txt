@@ -1,0 +1,38 @@
+=============
+xy_regressors
+=============
+
+xy_rfr
+======
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [xy_rfr]
+        0[ExttInput: 'input'] -- X --> 1[RandomForestRegressor: 'predictor']
+        0[ExttInput: 'input'] -- y --> 1[RandomForestRegressor: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- max_depth ---> 1[RandomForestRegressor: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        1[RandomForestRegressor: 'predictor'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExttInput : ['InputTransform']
+    An EXTendedTxt Data Input Node.
+
+RandomForestRegressor : ['SklearnTransform']
+    'No description'
+

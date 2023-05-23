@@ -1,0 +1,192 @@
+===============
+bmol_ecfp_class
+===============
+
+bmol_ecfp_svm_class
+===================
+SVM Classifier
+
+Model Type: Classification
+
+SVM Classifier with MorganFP.
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bmol_ecfp_svm_class]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[MorganFP: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[MorganFP: 'descriptor']
+        1[MorganFP: 'descriptor'] -- X --> 2[KernelDot: 'kernel']
+        0[ExtXyzInput: 'input'] -- meta --> 2[KernelDot: 'kernel']
+        2[KernelDot: 'kernel'] -- K --> 3[SupportVectorClassifier: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 3[SupportVectorClassifier: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 3[SupportVectorClassifier: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- C ---> 3[SupportVectorClassifier: 'predictor']
+        HyperParams --- power ---> 3[SupportVectorClassifier: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        3[SupportVectorClassifier: 'predictor'] -- z --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+MorganFP : ['Transform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+SupportVectorClassifier : ['SklearnTransform']
+    'No description'
+
+bmol_ecfp_lr_class
+==================
+'No summary'
+
+Model Type: Classification
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bmol_ecfp_lr_class]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[MorganFP: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[MorganFP: 'descriptor']
+        1[MorganFP: 'descriptor'] -- X --> 2[LogisticRegression: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 2[LogisticRegression: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 2[LogisticRegression: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- length ---> 1[MorganFP: 'descriptor']
+        HyperParams --- radius ---> 1[MorganFP: 'descriptor']
+        HyperParams --- normalize ---> 1[MorganFP: 'descriptor']
+        HyperParams --- C ---> 2[LogisticRegression: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        2[LogisticRegression: 'predictor'] -- z --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+MorganFP : ['Transform']
+    'No description'
+
+LogisticRegression : ['SklearnTransform']
+    'No description'
+
+bmol_ecfp_rf_class
+==================
+'No summary'
+
+Model Type: Classification
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bmol_ecfp_rf_class]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[MorganFP: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[MorganFP: 'descriptor']
+        1[MorganFP: 'descriptor'] -- X --> 2[RandomForestClassifier: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 2[RandomForestClassifier: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 2[RandomForestClassifier: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- length ---> 1[MorganFP: 'descriptor']
+        HyperParams --- radius ---> 1[MorganFP: 'descriptor']
+        HyperParams --- normalize ---> 1[MorganFP: 'descriptor']
+    end
+    subgraph Outputs [Outputs]
+        2[RandomForestClassifier: 'predictor'] -- z --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+MorganFP : ['Transform']
+    'No description'
+
+RandomForestClassifier : ['SklearnTransform']
+    'No description'
+
+bmol_ecfp_mplr_class
+====================
+'No summary'
+
+Model Type: Classification
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bmol_ecfp_mplr_class]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[MorganFP: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[MorganFP: 'descriptor']
+        1[MorganFP: 'descriptor'] -- X --> 2[CleanMatrix: 'clean']
+        0[ExtXyzInput: 'input'] -- meta --> 2[CleanMatrix: 'clean']
+        2[CleanMatrix: 'clean'] -- X --> 3[MarchenkoPasturFilter: 'descriptor_mp']
+        0[ExtXyzInput: 'input'] -- meta --> 3[MarchenkoPasturFilter: 'descriptor_mp']
+        3[MarchenkoPasturFilter: 'descriptor_mp'] -- X --> 4[LogisticRegression: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 4[LogisticRegression: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 4[LogisticRegression: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- length ---> 1[MorganFP: 'descriptor']
+        HyperParams --- radius ---> 1[MorganFP: 'descriptor']
+        HyperParams --- normalize ---> 1[MorganFP: 'descriptor']
+        HyperParams --- C ---> 4[LogisticRegression: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        4[LogisticRegression: 'predictor'] -- z --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+MorganFP : ['Transform']
+    'No description'
+
+CleanMatrix : ['FitTransform']
+    'No description'
+
+MarchenkoPasturFilter : ['FitTransform']
+    'No description'
+
+LogisticRegression : ['SklearnTransform']
+    'No description'
+

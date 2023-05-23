@@ -1,0 +1,7 @@
+benchml.plugins.plugin\_rdkit module
+====================================
+
+.. automodule:: benchml.plugins.plugin_rdkit
+   :members:
+   :undoc-members:
+   :show-inheritance:

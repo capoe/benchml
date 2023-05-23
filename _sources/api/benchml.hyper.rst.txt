@@ -1,0 +1,7 @@
+benchml.hyper module
+====================
+
+.. automodule:: benchml.hyper
+   :members:
+   :undoc-members:
+   :show-inheritance:

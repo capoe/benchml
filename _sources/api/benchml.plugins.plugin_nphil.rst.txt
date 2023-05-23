@@ -1,0 +1,7 @@
+benchml.plugins.plugin\_nphil module
+====================================
+
+.. automodule:: benchml.plugins.plugin_nphil
+   :members:
+   :undoc-members:
+   :show-inheritance:

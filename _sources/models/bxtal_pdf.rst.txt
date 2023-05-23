@@ -1,0 +1,516 @@
+=========
+bxtal_pdf
+=========
+
+bxtal_pdf_soap_standard_rr
+==========================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bxtal_pdf_soap_standard_rr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[SoapGylmxx: 'descriptor_atomic']
+        0[ExtXyzInput: 'input'] -- meta --> 1[SoapGylmxx: 'descriptor_atomic']
+        1[SoapGylmxx: 'descriptor_atomic'] -- Q --> 2[GylmReduceConvolve: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 2[GylmReduceConvolve: 'descriptor']
+        2[GylmReduceConvolve: 'descriptor'] -- X --> 3[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- meta --> 3[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- configs --> 4[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- meta --> 4[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- y --> 4[DoDivideBySize: 'input_norm']
+        3[WhitenMatrix: 'whiten'] -- X --> 5[Ridge: 'predictor']
+        4[DoDivideBySize: 'input_norm'] -- y --> 5[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 5[Ridge: 'predictor']
+        5[Ridge: 'predictor'] -- y --> 6[UndoDivideBySize: 'output']
+        4[DoDivideBySize: 'input_norm'] -- sizes --> 6[UndoDivideBySize: 'output']
+        0[ExtXyzInput: 'input'] -- meta --> 6[UndoDivideBySize: 'output']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- centre ---> 3[WhitenMatrix: 'whiten']
+        HyperParams --- scale ---> 3[WhitenMatrix: 'whiten']
+        HyperParams --- alpha ---> 5[Ridge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        6[UndoDivideBySize: 'output'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+SoapGylmxx : ['SoapBase']
+    'No description'
+
+GylmReduceConvolve : ['Transform']
+    'No description'
+
+WhitenMatrix : ['FitTransform']
+    'No description'
+
+DoDivideBySize : ['FitTransform']
+    'No description'
+
+Ridge : ['SklearnTransform']
+    'No description'
+
+UndoDivideBySize : ['Transform']
+    'No description'
+
+bxtal_pdf_gylm_standard_rr
+==========================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bxtal_pdf_gylm_standard_rr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[GylmAtomic: 'descriptor_atomic']
+        0[ExtXyzInput: 'input'] -- meta --> 1[GylmAtomic: 'descriptor_atomic']
+        1[GylmAtomic: 'descriptor_atomic'] -- Q --> 2[GylmReduceConvolve: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 2[GylmReduceConvolve: 'descriptor']
+        2[GylmReduceConvolve: 'descriptor'] -- X --> 3[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- meta --> 3[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- configs --> 4[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- meta --> 4[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- y --> 4[DoDivideBySize: 'input_norm']
+        3[WhitenMatrix: 'whiten'] -- X --> 5[Ridge: 'predictor']
+        4[DoDivideBySize: 'input_norm'] -- y --> 5[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 5[Ridge: 'predictor']
+        5[Ridge: 'predictor'] -- y --> 6[UndoDivideBySize: 'output']
+        4[DoDivideBySize: 'input_norm'] -- sizes --> 6[UndoDivideBySize: 'output']
+        0[ExtXyzInput: 'input'] -- meta --> 6[UndoDivideBySize: 'output']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- centre ---> 3[WhitenMatrix: 'whiten']
+        HyperParams --- scale ---> 3[WhitenMatrix: 'whiten']
+        HyperParams --- alpha ---> 5[Ridge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        6[UndoDivideBySize: 'output'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+GylmAtomic : ['GylmTransform']
+    'No description'
+
+GylmReduceConvolve : ['Transform']
+    'No description'
+
+WhitenMatrix : ['FitTransform']
+    'No description'
+
+DoDivideBySize : ['FitTransform']
+    'No description'
+
+Ridge : ['SklearnTransform']
+    'No description'
+
+UndoDivideBySize : ['Transform']
+    'No description'
+
+bxtal_pdf_soap_standard_krr
+===========================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bxtal_pdf_soap_standard_krr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[SoapGylmxx: 'descriptor_atomic']
+        0[ExtXyzInput: 'input'] -- meta --> 1[SoapGylmxx: 'descriptor_atomic']
+        1[SoapGylmxx: 'descriptor_atomic'] -- Q --> 2[GylmReduceConvolve: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 2[GylmReduceConvolve: 'descriptor']
+        2[GylmReduceConvolve: 'descriptor'] -- X --> 3[KernelDot: 'kernel']
+        0[ExtXyzInput: 'input'] -- meta --> 3[KernelDot: 'kernel']
+        0[ExtXyzInput: 'input'] -- configs --> 4[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- meta --> 4[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- y --> 4[DoDivideBySize: 'input_norm']
+        3[KernelDot: 'kernel'] -- K --> 5[KernelRidge: 'predictor']
+        4[DoDivideBySize: 'input_norm'] -- y --> 5[KernelRidge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 5[KernelRidge: 'predictor']
+        5[KernelRidge: 'predictor'] -- y --> 6[UndoDivideBySize: 'output']
+        4[DoDivideBySize: 'input_norm'] -- sizes --> 6[UndoDivideBySize: 'output']
+        0[ExtXyzInput: 'input'] -- meta --> 6[UndoDivideBySize: 'output']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 5[KernelRidge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        6[UndoDivideBySize: 'output'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+SoapGylmxx : ['SoapBase']
+    'No description'
+
+GylmReduceConvolve : ['Transform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+DoDivideBySize : ['FitTransform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+UndoDivideBySize : ['Transform']
+    'No description'
+
+bxtal_pdf_gylm_standard_krr
+===========================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bxtal_pdf_gylm_standard_krr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[GylmAtomic: 'descriptor_atomic']
+        0[ExtXyzInput: 'input'] -- meta --> 1[GylmAtomic: 'descriptor_atomic']
+        1[GylmAtomic: 'descriptor_atomic'] -- Q --> 2[GylmReduceConvolve: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 2[GylmReduceConvolve: 'descriptor']
+        2[GylmReduceConvolve: 'descriptor'] -- X --> 3[KernelDot: 'kernel']
+        0[ExtXyzInput: 'input'] -- meta --> 3[KernelDot: 'kernel']
+        0[ExtXyzInput: 'input'] -- configs --> 4[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- meta --> 4[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- y --> 4[DoDivideBySize: 'input_norm']
+        3[KernelDot: 'kernel'] -- K --> 5[KernelRidge: 'predictor']
+        4[DoDivideBySize: 'input_norm'] -- y --> 5[KernelRidge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 5[KernelRidge: 'predictor']
+        5[KernelRidge: 'predictor'] -- y --> 6[UndoDivideBySize: 'output']
+        4[DoDivideBySize: 'input_norm'] -- sizes --> 6[UndoDivideBySize: 'output']
+        0[ExtXyzInput: 'input'] -- meta --> 6[UndoDivideBySize: 'output']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 5[KernelRidge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        6[UndoDivideBySize: 'output'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+GylmAtomic : ['GylmTransform']
+    'No description'
+
+GylmReduceConvolve : ['Transform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+DoDivideBySize : ['FitTransform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+UndoDivideBySize : ['Transform']
+    'No description'
+
+bxtal_pdf_soap_minimal_rr
+=========================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bxtal_pdf_soap_minimal_rr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[SoapGylmxx: 'descriptor_atomic']
+        0[ExtXyzInput: 'input'] -- meta --> 1[SoapGylmxx: 'descriptor_atomic']
+        1[SoapGylmxx: 'descriptor_atomic'] -- Q --> 2[GylmReduceConvolve: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 2[GylmReduceConvolve: 'descriptor']
+        2[GylmReduceConvolve: 'descriptor'] -- X --> 3[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- meta --> 3[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- configs --> 4[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- meta --> 4[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- y --> 4[DoDivideBySize: 'input_norm']
+        3[WhitenMatrix: 'whiten'] -- X --> 5[Ridge: 'predictor']
+        4[DoDivideBySize: 'input_norm'] -- y --> 5[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 5[Ridge: 'predictor']
+        5[Ridge: 'predictor'] -- y --> 6[UndoDivideBySize: 'output']
+        4[DoDivideBySize: 'input_norm'] -- sizes --> 6[UndoDivideBySize: 'output']
+        0[ExtXyzInput: 'input'] -- meta --> 6[UndoDivideBySize: 'output']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- centre ---> 3[WhitenMatrix: 'whiten']
+        HyperParams --- scale ---> 3[WhitenMatrix: 'whiten']
+        HyperParams --- alpha ---> 5[Ridge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        6[UndoDivideBySize: 'output'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+SoapGylmxx : ['SoapBase']
+    'No description'
+
+GylmReduceConvolve : ['Transform']
+    'No description'
+
+WhitenMatrix : ['FitTransform']
+    'No description'
+
+DoDivideBySize : ['FitTransform']
+    'No description'
+
+Ridge : ['SklearnTransform']
+    'No description'
+
+UndoDivideBySize : ['Transform']
+    'No description'
+
+bxtal_pdf_gylm_minimal_rr
+=========================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bxtal_pdf_gylm_minimal_rr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[GylmAtomic: 'descriptor_atomic']
+        0[ExtXyzInput: 'input'] -- meta --> 1[GylmAtomic: 'descriptor_atomic']
+        1[GylmAtomic: 'descriptor_atomic'] -- Q --> 2[GylmReduceConvolve: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 2[GylmReduceConvolve: 'descriptor']
+        2[GylmReduceConvolve: 'descriptor'] -- X --> 3[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- meta --> 3[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- configs --> 4[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- meta --> 4[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- y --> 4[DoDivideBySize: 'input_norm']
+        3[WhitenMatrix: 'whiten'] -- X --> 5[Ridge: 'predictor']
+        4[DoDivideBySize: 'input_norm'] -- y --> 5[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 5[Ridge: 'predictor']
+        5[Ridge: 'predictor'] -- y --> 6[UndoDivideBySize: 'output']
+        4[DoDivideBySize: 'input_norm'] -- sizes --> 6[UndoDivideBySize: 'output']
+        0[ExtXyzInput: 'input'] -- meta --> 6[UndoDivideBySize: 'output']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- centre ---> 3[WhitenMatrix: 'whiten']
+        HyperParams --- scale ---> 3[WhitenMatrix: 'whiten']
+        HyperParams --- alpha ---> 5[Ridge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        6[UndoDivideBySize: 'output'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+GylmAtomic : ['GylmTransform']
+    'No description'
+
+GylmReduceConvolve : ['Transform']
+    'No description'
+
+WhitenMatrix : ['FitTransform']
+    'No description'
+
+DoDivideBySize : ['FitTransform']
+    'No description'
+
+Ridge : ['SklearnTransform']
+    'No description'
+
+UndoDivideBySize : ['Transform']
+    'No description'
+
+bxtal_pdf_soap_minimal_krr
+==========================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bxtal_pdf_soap_minimal_krr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[SoapGylmxx: 'descriptor_atomic']
+        0[ExtXyzInput: 'input'] -- meta --> 1[SoapGylmxx: 'descriptor_atomic']
+        1[SoapGylmxx: 'descriptor_atomic'] -- Q --> 2[GylmReduceConvolve: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 2[GylmReduceConvolve: 'descriptor']
+        2[GylmReduceConvolve: 'descriptor'] -- X --> 3[KernelDot: 'kernel']
+        0[ExtXyzInput: 'input'] -- meta --> 3[KernelDot: 'kernel']
+        0[ExtXyzInput: 'input'] -- configs --> 4[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- meta --> 4[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- y --> 4[DoDivideBySize: 'input_norm']
+        3[KernelDot: 'kernel'] -- K --> 5[KernelRidge: 'predictor']
+        4[DoDivideBySize: 'input_norm'] -- y --> 5[KernelRidge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 5[KernelRidge: 'predictor']
+        5[KernelRidge: 'predictor'] -- y --> 6[UndoDivideBySize: 'output']
+        4[DoDivideBySize: 'input_norm'] -- sizes --> 6[UndoDivideBySize: 'output']
+        0[ExtXyzInput: 'input'] -- meta --> 6[UndoDivideBySize: 'output']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 5[KernelRidge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        6[UndoDivideBySize: 'output'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+SoapGylmxx : ['SoapBase']
+    'No description'
+
+GylmReduceConvolve : ['Transform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+DoDivideBySize : ['FitTransform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+UndoDivideBySize : ['Transform']
+    'No description'
+
+bxtal_pdf_gylm_minimal_krr
+==========================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bxtal_pdf_gylm_minimal_krr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[GylmAtomic: 'descriptor_atomic']
+        0[ExtXyzInput: 'input'] -- meta --> 1[GylmAtomic: 'descriptor_atomic']
+        1[GylmAtomic: 'descriptor_atomic'] -- Q --> 2[GylmReduceConvolve: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 2[GylmReduceConvolve: 'descriptor']
+        2[GylmReduceConvolve: 'descriptor'] -- X --> 3[KernelDot: 'kernel']
+        0[ExtXyzInput: 'input'] -- meta --> 3[KernelDot: 'kernel']
+        0[ExtXyzInput: 'input'] -- configs --> 4[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- meta --> 4[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- y --> 4[DoDivideBySize: 'input_norm']
+        3[KernelDot: 'kernel'] -- K --> 5[KernelRidge: 'predictor']
+        4[DoDivideBySize: 'input_norm'] -- y --> 5[KernelRidge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 5[KernelRidge: 'predictor']
+        5[KernelRidge: 'predictor'] -- y --> 6[UndoDivideBySize: 'output']
+        4[DoDivideBySize: 'input_norm'] -- sizes --> 6[UndoDivideBySize: 'output']
+        0[ExtXyzInput: 'input'] -- meta --> 6[UndoDivideBySize: 'output']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 5[KernelRidge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        6[UndoDivideBySize: 'output'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+GylmAtomic : ['GylmTransform']
+    'No description'
+
+GylmReduceConvolve : ['Transform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+DoDivideBySize : ['FitTransform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+UndoDivideBySize : ['Transform']
+    'No description'
+

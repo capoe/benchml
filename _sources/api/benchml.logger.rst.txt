@@ -1,0 +1,7 @@
+benchml.logger module
+=====================
+
+.. automodule:: benchml.logger
+   :members:
+   :undoc-members:
+   :show-inheritance:

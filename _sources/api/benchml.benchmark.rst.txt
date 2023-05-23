@@ -1,0 +1,7 @@
+benchml.benchmark module
+========================
+
+.. automodule:: benchml.benchmark
+   :members:
+   :undoc-members:
+   :show-inheritance:

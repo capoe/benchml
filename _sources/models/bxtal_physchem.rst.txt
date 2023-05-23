@@ -1,0 +1,343 @@
+==============
+bxtal_physchem
+==============
+
+bxtal_physchem_s05_rfr
+======================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bxtal_physchem_s05_rfr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[PhyschemXtal: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[PhyschemXtal: 'descriptor']
+        0[ExtXyzInput: 'input'] -- configs --> 2[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- meta --> 2[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- y --> 2[DoDivideBySize: 'input_norm']
+        1[PhyschemXtal: 'descriptor'] -- X --> 3[RandomForestRegressor: 'predictor']
+        2[DoDivideBySize: 'input_norm'] -- y --> 3[RandomForestRegressor: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 3[RandomForestRegressor: 'predictor']
+        3[RandomForestRegressor: 'predictor'] -- y --> 4[UndoDivideBySize: 'output']
+        2[DoDivideBySize: 'input_norm'] -- sizes --> 4[UndoDivideBySize: 'output']
+        0[ExtXyzInput: 'input'] -- meta --> 4[UndoDivideBySize: 'output']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- force ---> 2[DoDivideBySize: 'input_norm']
+        HyperParams --- max_depth ---> 3[RandomForestRegressor: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        4[UndoDivideBySize: 'output'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+PhyschemXtal : ['Transform']
+    'No description'
+
+DoDivideBySize : ['FitTransform']
+    'No description'
+
+RandomForestRegressor : ['SklearnTransform']
+    'No description'
+
+UndoDivideBySize : ['Transform']
+    'No description'
+
+bxtal_physchem_s05_rr
+=====================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bxtal_physchem_s05_rr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[PhyschemXtal: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[PhyschemXtal: 'descriptor']
+        1[PhyschemXtal: 'descriptor'] -- X --> 2[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- meta --> 2[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- configs --> 3[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- meta --> 3[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- y --> 3[DoDivideBySize: 'input_norm']
+        2[WhitenMatrix: 'whiten'] -- X --> 4[Ridge: 'predictor']
+        3[DoDivideBySize: 'input_norm'] -- y --> 4[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 4[Ridge: 'predictor']
+        4[Ridge: 'predictor'] -- y --> 5[UndoDivideBySize: 'output']
+        3[DoDivideBySize: 'input_norm'] -- sizes --> 5[UndoDivideBySize: 'output']
+        0[ExtXyzInput: 'input'] -- meta --> 5[UndoDivideBySize: 'output']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- force ---> 3[DoDivideBySize: 'input_norm']
+        HyperParams --- alpha ---> 4[Ridge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        5[UndoDivideBySize: 'output'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+PhyschemXtal : ['Transform']
+    'No description'
+
+WhitenMatrix : ['FitTransform']
+    'No description'
+
+DoDivideBySize : ['FitTransform']
+    'No description'
+
+Ridge : ['SklearnTransform']
+    'No description'
+
+UndoDivideBySize : ['Transform']
+    'No description'
+
+bxtal_physchem_s10_rfr
+======================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bxtal_physchem_s10_rfr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[PhyschemXtal: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[PhyschemXtal: 'descriptor']
+        0[ExtXyzInput: 'input'] -- configs --> 2[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- meta --> 2[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- y --> 2[DoDivideBySize: 'input_norm']
+        1[PhyschemXtal: 'descriptor'] -- X --> 3[RandomForestRegressor: 'predictor']
+        2[DoDivideBySize: 'input_norm'] -- y --> 3[RandomForestRegressor: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 3[RandomForestRegressor: 'predictor']
+        3[RandomForestRegressor: 'predictor'] -- y --> 4[UndoDivideBySize: 'output']
+        2[DoDivideBySize: 'input_norm'] -- sizes --> 4[UndoDivideBySize: 'output']
+        0[ExtXyzInput: 'input'] -- meta --> 4[UndoDivideBySize: 'output']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- force ---> 2[DoDivideBySize: 'input_norm']
+        HyperParams --- max_depth ---> 3[RandomForestRegressor: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        4[UndoDivideBySize: 'output'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+PhyschemXtal : ['Transform']
+    'No description'
+
+DoDivideBySize : ['FitTransform']
+    'No description'
+
+RandomForestRegressor : ['SklearnTransform']
+    'No description'
+
+UndoDivideBySize : ['Transform']
+    'No description'
+
+bxtal_physchem_s10_rr
+=====================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bxtal_physchem_s10_rr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[PhyschemXtal: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[PhyschemXtal: 'descriptor']
+        1[PhyschemXtal: 'descriptor'] -- X --> 2[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- meta --> 2[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- configs --> 3[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- meta --> 3[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- y --> 3[DoDivideBySize: 'input_norm']
+        2[WhitenMatrix: 'whiten'] -- X --> 4[Ridge: 'predictor']
+        3[DoDivideBySize: 'input_norm'] -- y --> 4[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 4[Ridge: 'predictor']
+        4[Ridge: 'predictor'] -- y --> 5[UndoDivideBySize: 'output']
+        3[DoDivideBySize: 'input_norm'] -- sizes --> 5[UndoDivideBySize: 'output']
+        0[ExtXyzInput: 'input'] -- meta --> 5[UndoDivideBySize: 'output']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- force ---> 3[DoDivideBySize: 'input_norm']
+        HyperParams --- alpha ---> 4[Ridge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        5[UndoDivideBySize: 'output'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+PhyschemXtal : ['Transform']
+    'No description'
+
+WhitenMatrix : ['FitTransform']
+    'No description'
+
+DoDivideBySize : ['FitTransform']
+    'No description'
+
+Ridge : ['SklearnTransform']
+    'No description'
+
+UndoDivideBySize : ['Transform']
+    'No description'
+
+bxtal_physchem_s20_rfr
+======================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bxtal_physchem_s20_rfr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[PhyschemXtal: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[PhyschemXtal: 'descriptor']
+        0[ExtXyzInput: 'input'] -- configs --> 2[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- meta --> 2[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- y --> 2[DoDivideBySize: 'input_norm']
+        1[PhyschemXtal: 'descriptor'] -- X --> 3[RandomForestRegressor: 'predictor']
+        2[DoDivideBySize: 'input_norm'] -- y --> 3[RandomForestRegressor: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 3[RandomForestRegressor: 'predictor']
+        3[RandomForestRegressor: 'predictor'] -- y --> 4[UndoDivideBySize: 'output']
+        2[DoDivideBySize: 'input_norm'] -- sizes --> 4[UndoDivideBySize: 'output']
+        0[ExtXyzInput: 'input'] -- meta --> 4[UndoDivideBySize: 'output']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- force ---> 2[DoDivideBySize: 'input_norm']
+        HyperParams --- max_depth ---> 3[RandomForestRegressor: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        4[UndoDivideBySize: 'output'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+PhyschemXtal : ['Transform']
+    'No description'
+
+DoDivideBySize : ['FitTransform']
+    'No description'
+
+RandomForestRegressor : ['SklearnTransform']
+    'No description'
+
+UndoDivideBySize : ['Transform']
+    'No description'
+
+bxtal_physchem_s20_rr
+=====================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bxtal_physchem_s20_rr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[PhyschemXtal: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[PhyschemXtal: 'descriptor']
+        1[PhyschemXtal: 'descriptor'] -- X --> 2[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- meta --> 2[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- configs --> 3[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- meta --> 3[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- y --> 3[DoDivideBySize: 'input_norm']
+        2[WhitenMatrix: 'whiten'] -- X --> 4[Ridge: 'predictor']
+        3[DoDivideBySize: 'input_norm'] -- y --> 4[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 4[Ridge: 'predictor']
+        4[Ridge: 'predictor'] -- y --> 5[UndoDivideBySize: 'output']
+        3[DoDivideBySize: 'input_norm'] -- sizes --> 5[UndoDivideBySize: 'output']
+        0[ExtXyzInput: 'input'] -- meta --> 5[UndoDivideBySize: 'output']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- force ---> 3[DoDivideBySize: 'input_norm']
+        HyperParams --- alpha ---> 4[Ridge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        5[UndoDivideBySize: 'output'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+PhyschemXtal : ['Transform']
+    'No description'
+
+WhitenMatrix : ['FitTransform']
+    'No description'
+
+DoDivideBySize : ['FitTransform']
+    'No description'
+
+Ridge : ['SklearnTransform']
+    'No description'
+
+UndoDivideBySize : ['Transform']
+    'No description'
+

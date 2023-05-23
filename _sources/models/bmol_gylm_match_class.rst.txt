@@ -1,0 +1,160 @@
+=====================
+bmol_gylm_match_class
+=====================
+
+bmol_gylm_match_class
+=====================
+'No summary'
+
+Model Type: Classification
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bmol_gylm_match_class]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[GylmAtomic: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[GylmAtomic: 'descriptor']
+        1[GylmAtomic: 'descriptor'] -- X --> 2[KernelSmoothMatch: 'kernel']
+        0[ExtXyzInput: 'input'] -- meta --> 2[KernelSmoothMatch: 'kernel']
+        2[KernelSmoothMatch: 'kernel'] -- K --> 3[SupportVectorClassifier: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 3[SupportVectorClassifier: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 3[SupportVectorClassifier: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- C ---> 3[SupportVectorClassifier: 'predictor']
+        HyperParams --- power ---> 3[SupportVectorClassifier: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        3[SupportVectorClassifier: 'predictor'] -- z --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+GylmAtomic : ['GylmTransform']
+    'No description'
+
+KernelSmoothMatch : ['FitTransform']
+    'No description'
+
+SupportVectorClassifier : ['SklearnTransform']
+    'No description'
+
+bmol_gylm_match_class_norm
+==========================
+'No summary'
+
+Model Type: Classification
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bmol_gylm_match_class_norm]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[GylmAtomic: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[GylmAtomic: 'descriptor']
+        1[GylmAtomic: 'descriptor'] -- X --> 2[KernelSmoothMatch: 'kernel']
+        0[ExtXyzInput: 'input'] -- meta --> 2[KernelSmoothMatch: 'kernel']
+        2[KernelSmoothMatch: 'kernel'] -- K --> 3[SupportVectorClassifier: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 3[SupportVectorClassifier: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 3[SupportVectorClassifier: 'predictor']
+        3[SupportVectorClassifier: 'predictor'] -- z --> 4[RankNorm: 'ranker']
+        0[ExtXyzInput: 'input'] -- meta --> 4[RankNorm: 'ranker']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- C ---> 3[SupportVectorClassifier: 'predictor']
+        HyperParams --- power ---> 3[SupportVectorClassifier: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        4[RankNorm: 'ranker'] -- z --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+GylmAtomic : ['GylmTransform']
+    'No description'
+
+KernelSmoothMatch : ['FitTransform']
+    'No description'
+
+SupportVectorClassifier : ['SklearnTransform']
+    'No description'
+
+RankNorm : ['FitTransform']
+    'No description'
+
+bmol_gylm_match_class_attr
+==========================
+'No summary'
+
+Model Type: Classification
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bmol_gylm_match_class_attr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[GylmAtomic: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[GylmAtomic: 'descriptor']
+        1[GylmAtomic: 'descriptor'] -- X --> 2[KernelSmoothMatch: 'kernel']
+        0[ExtXyzInput: 'input'] -- meta --> 2[KernelSmoothMatch: 'kernel']
+        2[KernelSmoothMatch: 'kernel'] -- K --> 3[SupportVectorClassifier: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 3[SupportVectorClassifier: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 3[SupportVectorClassifier: 'predictor']
+        0[ExtXyzInput: 'input'] -- configs --> 4[AttributeKernelSmoothMatchSVM: 'attribute']
+        2[KernelSmoothMatch: 'kernel'] -- X --> 4[AttributeKernelSmoothMatchSVM: 'attribute']
+        1[GylmAtomic: 'descriptor'] -- X_probe --> 4[AttributeKernelSmoothMatchSVM: 'attribute']
+        3[SupportVectorClassifier: 'predictor'] -- model --> 4[AttributeKernelSmoothMatchSVM: 'attribute']
+        0[ExtXyzInput: 'input'] -- meta --> 4[AttributeKernelSmoothMatchSVM: 'attribute']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- C ---> 3[SupportVectorClassifier: 'predictor']
+        HyperParams --- power ---> 3[SupportVectorClassifier: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        3[SupportVectorClassifier: 'predictor'] -- y --> y[y]
+        3[SupportVectorClassifier: 'predictor'] -- z --> z[z]
+        4[AttributeKernelSmoothMatchSVM: 'attribute'] -- Z --> Z[Z]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+GylmAtomic : ['GylmTransform']
+    'No description'
+
+KernelSmoothMatch : ['FitTransform']
+    'No description'
+
+SupportVectorClassifier : ['SklearnTransform']
+    'No description'
+
+AttributeKernelSmoothMatchSVM : ['Transform']
+    'No description'
+

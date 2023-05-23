@@ -1,0 +1,19 @@
+benchml.predictors package
+==========================
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   benchml.predictors.gaussian_process
+   benchml.predictors.pred_sklearn
+
+Module contents
+---------------
+
+.. automodule:: benchml.predictors
+   :members:
+   :undoc-members:
+   :show-inheritance:

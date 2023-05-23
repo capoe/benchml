@@ -1,0 +1,232 @@
+=========
+bmol_ecfp
+=========
+
+bmol_ecfp4_krr
+==============
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bmol_ecfp4_krr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[MorganFP: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[MorganFP: 'descriptor']
+        1[MorganFP: 'descriptor'] -- X --> 2[KernelDot: 'kernel']
+        0[ExtXyzInput: 'input'] -- meta --> 2[KernelDot: 'kernel']
+        0[ExtXyzInput: 'input'] -- configs --> 3[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- meta --> 3[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- y --> 3[DoDivideBySize: 'input_norm']
+        2[KernelDot: 'kernel'] -- K --> 4[KernelRidge: 'predictor']
+        3[DoDivideBySize: 'input_norm'] -- y --> 4[KernelRidge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 4[KernelRidge: 'predictor']
+        4[KernelRidge: 'predictor'] -- y --> 5[UndoDivideBySize: 'output']
+        3[DoDivideBySize: 'input_norm'] -- sizes --> 5[UndoDivideBySize: 'output']
+        0[ExtXyzInput: 'input'] -- meta --> 5[UndoDivideBySize: 'output']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 4[KernelRidge: 'predictor']
+        HyperParams --- power ---> 4[KernelRidge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        5[UndoDivideBySize: 'output'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+MorganFP : ['Transform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+DoDivideBySize : ['FitTransform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+UndoDivideBySize : ['Transform']
+    'No description'
+
+bmol_ecfp4_rr
+=============
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bmol_ecfp4_rr]
+        0[ExtXyzInput: 'input'] -- configs --> 1[MorganFP: 'descriptor']
+        1[MorganFP: 'descriptor'] -- X --> 2[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- configs --> 3[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- meta --> 3[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- y --> 3[DoDivideBySize: 'input_norm']
+        2[WhitenMatrix: 'whiten'] -- X --> 4[Ridge: 'predictor']
+        3[DoDivideBySize: 'input_norm'] -- y --> 4[Ridge: 'predictor']
+        4[Ridge: 'predictor'] -- y --> 5[UndoDivideBySize: 'output']
+        3[DoDivideBySize: 'input_norm'] -- sizes --> 5[UndoDivideBySize: 'output']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 4[Ridge: 'predictor']
+        HyperParams --- centre ---> 2[WhitenMatrix: 'whiten']
+        HyperParams --- scale ---> 2[WhitenMatrix: 'whiten']
+    end
+    subgraph Outputs [Outputs]
+        5[UndoDivideBySize: 'output'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+MorganFP : ['Transform']
+    'No description'
+
+WhitenMatrix : ['FitTransform']
+    'No description'
+
+DoDivideBySize : ['FitTransform']
+    'No description'
+
+Ridge : ['SklearnTransform']
+    'No description'
+
+UndoDivideBySize : ['Transform']
+    'No description'
+
+bmol_ecfp6_krr
+==============
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bmol_ecfp6_krr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[MorganFP: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[MorganFP: 'descriptor']
+        1[MorganFP: 'descriptor'] -- X --> 2[KernelDot: 'kernel']
+        0[ExtXyzInput: 'input'] -- meta --> 2[KernelDot: 'kernel']
+        0[ExtXyzInput: 'input'] -- configs --> 3[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- meta --> 3[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- y --> 3[DoDivideBySize: 'input_norm']
+        2[KernelDot: 'kernel'] -- K --> 4[KernelRidge: 'predictor']
+        3[DoDivideBySize: 'input_norm'] -- y --> 4[KernelRidge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 4[KernelRidge: 'predictor']
+        4[KernelRidge: 'predictor'] -- y --> 5[UndoDivideBySize: 'output']
+        3[DoDivideBySize: 'input_norm'] -- sizes --> 5[UndoDivideBySize: 'output']
+        0[ExtXyzInput: 'input'] -- meta --> 5[UndoDivideBySize: 'output']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 4[KernelRidge: 'predictor']
+        HyperParams --- power ---> 4[KernelRidge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        5[UndoDivideBySize: 'output'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+MorganFP : ['Transform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+DoDivideBySize : ['FitTransform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+UndoDivideBySize : ['Transform']
+    'No description'
+
+bmol_ecfp6_rr
+=============
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bmol_ecfp6_rr]
+        0[ExtXyzInput: 'input'] -- configs --> 1[MorganFP: 'descriptor']
+        1[MorganFP: 'descriptor'] -- X --> 2[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- configs --> 3[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- meta --> 3[DoDivideBySize: 'input_norm']
+        0[ExtXyzInput: 'input'] -- y --> 3[DoDivideBySize: 'input_norm']
+        2[WhitenMatrix: 'whiten'] -- X --> 4[Ridge: 'predictor']
+        3[DoDivideBySize: 'input_norm'] -- y --> 4[Ridge: 'predictor']
+        4[Ridge: 'predictor'] -- y --> 5[UndoDivideBySize: 'output']
+        3[DoDivideBySize: 'input_norm'] -- sizes --> 5[UndoDivideBySize: 'output']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 4[Ridge: 'predictor']
+        HyperParams --- centre ---> 2[WhitenMatrix: 'whiten']
+        HyperParams --- scale ---> 2[WhitenMatrix: 'whiten']
+    end
+    subgraph Outputs [Outputs]
+        5[UndoDivideBySize: 'output'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+MorganFP : ['Transform']
+    'No description'
+
+WhitenMatrix : ['FitTransform']
+    'No description'
+
+DoDivideBySize : ['FitTransform']
+    'No description'
+
+Ridge : ['SklearnTransform']
+    'No description'
+
+UndoDivideBySize : ['Transform']
+    'No description'
+

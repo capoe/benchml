@@ -1,0 +1,7 @@
+benchml.plugins.plugin\_physchem module
+=======================================
+
+.. automodule:: benchml.plugins.plugin_physchem
+   :members:
+   :undoc-members:
+   :show-inheritance:

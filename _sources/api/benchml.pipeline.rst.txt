@@ -1,0 +1,7 @@
+benchml.pipeline module
+=======================
+
+.. automodule:: benchml.pipeline
+   :members:
+   :undoc-members:
+   :show-inheritance:

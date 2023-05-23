@@ -1,0 +1,26 @@
+benchml.models package
+======================
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   benchml.models.common
+   benchml.models.mod_basic
+   benchml.models.mod_bench
+   benchml.models.mod_bench_class
+   benchml.models.mod_bench_xtal
+   benchml.models.mod_dscribe
+   benchml.models.mod_logd
+   benchml.models.mod_logd_ai
+   benchml.models.mod_xy
+
+Module contents
+---------------
+
+.. automodule:: benchml.models
+   :members:
+   :undoc-members:
+   :show-inheritance:

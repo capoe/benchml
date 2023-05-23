@@ -1,0 +1,7 @@
+benchml.models.mod\_dscribe module
+==================================
+
+.. automodule:: benchml.models.mod_dscribe
+   :members:
+   :undoc-members:
+   :show-inheritance:

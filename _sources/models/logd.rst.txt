@@ -1,0 +1,679 @@
+====
+logd
+====
+
+logd_lr
+=======
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [logd_lr]
+        0[ExtXyzInput: 'input'] -- configs --> 1[CxCalcTransform: 'cx']
+        1[CxCalcTransform: 'cx'] -- X --> 2[LinearRegression: 'LinearRegression']
+        0[ExtXyzInput: 'input'] -- y --> 2[LinearRegression: 'LinearRegression']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- normalize ---> 2[LinearRegression: 'LinearRegression']
+    end
+    subgraph Outputs [Outputs]
+        2[LinearRegression: 'LinearRegression'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+CxCalcTransform : ['Transform']
+    'No description'
+
+LinearRegression : ['SklearnTransform']
+    'No description'
+
+logd_physchem_rfr
+=================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [logd_physchem_rfr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[Physchem2D: 'Physchem2D']
+        0[ExtXyzInput: 'input'] -- meta --> 1[Physchem2D: 'Physchem2D']
+        0[ExtXyzInput: 'input'] -- configs --> 2[CxCalcTransform: 'cx']
+        0[ExtXyzInput: 'input'] -- meta --> 2[CxCalcTransform: 'cx']
+        0[ExtXyzInput: 'input'] -- configs --> 3[PhyschemUser: 'PhyschemUser']
+        0[ExtXyzInput: 'input'] -- meta --> 3[PhyschemUser: 'PhyschemUser']
+        1[Physchem2D: 'Physchem2D'] -- X --> 4[Concatenate: 'desc']
+        3[PhyschemUser: 'PhyschemUser'] -- X --> 4[Concatenate: 'desc']
+        2[CxCalcTransform: 'cx'] -- X --> 4[Concatenate: 'desc']
+        0[ExtXyzInput: 'input'] -- meta --> 4[Concatenate: 'desc']
+        4[Concatenate: 'desc'] -- X --> 5[RandomForestRegressor: 'pred']
+        0[ExtXyzInput: 'input'] -- y --> 5[RandomForestRegressor: 'pred']
+        0[ExtXyzInput: 'input'] -- meta --> 5[RandomForestRegressor: 'pred']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- max_depth ---> 5[RandomForestRegressor: 'pred']
+    end
+    subgraph Outputs [Outputs]
+        5[RandomForestRegressor: 'pred'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+Physchem2D : ['Transform']
+    'No description'
+
+CxCalcTransform : ['Transform']
+    'No description'
+
+PhyschemUser : ['Transform']
+    'No description'
+
+Concatenate : ['Transform']
+    'No description'
+
+RandomForestRegressor : ['SklearnTransform']
+    'No description'
+
+logd_delta_hybrid_topo_krr
+==========================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [logd_delta_hybrid_topo_krr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[CxCalcTransform: 'cx_alt']
+        0[ExtXyzInput: 'input'] -- meta --> 1[CxCalcTransform: 'cx_alt']
+        0[ExtXyzInput: 'input'] -- target --> 2[Delta: 'Delta']
+        1[CxCalcTransform: 'cx_alt'] -- ref --> 2[Delta: 'Delta']
+        0[ExtXyzInput: 'input'] -- meta --> 2[Delta: 'Delta']
+        0[ExtXyzInput: 'input'] -- configs --> 3[CxCalcTransform: 'cx']
+        0[ExtXyzInput: 'input'] -- meta --> 3[CxCalcTransform: 'cx']
+        3[CxCalcTransform: 'cx'] -- X --> 4[KernelGaussian: 'kern_gaussian']
+        0[ExtXyzInput: 'input'] -- meta --> 4[KernelGaussian: 'kern_gaussian']
+        0[ExtXyzInput: 'input'] -- configs --> 5[MorganFP: 'desc']
+        0[ExtXyzInput: 'input'] -- meta --> 5[MorganFP: 'desc']
+        5[MorganFP: 'desc'] -- X --> 6[KernelDot: 'kern']
+        0[ExtXyzInput: 'input'] -- meta --> 6[KernelDot: 'kern']
+        4[KernelGaussian: 'kern_gaussian'] -- X --> 7[Add: 'kern_combo']
+        6[KernelDot: 'kern'] -- X --> 7[Add: 'kern_combo']
+        0[ExtXyzInput: 'input'] -- meta --> 7[Add: 'kern_combo']
+        7[Add: 'kern_combo'] -- K --> 8[KernelRidge: 'KernelRidge']
+        2[Delta: 'Delta'] -- y --> 8[KernelRidge: 'KernelRidge']
+        0[ExtXyzInput: 'input'] -- meta --> 8[KernelRidge: 'KernelRidge']
+        1[CxCalcTransform: 'cx_alt'] -- X --> 9[Add: 'out']
+        8[KernelRidge: 'KernelRidge'] -- X --> 9[Add: 'out']
+        0[ExtXyzInput: 'input'] -- meta --> 9[Add: 'out']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- radius ---> 5[MorganFP: 'desc']
+        HyperParams --- alpha ---> 8[KernelRidge: 'KernelRidge']
+        HyperParams --- scale ---> 4[KernelGaussian: 'kern_gaussian']
+        HyperParams --- coeffs ---> 7[Add: 'kern_combo']
+        HyperParams --- power ---> 8[KernelRidge: 'KernelRidge']
+    end
+    subgraph Outputs [Outputs]
+        9[Add: 'out'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+CxCalcTransform : ['Transform']
+    'No description'
+
+Delta : ['FitTransform']
+    'No description'
+
+CxCalcTransform : ['Transform']
+    'No description'
+
+KernelGaussian : ['FitTransform']
+    'No description'
+
+MorganFP : ['Transform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+Add : ['Transform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+Add : ['Transform']
+    'No description'
+
+logd_delta_hybrid_gylm_krr
+==========================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [logd_delta_hybrid_gylm_krr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[CxCalcTransform: 'cx_alt']
+        0[ExtXyzInput: 'input'] -- meta --> 1[CxCalcTransform: 'cx_alt']
+        0[ExtXyzInput: 'input'] -- target --> 2[Delta: 'Delta']
+        1[CxCalcTransform: 'cx_alt'] -- ref --> 2[Delta: 'Delta']
+        0[ExtXyzInput: 'input'] -- meta --> 2[Delta: 'Delta']
+        1[CxCalcTransform: 'cx_alt'] -- X --> 3[Reshape: 'cx']
+        0[ExtXyzInput: 'input'] -- meta --> 3[Reshape: 'cx']
+        3[Reshape: 'cx'] -- X --> 4[KernelGaussian: 'kern_gaussian']
+        0[ExtXyzInput: 'input'] -- meta --> 4[KernelGaussian: 'kern_gaussian']
+        0[ExtXyzInput: 'input'] -- configs --> 5[GylmAverage: 'desc']
+        0[ExtXyzInput: 'input'] -- meta --> 5[GylmAverage: 'desc']
+        5[GylmAverage: 'desc'] -- X --> 6[KernelDot: 'kern']
+        0[ExtXyzInput: 'input'] -- meta --> 6[KernelDot: 'kern']
+        4[KernelGaussian: 'kern_gaussian'] -- X --> 7[Add: 'kern_combo']
+        6[KernelDot: 'kern'] -- X --> 7[Add: 'kern_combo']
+        0[ExtXyzInput: 'input'] -- meta --> 7[Add: 'kern_combo']
+        7[Add: 'kern_combo'] -- K --> 8[KernelRidge: 'KernelRidge']
+        2[Delta: 'Delta'] -- y --> 8[KernelRidge: 'KernelRidge']
+        0[ExtXyzInput: 'input'] -- meta --> 8[KernelRidge: 'KernelRidge']
+        1[CxCalcTransform: 'cx_alt'] -- X --> 9[Add: 'out']
+        8[KernelRidge: 'KernelRidge'] -- X --> 9[Add: 'out']
+        0[ExtXyzInput: 'input'] -- meta --> 9[Add: 'out']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 8[KernelRidge: 'KernelRidge']
+        HyperParams --- scale ---> 4[KernelGaussian: 'kern_gaussian']
+        HyperParams --- coeffs ---> 7[Add: 'kern_combo']
+        HyperParams --- power ---> 8[KernelRidge: 'KernelRidge']
+    end
+    subgraph Outputs [Outputs]
+        9[Add: 'out'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+CxCalcTransform : ['Transform']
+    'No description'
+
+Delta : ['FitTransform']
+    'No description'
+
+Reshape : ['Transform']
+    'No description'
+
+KernelGaussian : ['FitTransform']
+    'No description'
+
+GylmAverage : ['GylmTransform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+Add : ['Transform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+Add : ['Transform']
+    'No description'
+
+logd_hybrid_topo_krr
+====================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [logd_hybrid_topo_krr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[CxCalcTransform: 'cx']
+        0[ExtXyzInput: 'input'] -- meta --> 1[CxCalcTransform: 'cx']
+        1[CxCalcTransform: 'cx'] -- X --> 2[KernelGaussian: 'kern_gaussian']
+        0[ExtXyzInput: 'input'] -- meta --> 2[KernelGaussian: 'kern_gaussian']
+        0[ExtXyzInput: 'input'] -- configs --> 3[MorganFP: 'desc']
+        0[ExtXyzInput: 'input'] -- meta --> 3[MorganFP: 'desc']
+        3[MorganFP: 'desc'] -- X --> 4[KernelDot: 'kern']
+        0[ExtXyzInput: 'input'] -- meta --> 4[KernelDot: 'kern']
+        2[KernelGaussian: 'kern_gaussian'] -- X --> 5[Add: 'Add']
+        4[KernelDot: 'kern'] -- X --> 5[Add: 'Add']
+        0[ExtXyzInput: 'input'] -- meta --> 5[Add: 'Add']
+        5[Add: 'Add'] -- K --> 6[KernelRidge: 'KernelRidge']
+        0[ExtXyzInput: 'input'] -- y --> 6[KernelRidge: 'KernelRidge']
+        0[ExtXyzInput: 'input'] -- meta --> 6[KernelRidge: 'KernelRidge']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- radius ---> 3[MorganFP: 'desc']
+        HyperParams --- alpha ---> 6[KernelRidge: 'KernelRidge']
+        HyperParams --- scale ---> 2[KernelGaussian: 'kern_gaussian']
+        HyperParams --- coeffs ---> 5[Add: 'Add']
+        HyperParams --- power ---> 6[KernelRidge: 'KernelRidge']
+    end
+    subgraph Outputs [Outputs]
+        6[KernelRidge: 'KernelRidge'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+CxCalcTransform : ['Transform']
+    'No description'
+
+KernelGaussian : ['FitTransform']
+    'No description'
+
+MorganFP : ['Transform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+Add : ['Transform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+logd_hybrid_topo_rgp
+====================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [logd_hybrid_topo_rgp]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[CxCalcTransform: 'cx']
+        0[ExtXyzInput: 'input'] -- meta --> 1[CxCalcTransform: 'cx']
+        1[CxCalcTransform: 'cx'] -- X --> 2[KernelGaussian: 'kern_gaussian']
+        0[ExtXyzInput: 'input'] -- meta --> 2[KernelGaussian: 'kern_gaussian']
+        0[ExtXyzInput: 'input'] -- configs --> 3[MorganFP: 'desc']
+        0[ExtXyzInput: 'input'] -- meta --> 3[MorganFP: 'desc']
+        3[MorganFP: 'desc'] -- X --> 4[KernelDot: 'kern']
+        0[ExtXyzInput: 'input'] -- meta --> 4[KernelDot: 'kern']
+        2[KernelGaussian: 'kern_gaussian'] -- X --> 5[Add: 'add_k']
+        4[KernelDot: 'kern'] -- X --> 5[Add: 'add_k']
+        0[ExtXyzInput: 'input'] -- meta --> 5[Add: 'add_k']
+        2[KernelGaussian: 'kern_gaussian'] -- X --> 6[Add: 'add_k_diag']
+        4[KernelDot: 'kern'] -- X --> 6[Add: 'add_k_diag']
+        0[ExtXyzInput: 'input'] -- meta --> 6[Add: 'add_k_diag']
+        5[Add: 'add_k'] -- K --> 7[ResidualGaussianProcess: 'gp']
+        6[Add: 'add_k_diag'] -- K_diag --> 7[ResidualGaussianProcess: 'gp']
+        0[ExtXyzInput: 'input'] -- y --> 7[ResidualGaussianProcess: 'gp']
+        0[ExtXyzInput: 'input'] -- meta --> 7[ResidualGaussianProcess: 'gp']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- radius ---> 3[MorganFP: 'desc']
+        HyperParams --- scale ---> 2[KernelGaussian: 'kern_gaussian']
+        HyperParams --- alpha ---> 7[ResidualGaussianProcess: 'gp']
+        HyperParams --- coeffs ---> 5[Add: 'add_k']
+        HyperParams --- coeffs ---> 6[Add: 'add_k_diag']
+        HyperParams --- power ---> 7[ResidualGaussianProcess: 'gp']
+    end
+    subgraph Outputs [Outputs]
+        7[ResidualGaussianProcess: 'gp'] -- y --> y[y]
+        7[ResidualGaussianProcess: 'gp'] -- dy --> dy[dy]
+        7[ResidualGaussianProcess: 'gp'] -- dk --> dk[dk]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+CxCalcTransform : ['Transform']
+    'No description'
+
+KernelGaussian : ['FitTransform']
+    'No description'
+
+MorganFP : ['Transform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+Add : ['Transform']
+    'No description'
+
+Add : ['Transform']
+    'No description'
+
+ResidualGaussianProcess : ['FitTransform']
+    'No description'
+
+logd_hybrid_topo_gp
+===================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [logd_hybrid_topo_gp]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[CxCalcTransform: 'cx']
+        0[ExtXyzInput: 'input'] -- meta --> 1[CxCalcTransform: 'cx']
+        1[CxCalcTransform: 'cx'] -- X --> 2[KernelGaussian: 'kern_gaussian']
+        0[ExtXyzInput: 'input'] -- meta --> 2[KernelGaussian: 'kern_gaussian']
+        0[ExtXyzInput: 'input'] -- configs --> 3[MorganFP: 'desc']
+        0[ExtXyzInput: 'input'] -- meta --> 3[MorganFP: 'desc']
+        3[MorganFP: 'desc'] -- X --> 4[KernelDot: 'kern']
+        0[ExtXyzInput: 'input'] -- meta --> 4[KernelDot: 'kern']
+        2[KernelGaussian: 'kern_gaussian'] -- X --> 5[Add: 'add_k']
+        4[KernelDot: 'kern'] -- X --> 5[Add: 'add_k']
+        0[ExtXyzInput: 'input'] -- meta --> 5[Add: 'add_k']
+        2[KernelGaussian: 'kern_gaussian'] -- X --> 6[Add: 'add_k_diag']
+        4[KernelDot: 'kern'] -- X --> 6[Add: 'add_k_diag']
+        0[ExtXyzInput: 'input'] -- meta --> 6[Add: 'add_k_diag']
+        5[Add: 'add_k'] -- K --> 7[GaussianProcess: 'GaussianProcess']
+        6[Add: 'add_k_diag'] -- K_diag --> 7[GaussianProcess: 'GaussianProcess']
+        0[ExtXyzInput: 'input'] -- y --> 7[GaussianProcess: 'GaussianProcess']
+        0[ExtXyzInput: 'input'] -- meta --> 7[GaussianProcess: 'GaussianProcess']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- radius ---> 3[MorganFP: 'desc']
+        HyperParams --- alpha ---> 7[GaussianProcess: 'GaussianProcess']
+        HyperParams --- scale ---> 2[KernelGaussian: 'kern_gaussian']
+        HyperParams --- coeffs ---> 5[Add: 'add_k']
+        HyperParams --- coeffs ---> 6[Add: 'add_k_diag']
+        HyperParams --- power ---> 7[GaussianProcess: 'GaussianProcess']
+    end
+    subgraph Outputs [Outputs]
+        7[GaussianProcess: 'GaussianProcess'] -- y --> y[y]
+        7[GaussianProcess: 'GaussianProcess'] -- dy --> dy[dy]
+        7[GaussianProcess: 'GaussianProcess'] -- dy_rank --> dy_rank[dy_rank]
+        7[GaussianProcess: 'GaussianProcess'] -- dy_zscore --> dy_zscore[dy_zscore]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+CxCalcTransform : ['Transform']
+    'No description'
+
+KernelGaussian : ['FitTransform']
+    'No description'
+
+MorganFP : ['Transform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+Add : ['Transform']
+    'No description'
+
+Add : ['Transform']
+    'No description'
+
+GaussianProcess : ['FitTransform']
+    'No description'
+
+logd_hybrid_gylm_krr
+====================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [logd_hybrid_gylm_krr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[CxCalcTransform: 'cx']
+        0[ExtXyzInput: 'input'] -- meta --> 1[CxCalcTransform: 'cx']
+        1[CxCalcTransform: 'cx'] -- X --> 2[KernelGaussian: 'kern_gaussian']
+        0[ExtXyzInput: 'input'] -- meta --> 2[KernelGaussian: 'kern_gaussian']
+        0[ExtXyzInput: 'input'] -- configs --> 3[GylmAverage: 'desc']
+        0[ExtXyzInput: 'input'] -- meta --> 3[GylmAverage: 'desc']
+        3[GylmAverage: 'desc'] -- X --> 4[KernelDot: 'kern']
+        0[ExtXyzInput: 'input'] -- meta --> 4[KernelDot: 'kern']
+        2[KernelGaussian: 'kern_gaussian'] -- X --> 5[Add: 'Add']
+        4[KernelDot: 'kern'] -- X --> 5[Add: 'Add']
+        0[ExtXyzInput: 'input'] -- meta --> 5[Add: 'Add']
+        5[Add: 'Add'] -- K --> 6[KernelRidge: 'KernelRidge']
+        0[ExtXyzInput: 'input'] -- y --> 6[KernelRidge: 'KernelRidge']
+        0[ExtXyzInput: 'input'] -- meta --> 6[KernelRidge: 'KernelRidge']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 6[KernelRidge: 'KernelRidge']
+        HyperParams --- scale ---> 2[KernelGaussian: 'kern_gaussian']
+        HyperParams --- coeffs ---> 5[Add: 'Add']
+        HyperParams --- power ---> 4[KernelDot: 'kern']
+        HyperParams --- power ---> 6[KernelRidge: 'KernelRidge']
+    end
+    subgraph Outputs [Outputs]
+        6[KernelRidge: 'KernelRidge'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+CxCalcTransform : ['Transform']
+    'No description'
+
+KernelGaussian : ['FitTransform']
+    'No description'
+
+GylmAverage : ['GylmTransform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+Add : ['Transform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+logd_delta_gylm_krr
+===================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [logd_delta_gylm_krr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[CxCalcTransform: 'cx']
+        0[ExtXyzInput: 'input'] -- meta --> 1[CxCalcTransform: 'cx']
+        0[ExtXyzInput: 'input'] -- target --> 2[Delta: 'Delta']
+        1[CxCalcTransform: 'cx'] -- ref --> 2[Delta: 'Delta']
+        0[ExtXyzInput: 'input'] -- meta --> 2[Delta: 'Delta']
+        0[ExtXyzInput: 'input'] -- configs --> 3[GylmAverage: 'desc']
+        0[ExtXyzInput: 'input'] -- meta --> 3[GylmAverage: 'desc']
+        3[GylmAverage: 'desc'] -- X --> 4[KernelDot: 'KernelDot']
+        0[ExtXyzInput: 'input'] -- meta --> 4[KernelDot: 'KernelDot']
+        4[KernelDot: 'KernelDot'] -- K --> 5[KernelRidge: 'KernelRidge']
+        2[Delta: 'Delta'] -- y --> 5[KernelRidge: 'KernelRidge']
+        0[ExtXyzInput: 'input'] -- meta --> 5[KernelRidge: 'KernelRidge']
+        1[CxCalcTransform: 'cx'] -- X --> 6[Add: 'Add']
+        5[KernelRidge: 'KernelRidge'] -- X --> 6[Add: 'Add']
+        0[ExtXyzInput: 'input'] -- meta --> 6[Add: 'Add']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 5[KernelRidge: 'KernelRidge']
+        HyperParams --- power ---> 5[KernelRidge: 'KernelRidge']
+    end
+    subgraph Outputs [Outputs]
+        6[Add: 'Add'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+CxCalcTransform : ['Transform']
+    'No description'
+
+Delta : ['FitTransform']
+    'No description'
+
+GylmAverage : ['GylmTransform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+Add : ['Transform']
+    'No description'
+
+logd_delta_topo_krr
+===================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [logd_delta_topo_krr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[CxCalcTransform: 'cx']
+        0[ExtXyzInput: 'input'] -- meta --> 1[CxCalcTransform: 'cx']
+        0[ExtXyzInput: 'input'] -- target --> 2[Delta: 'Delta']
+        1[CxCalcTransform: 'cx'] -- ref --> 2[Delta: 'Delta']
+        0[ExtXyzInput: 'input'] -- meta --> 2[Delta: 'Delta']
+        0[ExtXyzInput: 'input'] -- configs --> 3[MorganFP: 'desc']
+        0[ExtXyzInput: 'input'] -- meta --> 3[MorganFP: 'desc']
+        3[MorganFP: 'desc'] -- X --> 4[KernelDot: 'kern']
+        0[ExtXyzInput: 'input'] -- meta --> 4[KernelDot: 'kern']
+        4[KernelDot: 'kern'] -- K --> 5[KernelRidge: 'KernelRidge']
+        2[Delta: 'Delta'] -- y --> 5[KernelRidge: 'KernelRidge']
+        0[ExtXyzInput: 'input'] -- meta --> 5[KernelRidge: 'KernelRidge']
+        1[CxCalcTransform: 'cx'] -- X --> 6[Add: 'Add']
+        5[KernelRidge: 'KernelRidge'] -- X --> 6[Add: 'Add']
+        0[ExtXyzInput: 'input'] -- meta --> 6[Add: 'Add']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- radius ---> 3[MorganFP: 'desc']
+        HyperParams --- alpha ---> 5[KernelRidge: 'KernelRidge']
+        HyperParams --- power ---> 5[KernelRidge: 'KernelRidge']
+    end
+    subgraph Outputs [Outputs]
+        6[Add: 'Add'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+CxCalcTransform : ['Transform']
+    'No description'
+
+Delta : ['FitTransform']
+    'No description'
+
+MorganFP : ['Transform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+Add : ['Transform']
+    'No description'
+

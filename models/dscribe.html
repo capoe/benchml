@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dscribe &mdash; BenchML 0.5.3 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/style.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ecfp" href="ecfp.html" />
+    <link rel="prev" title="bxtal_soap" href="bxtal_soap.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            BenchML
+              <img src="../_static/bml.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.5.3
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../use.html">User guide</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="models.html">BenchML models</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="bmol_acsf.html">bmol_acsf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bmol_cm.html">bmol_cm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bmol_ecfp.html">bmol_ecfp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bmol_ecfp_class.html">bmol_ecfp_class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bmol_gylm.html">bmol_gylm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bmol_gylm_match_class.html">bmol_gylm_match_class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bmol_mbtr.html">bmol_mbtr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bmol_pdf.html">bmol_pdf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bmol_physchem.html">bmol_physchem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bmol_physchem_class.html">bmol_physchem_class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bmol_soap.html">bmol_soap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bxtal_acsf.html">bxtal_acsf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bxtal_esm.html">bxtal_esm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bxtal_gylm.html">bxtal_gylm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bxtal_mbtr.html">bxtal_mbtr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bxtal_pdf.html">bxtal_pdf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bxtal_physchem.html">bxtal_physchem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bxtal_soap.html">bxtal_soap</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">dscribe</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cm-rr">cm_rr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#acsf-rr">acsf_rr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mbtr-rr">mbtr_rr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lmbtr-rr">lmbtr_rr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sinematrix-rr">sinematrix_rr</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ecfp.html">ecfp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gylm.html">gylm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="logd.html">logd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="logd_ai.html">logd_ai</a></li>
+<li class="toctree-l3"><a class="reference internal" href="logd_extensive.html">logd_extensive</a></li>
+<li class="toctree-l3"><a class="reference internal" href="soap.html">soap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="xy_classifiers.html">xy_classifiers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="xy_regressors.html">xy_regressors</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../dev.html">Development guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/benchml.html">Autogenerated API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">BenchML</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../use.html">User guide</a></li>
+          <li class="breadcrumb-item"><a href="models.html">Models</a></li>
+      <li class="breadcrumb-item active">dscribe</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/models/dscribe.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="dscribe">
+<h1>dscribe<a class="headerlink" href="#dscribe" title="Permalink to this heading"></a></h1>
+<section id="cm-rr">
+<h2>cm_rr<a class="headerlink" href="#cm-rr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="pipeline-graph">
+<h3>Pipeline Graph<a class="headerlink" href="#pipeline-graph" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [cm_rr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[DscribeCM: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[DscribeCM: 'descriptor']
+    1[DscribeCM: 'descriptor'] -- X --&gt; 2[ReduceMatrix: 'reduce']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceMatrix: 'reduce']
+    2[ReduceMatrix: 'reduce'] -- X --&gt; 3[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- y --&gt; 3[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[Ridge: 'predictor']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 3[Ridge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    3[Ridge: 'predictor'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="transforms">
+<h3>Transforms<a class="headerlink" href="#transforms" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>DscribeCM<span class="classifier">[‘DscribeTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceMatrix<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>Ridge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="acsf-rr">
+<h2>acsf_rr<a class="headerlink" href="#acsf-rr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id1">
+<h3>Pipeline Graph<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [acsf_rr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[DscribeACSF: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[DscribeACSF: 'descriptor']
+    1[DscribeACSF: 'descriptor'] -- X --&gt; 2[ReduceMatrix: 'reduce']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceMatrix: 'reduce']
+    2[ReduceMatrix: 'reduce'] -- X --&gt; 3[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- y --&gt; 3[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[Ridge: 'predictor']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 3[Ridge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    3[Ridge: 'predictor'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id2">
+<h3>Transforms<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>DscribeACSF<span class="classifier">[‘DscribeTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceMatrix<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>Ridge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="mbtr-rr">
+<h2>mbtr_rr<a class="headerlink" href="#mbtr-rr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id3">
+<h3>Pipeline Graph<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [mbtr_rr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[DscribeMBTR: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[DscribeMBTR: 'descriptor']
+    1[DscribeMBTR: 'descriptor'] -- X --&gt; 2[ReduceMatrix: 'reduce']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceMatrix: 'reduce']
+    2[ReduceMatrix: 'reduce'] -- X --&gt; 3[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- y --&gt; 3[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[Ridge: 'predictor']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 3[Ridge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    3[Ridge: 'predictor'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id4">
+<h3>Transforms<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>DscribeMBTR<span class="classifier">[‘DscribeTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceMatrix<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>Ridge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="lmbtr-rr">
+<h2>lmbtr_rr<a class="headerlink" href="#lmbtr-rr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id5">
+<h3>Pipeline Graph<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [lmbtr_rr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[DscribeLMBTR: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[DscribeLMBTR: 'descriptor']
+    1[DscribeLMBTR: 'descriptor'] -- X --&gt; 2[ReduceMatrix: 'reduce']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceMatrix: 'reduce']
+    2[ReduceMatrix: 'reduce'] -- X --&gt; 3[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- y --&gt; 3[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[Ridge: 'predictor']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 3[Ridge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    3[Ridge: 'predictor'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id6">
+<h3>Transforms<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>DscribeLMBTR<span class="classifier">[‘DscribeTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceMatrix<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>Ridge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="sinematrix-rr">
+<h2>sinematrix_rr<a class="headerlink" href="#sinematrix-rr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id7">
+<h3>Pipeline Graph<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [sinematrix_rr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[DscribeSineMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[DscribeSineMatrix: 'descriptor']
+    1[DscribeSineMatrix: 'descriptor'] -- X --&gt; 2[ReduceMatrix: 'reduce']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceMatrix: 'reduce']
+    2[ReduceMatrix: 'reduce'] -- X --&gt; 3[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- y --&gt; 3[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[Ridge: 'predictor']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 3[Ridge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    3[Ridge: 'predictor'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id8">
+<h3>Transforms<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>DscribeSineMatrix<span class="classifier">[‘DscribeTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceMatrix<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>Ridge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="bxtal_soap.html" class="btn btn-neutral float-left" title="bxtal_soap" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ecfp.html" class="btn btn-neutral float-right" title="ecfp" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Carl Poelking.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

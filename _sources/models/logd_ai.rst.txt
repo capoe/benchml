@@ -1,0 +1,158 @@
+=======
+logd_ai
+=======
+
+logd_ai_hybrid_topo_cxlogp_gp
+=============================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [logd_ai_hybrid_topo_cxlogp_gp]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[CxCalcTransform: 'cx']
+        0[ExtXyzInput: 'input'] -- meta --> 1[CxCalcTransform: 'cx']
+        1[CxCalcTransform: 'cx'] -- X --> 2[KernelGaussian: 'kern_gaussian']
+        0[ExtXyzInput: 'input'] -- meta --> 2[KernelGaussian: 'kern_gaussian']
+        0[ExtXyzInput: 'input'] -- configs --> 3[MorganFP: 'desc']
+        0[ExtXyzInput: 'input'] -- meta --> 3[MorganFP: 'desc']
+        3[MorganFP: 'desc'] -- X --> 4[KernelDot: 'kern']
+        0[ExtXyzInput: 'input'] -- meta --> 4[KernelDot: 'kern']
+        2[KernelGaussian: 'kern_gaussian'] -- X --> 5[Add: 'add_k']
+        4[KernelDot: 'kern'] -- X --> 5[Add: 'add_k']
+        0[ExtXyzInput: 'input'] -- meta --> 5[Add: 'add_k']
+        2[KernelGaussian: 'kern_gaussian'] -- X --> 6[Add: 'add_k_diag']
+        4[KernelDot: 'kern'] -- X --> 6[Add: 'add_k_diag']
+        0[ExtXyzInput: 'input'] -- meta --> 6[Add: 'add_k_diag']
+        5[Add: 'add_k'] -- K --> 7[GaussianProcess: 'GaussianProcess']
+        6[Add: 'add_k_diag'] -- K_diag --> 7[GaussianProcess: 'GaussianProcess']
+        0[ExtXyzInput: 'input'] -- y --> 7[GaussianProcess: 'GaussianProcess']
+        0[ExtXyzInput: 'input'] -- meta --> 7[GaussianProcess: 'GaussianProcess']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- radius ---> 3[MorganFP: 'desc']
+        HyperParams --- alpha ---> 7[GaussianProcess: 'GaussianProcess']
+        HyperParams --- scale ---> 2[KernelGaussian: 'kern_gaussian']
+        HyperParams --- coeffs ---> 5[Add: 'add_k']
+        HyperParams --- coeffs ---> 6[Add: 'add_k_diag']
+        HyperParams --- power ---> 7[GaussianProcess: 'GaussianProcess']
+    end
+    subgraph Outputs [Outputs]
+        7[GaussianProcess: 'GaussianProcess'] -- y --> y[y]
+        7[GaussianProcess: 'GaussianProcess'] -- dy --> dy[dy]
+        7[GaussianProcess: 'GaussianProcess'] -- dy_rank --> dy_rank[dy_rank]
+        7[GaussianProcess: 'GaussianProcess'] -- dy_zscore --> dy_zscore[dy_zscore]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+CxCalcTransform : ['Transform']
+    'No description'
+
+KernelGaussian : ['FitTransform']
+    'No description'
+
+MorganFP : ['Transform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+Add : ['Transform']
+    'No description'
+
+Add : ['Transform']
+    'No description'
+
+GaussianProcess : ['FitTransform']
+    'No description'
+
+logd_ai_hybrid_topo_rdlogp_gp
+=============================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [logd_ai_hybrid_topo_rdlogp_gp]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[Physchem2D: 'Physchem2D']
+        0[ExtXyzInput: 'input'] -- meta --> 1[Physchem2D: 'Physchem2D']
+        1[Physchem2D: 'Physchem2D'] -- X --> 2[KernelGaussian: 'kern_gaussian']
+        0[ExtXyzInput: 'input'] -- meta --> 2[KernelGaussian: 'kern_gaussian']
+        0[ExtXyzInput: 'input'] -- configs --> 3[MorganFP: 'desc']
+        0[ExtXyzInput: 'input'] -- meta --> 3[MorganFP: 'desc']
+        3[MorganFP: 'desc'] -- X --> 4[KernelDot: 'kern']
+        0[ExtXyzInput: 'input'] -- meta --> 4[KernelDot: 'kern']
+        2[KernelGaussian: 'kern_gaussian'] -- X --> 5[Add: 'add_k']
+        4[KernelDot: 'kern'] -- X --> 5[Add: 'add_k']
+        0[ExtXyzInput: 'input'] -- meta --> 5[Add: 'add_k']
+        2[KernelGaussian: 'kern_gaussian'] -- X --> 6[Add: 'add_k_diag']
+        4[KernelDot: 'kern'] -- X --> 6[Add: 'add_k_diag']
+        0[ExtXyzInput: 'input'] -- meta --> 6[Add: 'add_k_diag']
+        5[Add: 'add_k'] -- K --> 7[GaussianProcess: 'GaussianProcess']
+        6[Add: 'add_k_diag'] -- K_diag --> 7[GaussianProcess: 'GaussianProcess']
+        0[ExtXyzInput: 'input'] -- y --> 7[GaussianProcess: 'GaussianProcess']
+        0[ExtXyzInput: 'input'] -- meta --> 7[GaussianProcess: 'GaussianProcess']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- radius ---> 3[MorganFP: 'desc']
+        HyperParams --- alpha ---> 7[GaussianProcess: 'GaussianProcess']
+        HyperParams --- scale ---> 2[KernelGaussian: 'kern_gaussian']
+        HyperParams --- coeffs ---> 5[Add: 'add_k']
+        HyperParams --- coeffs ---> 6[Add: 'add_k_diag']
+        HyperParams --- power ---> 7[GaussianProcess: 'GaussianProcess']
+    end
+    subgraph Outputs [Outputs]
+        7[GaussianProcess: 'GaussianProcess'] -- y --> y[y]
+        7[GaussianProcess: 'GaussianProcess'] -- dy --> dy[dy]
+        7[GaussianProcess: 'GaussianProcess'] -- dy_rank --> dy_rank[dy_rank]
+        7[GaussianProcess: 'GaussianProcess'] -- dy_zscore --> dy_zscore[dy_zscore]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+Physchem2D : ['Transform']
+    'No description'
+
+KernelGaussian : ['FitTransform']
+    'No description'
+
+MorganFP : ['Transform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+Add : ['Transform']
+    'No description'
+
+Add : ['Transform']
+    'No description'
+
+GaussianProcess : ['FitTransform']
+    'No description'
+

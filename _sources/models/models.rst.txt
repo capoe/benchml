@@ -1,0 +1,35 @@
+======
+Models
+======
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Collections of BenchML models:
+
+   bmol_acsf <bmol_acsf>
+   bmol_cm <bmol_cm>
+   bmol_ecfp <bmol_ecfp>
+   bmol_ecfp_class <bmol_ecfp_class>
+   bmol_gylm <bmol_gylm>
+   bmol_gylm_match_class <bmol_gylm_match_class>
+   bmol_mbtr <bmol_mbtr>
+   bmol_pdf <bmol_pdf>
+   bmol_physchem <bmol_physchem>
+   bmol_physchem_class <bmol_physchem_class>
+   bmol_soap <bmol_soap>
+   bxtal_acsf <bxtal_acsf>
+   bxtal_esm <bxtal_esm>
+   bxtal_gylm <bxtal_gylm>
+   bxtal_mbtr <bxtal_mbtr>
+   bxtal_pdf <bxtal_pdf>
+   bxtal_physchem <bxtal_physchem>
+   bxtal_soap <bxtal_soap>
+   dscribe <dscribe>
+   ecfp <ecfp>
+   gylm <gylm>
+   logd <logd>
+   logd_ai <logd_ai>
+   logd_extensive <logd_extensive>
+   soap <soap>
+   xy_classifiers <xy_classifiers>
+   xy_regressors <xy_regressors>

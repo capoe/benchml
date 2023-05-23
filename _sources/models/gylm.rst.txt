@@ -1,0 +1,145 @@
+====
+gylm
+====
+
+gylm_average_krr
+================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [gylm_average_krr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[GylmAverage: 'desc']
+        0[ExtXyzInput: 'input'] -- meta --> 1[GylmAverage: 'desc']
+        1[GylmAverage: 'desc'] -- X --> 2[KernelDot: 'KernelDot']
+        0[ExtXyzInput: 'input'] -- meta --> 2[KernelDot: 'KernelDot']
+        2[KernelDot: 'KernelDot'] -- K --> 3[KernelRidge: 'KernelRidge']
+        0[ExtXyzInput: 'input'] -- y --> 3[KernelRidge: 'KernelRidge']
+        0[ExtXyzInput: 'input'] -- meta --> 3[KernelRidge: 'KernelRidge']
+    end
+    subgraph Hyper [BayesianHyper]
+        HyperParams --- alpha ---> 3[KernelRidge: 'KernelRidge']
+        HyperParams --- power ---> 3[KernelRidge: 'KernelRidge']
+    end
+    subgraph Outputs [Outputs]
+        3[KernelRidge: 'KernelRidge'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+GylmAverage : ['GylmTransform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+gylm_average_krr_grid
+=====================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [gylm_average_krr_grid]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[GylmAverage: 'desc']
+        0[ExtXyzInput: 'input'] -- meta --> 1[GylmAverage: 'desc']
+        1[GylmAverage: 'desc'] -- X --> 2[KernelDot: 'KernelDot']
+        0[ExtXyzInput: 'input'] -- meta --> 2[KernelDot: 'KernelDot']
+        2[KernelDot: 'KernelDot'] -- K --> 3[KernelRidge: 'KernelRidge']
+        0[ExtXyzInput: 'input'] -- y --> 3[KernelRidge: 'KernelRidge']
+        0[ExtXyzInput: 'input'] -- meta --> 3[KernelRidge: 'KernelRidge']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 3[KernelRidge: 'KernelRidge']
+        HyperParams --- power ---> 3[KernelRidge: 'KernelRidge']
+    end
+    subgraph Outputs [Outputs]
+        3[KernelRidge: 'KernelRidge'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+GylmAverage : ['GylmTransform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+gylm_smooth_match_krr
+=====================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [gylm_smooth_match_krr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[GylmAtomic: 'desc']
+        0[ExtXyzInput: 'input'] -- meta --> 1[GylmAtomic: 'desc']
+        1[GylmAtomic: 'desc'] -- X --> 2[KernelSmoothMatch: 'KernelSmoothMatch']
+        0[ExtXyzInput: 'input'] -- meta --> 2[KernelSmoothMatch: 'KernelSmoothMatch']
+        2[KernelSmoothMatch: 'KernelSmoothMatch'] -- K --> 3[KernelRidge: 'KernelRidge']
+        0[ExtXyzInput: 'input'] -- y --> 3[KernelRidge: 'KernelRidge']
+        0[ExtXyzInput: 'input'] -- meta --> 3[KernelRidge: 'KernelRidge']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 3[KernelRidge: 'KernelRidge']
+        HyperParams --- power ---> 3[KernelRidge: 'KernelRidge']
+    end
+    subgraph Outputs [Outputs]
+        3[KernelRidge: 'KernelRidge'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+GylmAtomic : ['GylmTransform']
+    'No description'
+
+KernelSmoothMatch : ['FitTransform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+

@@ -1,0 +1,7 @@
+benchml.accumulator module
+==========================
+
+.. automodule:: benchml.accumulator
+   :members:
+   :undoc-members:
+   :show-inheritance:

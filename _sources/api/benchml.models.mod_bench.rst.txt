@@ -1,0 +1,7 @@
+benchml.models.mod\_bench module
+================================
+
+.. automodule:: benchml.models.mod_bench
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,234 @@
+=======
+dscribe
+=======
+
+cm_rr
+=====
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [cm_rr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[DscribeCM: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[DscribeCM: 'descriptor']
+        1[DscribeCM: 'descriptor'] -- X --> 2[ReduceMatrix: 'reduce']
+        0[ExtXyzInput: 'input'] -- meta --> 2[ReduceMatrix: 'reduce']
+        2[ReduceMatrix: 'reduce'] -- X --> 3[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 3[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 3[Ridge: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 3[Ridge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        3[Ridge: 'predictor'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+DscribeCM : ['DscribeTransform']
+    'No description'
+
+ReduceMatrix : ['Transform']
+    'No description'
+
+Ridge : ['SklearnTransform']
+    'No description'
+
+acsf_rr
+=======
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [acsf_rr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[DscribeACSF: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[DscribeACSF: 'descriptor']
+        1[DscribeACSF: 'descriptor'] -- X --> 2[ReduceMatrix: 'reduce']
+        0[ExtXyzInput: 'input'] -- meta --> 2[ReduceMatrix: 'reduce']
+        2[ReduceMatrix: 'reduce'] -- X --> 3[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 3[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 3[Ridge: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 3[Ridge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        3[Ridge: 'predictor'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+DscribeACSF : ['DscribeTransform']
+    'No description'
+
+ReduceMatrix : ['Transform']
+    'No description'
+
+Ridge : ['SklearnTransform']
+    'No description'
+
+mbtr_rr
+=======
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [mbtr_rr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[DscribeMBTR: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[DscribeMBTR: 'descriptor']
+        1[DscribeMBTR: 'descriptor'] -- X --> 2[ReduceMatrix: 'reduce']
+        0[ExtXyzInput: 'input'] -- meta --> 2[ReduceMatrix: 'reduce']
+        2[ReduceMatrix: 'reduce'] -- X --> 3[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 3[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 3[Ridge: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 3[Ridge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        3[Ridge: 'predictor'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+DscribeMBTR : ['DscribeTransform']
+    'No description'
+
+ReduceMatrix : ['Transform']
+    'No description'
+
+Ridge : ['SklearnTransform']
+    'No description'
+
+lmbtr_rr
+========
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [lmbtr_rr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[DscribeLMBTR: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[DscribeLMBTR: 'descriptor']
+        1[DscribeLMBTR: 'descriptor'] -- X --> 2[ReduceMatrix: 'reduce']
+        0[ExtXyzInput: 'input'] -- meta --> 2[ReduceMatrix: 'reduce']
+        2[ReduceMatrix: 'reduce'] -- X --> 3[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 3[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 3[Ridge: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 3[Ridge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        3[Ridge: 'predictor'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+DscribeLMBTR : ['DscribeTransform']
+    'No description'
+
+ReduceMatrix : ['Transform']
+    'No description'
+
+Ridge : ['SklearnTransform']
+    'No description'
+
+sinematrix_rr
+=============
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [sinematrix_rr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[DscribeSineMatrix: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[DscribeSineMatrix: 'descriptor']
+        1[DscribeSineMatrix: 'descriptor'] -- X --> 2[ReduceMatrix: 'reduce']
+        0[ExtXyzInput: 'input'] -- meta --> 2[ReduceMatrix: 'reduce']
+        2[ReduceMatrix: 'reduce'] -- X --> 3[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 3[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 3[Ridge: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 3[Ridge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        3[Ridge: 'predictor'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+DscribeSineMatrix : ['DscribeTransform']
+    'No description'
+
+ReduceMatrix : ['Transform']
+    'No description'
+
+Ridge : ['SklearnTransform']
+    'No description'
+

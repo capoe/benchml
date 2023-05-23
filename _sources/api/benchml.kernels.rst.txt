@@ -1,0 +1,18 @@
+benchml.kernels package
+=======================
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   benchml.kernels.kern_basic
+
+Module contents
+---------------
+
+.. automodule:: benchml.kernels
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,18 @@
+benchml.descriptors package
+===========================
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   benchml.descriptors.descr_basic
+
+Module contents
+---------------
+
+.. automodule:: benchml.descriptors
+   :members:
+   :undoc-members:
+   :show-inheritance:

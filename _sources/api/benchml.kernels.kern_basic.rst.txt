@@ -1,0 +1,7 @@
+benchml.kernels.kern\_basic module
+==================================
+
+.. automodule:: benchml.kernels.kern_basic
+   :members:
+   :undoc-members:
+   :show-inheritance:

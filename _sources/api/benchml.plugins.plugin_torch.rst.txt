@@ -1,0 +1,7 @@
+benchml.plugins.plugin\_torch module
+====================================
+
+.. automodule:: benchml.plugins.plugin_torch
+   :members:
+   :undoc-members:
+   :show-inheritance:

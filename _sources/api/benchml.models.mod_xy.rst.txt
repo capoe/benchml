@@ -1,0 +1,7 @@
+benchml.models.mod\_xy module
+=============================
+
+.. automodule:: benchml.models.mod_xy
+   :members:
+   :undoc-members:
+   :show-inheritance:

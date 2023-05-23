@@ -1,0 +1,7 @@
+benchml.basic module
+====================
+
+.. automodule:: benchml.basic
+   :members:
+   :undoc-members:
+   :show-inheritance:

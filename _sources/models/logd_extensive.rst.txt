@@ -1,0 +1,168 @@
+==============
+logd_extensive
+==============
+
+logd_gylm_minimal_rr
+====================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [logd_gylm_minimal_rr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[GylmAtomic: 'descriptor_atomic']
+        0[ExtXyzInput: 'input'] -- meta --> 1[GylmAtomic: 'descriptor_atomic']
+        1[GylmAtomic: 'descriptor_atomic'] -- X --> 2[ReduceTypedMatrix: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 2[ReduceTypedMatrix: 'descriptor']
+        2[ReduceTypedMatrix: 'descriptor'] -- X --> 3[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- meta --> 3[WhitenMatrix: 'whiten']
+        3[WhitenMatrix: 'whiten'] -- X --> 4[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 4[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 4[Ridge: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 4[Ridge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        4[Ridge: 'predictor'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+GylmAtomic : ['GylmTransform']
+    'No description'
+
+ReduceTypedMatrix : ['FitTransform']
+    'No description'
+
+WhitenMatrix : ['FitTransform']
+    'No description'
+
+Ridge : ['SklearnTransform']
+    'No description'
+
+logd_gylm_hybrid_rr
+===================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [logd_gylm_hybrid_rr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[GylmAtomic: 'descriptor_atomic']
+        0[ExtXyzInput: 'input'] -- meta --> 1[GylmAtomic: 'descriptor_atomic']
+        1[GylmAtomic: 'descriptor_atomic'] -- X --> 2[ReduceTypedMatrix: 'descriptor_struct']
+        0[ExtXyzInput: 'input'] -- meta --> 2[ReduceTypedMatrix: 'descriptor_struct']
+        0[ExtXyzInput: 'input'] -- configs --> 3[CxCalcTransform: 'cx']
+        0[ExtXyzInput: 'input'] -- meta --> 3[CxCalcTransform: 'cx']
+        2[ReduceTypedMatrix: 'descriptor_struct'] -- X --> 4[Concatenate: 'descriptor']
+        3[CxCalcTransform: 'cx'] -- X --> 4[Concatenate: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 4[Concatenate: 'descriptor']
+        4[Concatenate: 'descriptor'] -- X --> 5[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- meta --> 5[WhitenMatrix: 'whiten']
+        5[WhitenMatrix: 'whiten'] -- X --> 6[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 6[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 6[Ridge: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 6[Ridge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        6[Ridge: 'predictor'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+GylmAtomic : ['GylmTransform']
+    'No description'
+
+ReduceTypedMatrix : ['FitTransform']
+    'No description'
+
+CxCalcTransform : ['Transform']
+    'No description'
+
+Concatenate : ['Transform']
+    'No description'
+
+WhitenMatrix : ['FitTransform']
+    'No description'
+
+Ridge : ['SklearnTransform']
+    'No description'
+
+logd_gylm_extended_rr
+=====================
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [logd_gylm_extended_rr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[GylmAtomic: 'descriptor_atomic']
+        0[ExtXyzInput: 'input'] -- meta --> 1[GylmAtomic: 'descriptor_atomic']
+        1[GylmAtomic: 'descriptor_atomic'] -- X --> 2[ReduceTypedMatrix: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 2[ReduceTypedMatrix: 'descriptor']
+        2[ReduceTypedMatrix: 'descriptor'] -- X --> 3[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- meta --> 3[WhitenMatrix: 'whiten']
+        3[WhitenMatrix: 'whiten'] -- X --> 4[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 4[Ridge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 4[Ridge: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 4[Ridge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        4[Ridge: 'predictor'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+GylmAtomic : ['GylmTransform']
+    'No description'
+
+ReduceTypedMatrix : ['FitTransform']
+    'No description'
+
+WhitenMatrix : ['FitTransform']
+    'No description'
+
+Ridge : ['SklearnTransform']
+    'No description'
+

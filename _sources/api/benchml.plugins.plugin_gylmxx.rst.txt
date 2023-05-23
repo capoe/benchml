@@ -1,0 +1,7 @@
+benchml.plugins.plugin\_gylmxx module
+=====================================
+
+.. automodule:: benchml.plugins.plugin_gylmxx
+   :members:
+   :undoc-members:
+   :show-inheritance:

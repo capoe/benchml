@@ -1,0 +1,7 @@
+benchml.ensemble module
+=======================
+
+.. automodule:: benchml.ensemble
+   :members:
+   :undoc-members:
+   :show-inheritance:

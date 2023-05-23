@@ -1,0 +1,7 @@
+benchml.ptable module
+=====================
+
+.. automodule:: benchml.ptable
+   :members:
+   :undoc-members:
+   :show-inheritance:

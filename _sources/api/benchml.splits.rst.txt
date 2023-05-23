@@ -1,0 +1,7 @@
+benchml.splits module
+=====================
+
+.. automodule:: benchml.splits
+   :members:
+   :undoc-members:
+   :show-inheritance:

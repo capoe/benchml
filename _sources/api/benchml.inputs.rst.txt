@@ -1,0 +1,7 @@
+benchml.inputs module
+=====================
+
+.. automodule:: benchml.inputs
+   :members:
+   :undoc-members:
+   :show-inheritance:

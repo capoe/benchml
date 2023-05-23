@@ -1,0 +1,218 @@
+====
+ecfp
+====
+
+morgan_krr
+==========
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [morgan_krr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[MorganFP: 'desc']
+        0[ExtXyzInput: 'input'] -- meta --> 1[MorganFP: 'desc']
+        1[MorganFP: 'desc'] -- X --> 2[KernelDot: 'kern']
+        0[ExtXyzInput: 'input'] -- meta --> 2[KernelDot: 'kern']
+        2[KernelDot: 'kern'] -- K --> 3[KernelRidge: 'KernelRidge']
+        0[ExtXyzInput: 'input'] -- y --> 3[KernelRidge: 'KernelRidge']
+        0[ExtXyzInput: 'input'] -- meta --> 3[KernelRidge: 'KernelRidge']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 3[KernelRidge: 'KernelRidge']
+        HyperParams --- power ---> 3[KernelRidge: 'KernelRidge']
+    end
+    subgraph Outputs [Outputs]
+        3[KernelRidge: 'KernelRidge'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+MorganFP : ['Transform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+morgan_krr_ext
+==============
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [morgan_krr_ext]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[MorganFP: 'desc']
+        0[ExtXyzInput: 'input'] -- meta --> 1[MorganFP: 'desc']
+        1[MorganFP: 'desc'] -- X --> 2[KernelDot: 'kern']
+        0[ExtXyzInput: 'input'] -- meta --> 2[KernelDot: 'kern']
+        2[KernelDot: 'kern'] -- K --> 3[KernelRidge: 'KernelRidge']
+        0[ExtXyzInput: 'input'] -- y --> 3[KernelRidge: 'KernelRidge']
+        0[ExtXyzInput: 'input'] -- meta --> 3[KernelRidge: 'KernelRidge']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- radius ---> 1[MorganFP: 'desc']
+        HyperParams --- alpha ---> 3[KernelRidge: 'KernelRidge']
+        HyperParams --- power ---> 3[KernelRidge: 'KernelRidge']
+    end
+    subgraph Outputs [Outputs]
+        3[KernelRidge: 'KernelRidge'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+MorganFP : ['Transform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+morgan_rr
+=========
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [morgan_rr]
+        0[ExtXyzInput: 'input'] -- configs --> 1[MorganFP: 'MorganFP']
+        1[MorganFP: 'MorganFP'] -- X --> 2[Ridge: 'Ridge']
+        0[ExtXyzInput: 'input'] -- y --> 2[Ridge: 'Ridge']
+    end
+    subgraph Hyper [BayesianHyper]
+        HyperParams --- alpha ---> 2[Ridge: 'Ridge']
+    end
+    subgraph Outputs [Outputs]
+        2[Ridge: 'Ridge'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+MorganFP : ['Transform']
+    'No description'
+
+Ridge : ['SklearnTransform']
+    'No description'
+
+morgan_gb
+=========
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [morgan_gb]
+        0[ExtXyzInput: 'input'] -- configs --> 1[MorganFP: 'MorganFP']
+        1[MorganFP: 'MorganFP'] -- X --> 2[GradientBoosting: 'GradientBoosting']
+        0[ExtXyzInput: 'input'] -- y --> 2[GradientBoosting: 'GradientBoosting']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- max_depth ---> 2[GradientBoosting: 'GradientBoosting']
+    end
+    subgraph Outputs [Outputs]
+        2[GradientBoosting: 'GradientBoosting'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+MorganFP : ['Transform']
+    'No description'
+
+GradientBoosting : ['SklearnTransform']
+    'No description'
+
+morgan_rfr
+==========
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [morgan_rfr]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[MorganFP: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[MorganFP: 'descriptor']
+        1[MorganFP: 'descriptor'] -- X --> 2[RandomForestRegressor: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 2[RandomForestRegressor: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 2[RandomForestRegressor: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- length ---> 1[MorganFP: 'descriptor']
+        HyperParams --- radius ---> 1[MorganFP: 'descriptor']
+        HyperParams --- max_depth ---> 2[RandomForestRegressor: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        2[RandomForestRegressor: 'predictor'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+MorganFP : ['Transform']
+    'No description'
+
+RandomForestRegressor : ['SklearnTransform']
+    'No description'
+

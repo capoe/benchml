@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>bxtal_soap &mdash; BenchML 0.5.3 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/style.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="dscribe" href="dscribe.html" />
+    <link rel="prev" title="bxtal_physchem" href="bxtal_physchem.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            BenchML
+              <img src="../_static/bml.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.5.3
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../use.html">User guide</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="models.html">BenchML models</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="bmol_acsf.html">bmol_acsf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bmol_cm.html">bmol_cm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bmol_ecfp.html">bmol_ecfp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bmol_ecfp_class.html">bmol_ecfp_class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bmol_gylm.html">bmol_gylm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bmol_gylm_match_class.html">bmol_gylm_match_class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bmol_mbtr.html">bmol_mbtr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bmol_pdf.html">bmol_pdf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bmol_physchem.html">bmol_physchem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bmol_physchem_class.html">bmol_physchem_class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bmol_soap.html">bmol_soap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bxtal_acsf.html">bxtal_acsf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bxtal_esm.html">bxtal_esm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bxtal_gylm.html">bxtal_gylm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bxtal_mbtr.html">bxtal_mbtr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bxtal_pdf.html">bxtal_pdf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bxtal_physchem.html">bxtal_physchem</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">bxtal_soap</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-minimal-nocross-int-krr">bxtal_soap_minimal_nocross_int_krr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-minimal-cross-int-krr">bxtal_soap_minimal_cross_int_krr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-smart-nocross-int-krr">bxtal_soap_smart_nocross_int_krr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-smart-cross-int-krr">bxtal_soap_smart_cross_int_krr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-longrange-nocross-int-krr">bxtal_soap_longrange_nocross_int_krr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-longrange-cross-int-krr">bxtal_soap_longrange_cross_int_krr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-minimal-nocross-ext-krr">bxtal_soap_minimal_nocross_ext_krr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-minimal-cross-ext-krr">bxtal_soap_minimal_cross_ext_krr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-smart-nocross-ext-krr">bxtal_soap_smart_nocross_ext_krr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-smart-cross-ext-krr">bxtal_soap_smart_cross_ext_krr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-longrange-nocross-ext-krr">bxtal_soap_longrange_nocross_ext_krr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-longrange-cross-ext-krr">bxtal_soap_longrange_cross_ext_krr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-minimal-nocross-int-rr">bxtal_soap_minimal_nocross_int_rr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-minimal-cross-int-rr">bxtal_soap_minimal_cross_int_rr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-smart-nocross-int-rr">bxtal_soap_smart_nocross_int_rr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-smart-cross-int-rr">bxtal_soap_smart_cross_int_rr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-longrange-nocross-int-rr">bxtal_soap_longrange_nocross_int_rr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-longrange-cross-int-rr">bxtal_soap_longrange_cross_int_rr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-minimal-nocross-ext-rr">bxtal_soap_minimal_nocross_ext_rr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-minimal-cross-ext-rr">bxtal_soap_minimal_cross_ext_rr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-smart-nocross-ext-rr">bxtal_soap_smart_nocross_ext_rr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-smart-cross-ext-rr">bxtal_soap_smart_cross_ext_rr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-longrange-nocross-ext-rr">bxtal_soap_longrange_nocross_ext_rr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bxtal-soap-longrange-cross-ext-rr">bxtal_soap_longrange_cross_ext_rr</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="dscribe.html">dscribe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ecfp.html">ecfp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gylm.html">gylm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="logd.html">logd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="logd_ai.html">logd_ai</a></li>
+<li class="toctree-l3"><a class="reference internal" href="logd_extensive.html">logd_extensive</a></li>
+<li class="toctree-l3"><a class="reference internal" href="soap.html">soap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="xy_classifiers.html">xy_classifiers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="xy_regressors.html">xy_regressors</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../dev.html">Development guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/benchml.html">Autogenerated API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">BenchML</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../use.html">User guide</a></li>
+          <li class="breadcrumb-item"><a href="models.html">Models</a></li>
+      <li class="breadcrumb-item active">bxtal_soap</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/models/bxtal_soap.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="bxtal-soap">
+<h1>bxtal_soap<a class="headerlink" href="#bxtal-soap" title="Permalink to this heading"></a></h1>
+<section id="bxtal-soap-minimal-nocross-int-krr">
+<h2>bxtal_soap_minimal_nocross_int_krr<a class="headerlink" href="#bxtal-soap-minimal-nocross-int-krr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="pipeline-graph">
+<h3>Pipeline Graph<a class="headerlink" href="#pipeline-graph" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_minimal_nocross_int_krr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 5[DoDivideBySize: 'input_norm']
+    4[KernelDot: 'kernel'] -- K --&gt; 6[KernelRidge: 'predictor']
+    5[DoDivideBySize: 'input_norm'] -- y --&gt; 6[KernelRidge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[KernelRidge: 'predictor']
+    6[KernelRidge: 'predictor'] -- y --&gt; 7[UndoDivideBySize: 'output']
+    5[DoDivideBySize: 'input_norm'] -- sizes --&gt; 7[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 7[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 6[KernelRidge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    7[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="transforms">
+<h3>Transforms<a class="headerlink" href="#transforms" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelDot<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelRidge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-minimal-cross-int-krr">
+<h2>bxtal_soap_minimal_cross_int_krr<a class="headerlink" href="#bxtal-soap-minimal-cross-int-krr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id1">
+<h3>Pipeline Graph<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_minimal_cross_int_krr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 5[DoDivideBySize: 'input_norm']
+    4[KernelDot: 'kernel'] -- K --&gt; 6[KernelRidge: 'predictor']
+    5[DoDivideBySize: 'input_norm'] -- y --&gt; 6[KernelRidge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[KernelRidge: 'predictor']
+    6[KernelRidge: 'predictor'] -- y --&gt; 7[UndoDivideBySize: 'output']
+    5[DoDivideBySize: 'input_norm'] -- sizes --&gt; 7[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 7[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 6[KernelRidge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    7[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id2">
+<h3>Transforms<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelDot<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelRidge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-smart-nocross-int-krr">
+<h2>bxtal_soap_smart_nocross_int_krr<a class="headerlink" href="#bxtal-soap-smart-nocross-int-krr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id3">
+<h3>Pipeline Graph<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_smart_nocross_int_krr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 5[DoDivideBySize: 'input_norm']
+    4[KernelDot: 'kernel'] -- K --&gt; 6[KernelRidge: 'predictor']
+    5[DoDivideBySize: 'input_norm'] -- y --&gt; 6[KernelRidge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[KernelRidge: 'predictor']
+    6[KernelRidge: 'predictor'] -- y --&gt; 7[UndoDivideBySize: 'output']
+    5[DoDivideBySize: 'input_norm'] -- sizes --&gt; 7[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 7[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 6[KernelRidge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    7[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id4">
+<h3>Transforms<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelDot<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelRidge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-smart-cross-int-krr">
+<h2>bxtal_soap_smart_cross_int_krr<a class="headerlink" href="#bxtal-soap-smart-cross-int-krr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id5">
+<h3>Pipeline Graph<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_smart_cross_int_krr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 5[DoDivideBySize: 'input_norm']
+    4[KernelDot: 'kernel'] -- K --&gt; 6[KernelRidge: 'predictor']
+    5[DoDivideBySize: 'input_norm'] -- y --&gt; 6[KernelRidge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[KernelRidge: 'predictor']
+    6[KernelRidge: 'predictor'] -- y --&gt; 7[UndoDivideBySize: 'output']
+    5[DoDivideBySize: 'input_norm'] -- sizes --&gt; 7[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 7[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 6[KernelRidge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    7[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id6">
+<h3>Transforms<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelDot<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelRidge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-longrange-nocross-int-krr">
+<h2>bxtal_soap_longrange_nocross_int_krr<a class="headerlink" href="#bxtal-soap-longrange-nocross-int-krr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id7">
+<h3>Pipeline Graph<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_longrange_nocross_int_krr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 5[DoDivideBySize: 'input_norm']
+    4[KernelDot: 'kernel'] -- K --&gt; 6[KernelRidge: 'predictor']
+    5[DoDivideBySize: 'input_norm'] -- y --&gt; 6[KernelRidge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[KernelRidge: 'predictor']
+    6[KernelRidge: 'predictor'] -- y --&gt; 7[UndoDivideBySize: 'output']
+    5[DoDivideBySize: 'input_norm'] -- sizes --&gt; 7[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 7[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 6[KernelRidge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    7[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id8">
+<h3>Transforms<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelDot<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelRidge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-longrange-cross-int-krr">
+<h2>bxtal_soap_longrange_cross_int_krr<a class="headerlink" href="#bxtal-soap-longrange-cross-int-krr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id9">
+<h3>Pipeline Graph<a class="headerlink" href="#id9" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_longrange_cross_int_krr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 5[DoDivideBySize: 'input_norm']
+    4[KernelDot: 'kernel'] -- K --&gt; 6[KernelRidge: 'predictor']
+    5[DoDivideBySize: 'input_norm'] -- y --&gt; 6[KernelRidge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[KernelRidge: 'predictor']
+    6[KernelRidge: 'predictor'] -- y --&gt; 7[UndoDivideBySize: 'output']
+    5[DoDivideBySize: 'input_norm'] -- sizes --&gt; 7[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 7[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 6[KernelRidge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    7[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id10">
+<h3>Transforms<a class="headerlink" href="#id10" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelDot<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelRidge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-minimal-nocross-ext-krr">
+<h2>bxtal_soap_minimal_nocross_ext_krr<a class="headerlink" href="#bxtal-soap-minimal-nocross-ext-krr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id11">
+<h3>Pipeline Graph<a class="headerlink" href="#id11" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_minimal_nocross_ext_krr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 5[DoDivideBySize: 'input_norm']
+    4[KernelDot: 'kernel'] -- K --&gt; 6[KernelRidge: 'predictor']
+    5[DoDivideBySize: 'input_norm'] -- y --&gt; 6[KernelRidge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[KernelRidge: 'predictor']
+    6[KernelRidge: 'predictor'] -- y --&gt; 7[UndoDivideBySize: 'output']
+    5[DoDivideBySize: 'input_norm'] -- sizes --&gt; 7[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 7[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 6[KernelRidge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    7[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id12">
+<h3>Transforms<a class="headerlink" href="#id12" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelDot<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelRidge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-minimal-cross-ext-krr">
+<h2>bxtal_soap_minimal_cross_ext_krr<a class="headerlink" href="#bxtal-soap-minimal-cross-ext-krr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id13">
+<h3>Pipeline Graph<a class="headerlink" href="#id13" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_minimal_cross_ext_krr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 5[DoDivideBySize: 'input_norm']
+    4[KernelDot: 'kernel'] -- K --&gt; 6[KernelRidge: 'predictor']
+    5[DoDivideBySize: 'input_norm'] -- y --&gt; 6[KernelRidge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[KernelRidge: 'predictor']
+    6[KernelRidge: 'predictor'] -- y --&gt; 7[UndoDivideBySize: 'output']
+    5[DoDivideBySize: 'input_norm'] -- sizes --&gt; 7[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 7[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 6[KernelRidge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    7[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id14">
+<h3>Transforms<a class="headerlink" href="#id14" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelDot<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelRidge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-smart-nocross-ext-krr">
+<h2>bxtal_soap_smart_nocross_ext_krr<a class="headerlink" href="#bxtal-soap-smart-nocross-ext-krr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id15">
+<h3>Pipeline Graph<a class="headerlink" href="#id15" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_smart_nocross_ext_krr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 5[DoDivideBySize: 'input_norm']
+    4[KernelDot: 'kernel'] -- K --&gt; 6[KernelRidge: 'predictor']
+    5[DoDivideBySize: 'input_norm'] -- y --&gt; 6[KernelRidge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[KernelRidge: 'predictor']
+    6[KernelRidge: 'predictor'] -- y --&gt; 7[UndoDivideBySize: 'output']
+    5[DoDivideBySize: 'input_norm'] -- sizes --&gt; 7[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 7[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 6[KernelRidge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    7[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id16">
+<h3>Transforms<a class="headerlink" href="#id16" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelDot<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelRidge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-smart-cross-ext-krr">
+<h2>bxtal_soap_smart_cross_ext_krr<a class="headerlink" href="#bxtal-soap-smart-cross-ext-krr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id17">
+<h3>Pipeline Graph<a class="headerlink" href="#id17" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_smart_cross_ext_krr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 5[DoDivideBySize: 'input_norm']
+    4[KernelDot: 'kernel'] -- K --&gt; 6[KernelRidge: 'predictor']
+    5[DoDivideBySize: 'input_norm'] -- y --&gt; 6[KernelRidge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[KernelRidge: 'predictor']
+    6[KernelRidge: 'predictor'] -- y --&gt; 7[UndoDivideBySize: 'output']
+    5[DoDivideBySize: 'input_norm'] -- sizes --&gt; 7[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 7[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 6[KernelRidge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    7[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id18">
+<h3>Transforms<a class="headerlink" href="#id18" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelDot<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelRidge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-longrange-nocross-ext-krr">
+<h2>bxtal_soap_longrange_nocross_ext_krr<a class="headerlink" href="#bxtal-soap-longrange-nocross-ext-krr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id19">
+<h3>Pipeline Graph<a class="headerlink" href="#id19" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_longrange_nocross_ext_krr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 5[DoDivideBySize: 'input_norm']
+    4[KernelDot: 'kernel'] -- K --&gt; 6[KernelRidge: 'predictor']
+    5[DoDivideBySize: 'input_norm'] -- y --&gt; 6[KernelRidge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[KernelRidge: 'predictor']
+    6[KernelRidge: 'predictor'] -- y --&gt; 7[UndoDivideBySize: 'output']
+    5[DoDivideBySize: 'input_norm'] -- sizes --&gt; 7[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 7[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 6[KernelRidge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    7[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id20">
+<h3>Transforms<a class="headerlink" href="#id20" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelDot<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelRidge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-longrange-cross-ext-krr">
+<h2>bxtal_soap_longrange_cross_ext_krr<a class="headerlink" href="#bxtal-soap-longrange-cross-ext-krr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id21">
+<h3>Pipeline Graph<a class="headerlink" href="#id21" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_longrange_cross_ext_krr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[KernelDot: 'kernel']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 5[DoDivideBySize: 'input_norm']
+    4[KernelDot: 'kernel'] -- K --&gt; 6[KernelRidge: 'predictor']
+    5[DoDivideBySize: 'input_norm'] -- y --&gt; 6[KernelRidge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[KernelRidge: 'predictor']
+    6[KernelRidge: 'predictor'] -- y --&gt; 7[UndoDivideBySize: 'output']
+    5[DoDivideBySize: 'input_norm'] -- sizes --&gt; 7[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 7[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 6[KernelRidge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    7[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id22">
+<h3>Transforms<a class="headerlink" href="#id22" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelDot<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>KernelRidge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-minimal-nocross-int-rr">
+<h2>bxtal_soap_minimal_nocross_int_rr<a class="headerlink" href="#bxtal-soap-minimal-nocross-int-rr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id23">
+<h3>Pipeline Graph<a class="headerlink" href="#id23" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_minimal_nocross_int_rr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 4[DoDivideBySize: 'input_norm']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 5[Ridge: 'predictor']
+    4[DoDivideBySize: 'input_norm'] -- y --&gt; 5[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[Ridge: 'predictor']
+    5[Ridge: 'predictor'] -- y --&gt; 6[UndoDivideBySize: 'output']
+    4[DoDivideBySize: 'input_norm'] -- sizes --&gt; 6[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 5[Ridge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    6[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id24">
+<h3>Transforms<a class="headerlink" href="#id24" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>Ridge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-minimal-cross-int-rr">
+<h2>bxtal_soap_minimal_cross_int_rr<a class="headerlink" href="#bxtal-soap-minimal-cross-int-rr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id25">
+<h3>Pipeline Graph<a class="headerlink" href="#id25" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_minimal_cross_int_rr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 4[DoDivideBySize: 'input_norm']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 5[Ridge: 'predictor']
+    4[DoDivideBySize: 'input_norm'] -- y --&gt; 5[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[Ridge: 'predictor']
+    5[Ridge: 'predictor'] -- y --&gt; 6[UndoDivideBySize: 'output']
+    4[DoDivideBySize: 'input_norm'] -- sizes --&gt; 6[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 5[Ridge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    6[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id26">
+<h3>Transforms<a class="headerlink" href="#id26" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>Ridge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-smart-nocross-int-rr">
+<h2>bxtal_soap_smart_nocross_int_rr<a class="headerlink" href="#bxtal-soap-smart-nocross-int-rr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id27">
+<h3>Pipeline Graph<a class="headerlink" href="#id27" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_smart_nocross_int_rr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 4[DoDivideBySize: 'input_norm']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 5[Ridge: 'predictor']
+    4[DoDivideBySize: 'input_norm'] -- y --&gt; 5[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[Ridge: 'predictor']
+    5[Ridge: 'predictor'] -- y --&gt; 6[UndoDivideBySize: 'output']
+    4[DoDivideBySize: 'input_norm'] -- sizes --&gt; 6[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 5[Ridge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    6[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id28">
+<h3>Transforms<a class="headerlink" href="#id28" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>Ridge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-smart-cross-int-rr">
+<h2>bxtal_soap_smart_cross_int_rr<a class="headerlink" href="#bxtal-soap-smart-cross-int-rr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id29">
+<h3>Pipeline Graph<a class="headerlink" href="#id29" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_smart_cross_int_rr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 4[DoDivideBySize: 'input_norm']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 5[Ridge: 'predictor']
+    4[DoDivideBySize: 'input_norm'] -- y --&gt; 5[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[Ridge: 'predictor']
+    5[Ridge: 'predictor'] -- y --&gt; 6[UndoDivideBySize: 'output']
+    4[DoDivideBySize: 'input_norm'] -- sizes --&gt; 6[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 5[Ridge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    6[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id30">
+<h3>Transforms<a class="headerlink" href="#id30" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>Ridge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-longrange-nocross-int-rr">
+<h2>bxtal_soap_longrange_nocross_int_rr<a class="headerlink" href="#bxtal-soap-longrange-nocross-int-rr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id31">
+<h3>Pipeline Graph<a class="headerlink" href="#id31" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_longrange_nocross_int_rr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 4[DoDivideBySize: 'input_norm']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 5[Ridge: 'predictor']
+    4[DoDivideBySize: 'input_norm'] -- y --&gt; 5[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[Ridge: 'predictor']
+    5[Ridge: 'predictor'] -- y --&gt; 6[UndoDivideBySize: 'output']
+    4[DoDivideBySize: 'input_norm'] -- sizes --&gt; 6[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 5[Ridge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    6[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id32">
+<h3>Transforms<a class="headerlink" href="#id32" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>Ridge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-longrange-cross-int-rr">
+<h2>bxtal_soap_longrange_cross_int_rr<a class="headerlink" href="#bxtal-soap-longrange-cross-int-rr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id33">
+<h3>Pipeline Graph<a class="headerlink" href="#id33" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_longrange_cross_int_rr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 4[DoDivideBySize: 'input_norm']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 5[Ridge: 'predictor']
+    4[DoDivideBySize: 'input_norm'] -- y --&gt; 5[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[Ridge: 'predictor']
+    5[Ridge: 'predictor'] -- y --&gt; 6[UndoDivideBySize: 'output']
+    4[DoDivideBySize: 'input_norm'] -- sizes --&gt; 6[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 5[Ridge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    6[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id34">
+<h3>Transforms<a class="headerlink" href="#id34" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>Ridge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-minimal-nocross-ext-rr">
+<h2>bxtal_soap_minimal_nocross_ext_rr<a class="headerlink" href="#bxtal-soap-minimal-nocross-ext-rr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id35">
+<h3>Pipeline Graph<a class="headerlink" href="#id35" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_minimal_nocross_ext_rr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 4[DoDivideBySize: 'input_norm']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 5[Ridge: 'predictor']
+    4[DoDivideBySize: 'input_norm'] -- y --&gt; 5[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[Ridge: 'predictor']
+    5[Ridge: 'predictor'] -- y --&gt; 6[UndoDivideBySize: 'output']
+    4[DoDivideBySize: 'input_norm'] -- sizes --&gt; 6[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 5[Ridge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    6[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id36">
+<h3>Transforms<a class="headerlink" href="#id36" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>Ridge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-minimal-cross-ext-rr">
+<h2>bxtal_soap_minimal_cross_ext_rr<a class="headerlink" href="#bxtal-soap-minimal-cross-ext-rr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id37">
+<h3>Pipeline Graph<a class="headerlink" href="#id37" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_minimal_cross_ext_rr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 4[DoDivideBySize: 'input_norm']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 5[Ridge: 'predictor']
+    4[DoDivideBySize: 'input_norm'] -- y --&gt; 5[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[Ridge: 'predictor']
+    5[Ridge: 'predictor'] -- y --&gt; 6[UndoDivideBySize: 'output']
+    4[DoDivideBySize: 'input_norm'] -- sizes --&gt; 6[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 5[Ridge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    6[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id38">
+<h3>Transforms<a class="headerlink" href="#id38" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>Ridge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-smart-nocross-ext-rr">
+<h2>bxtal_soap_smart_nocross_ext_rr<a class="headerlink" href="#bxtal-soap-smart-nocross-ext-rr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id39">
+<h3>Pipeline Graph<a class="headerlink" href="#id39" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_smart_nocross_ext_rr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 4[DoDivideBySize: 'input_norm']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 5[Ridge: 'predictor']
+    4[DoDivideBySize: 'input_norm'] -- y --&gt; 5[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[Ridge: 'predictor']
+    5[Ridge: 'predictor'] -- y --&gt; 6[UndoDivideBySize: 'output']
+    4[DoDivideBySize: 'input_norm'] -- sizes --&gt; 6[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 5[Ridge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    6[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id40">
+<h3>Transforms<a class="headerlink" href="#id40" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>Ridge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-smart-cross-ext-rr">
+<h2>bxtal_soap_smart_cross_ext_rr<a class="headerlink" href="#bxtal-soap-smart-cross-ext-rr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id41">
+<h3>Pipeline Graph<a class="headerlink" href="#id41" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_smart_cross_ext_rr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 4[DoDivideBySize: 'input_norm']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 5[Ridge: 'predictor']
+    4[DoDivideBySize: 'input_norm'] -- y --&gt; 5[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[Ridge: 'predictor']
+    5[Ridge: 'predictor'] -- y --&gt; 6[UndoDivideBySize: 'output']
+    4[DoDivideBySize: 'input_norm'] -- sizes --&gt; 6[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 5[Ridge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    6[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id42">
+<h3>Transforms<a class="headerlink" href="#id42" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>Ridge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-longrange-nocross-ext-rr">
+<h2>bxtal_soap_longrange_nocross_ext_rr<a class="headerlink" href="#bxtal-soap-longrange-nocross-ext-rr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id43">
+<h3>Pipeline Graph<a class="headerlink" href="#id43" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_longrange_nocross_ext_rr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 4[DoDivideBySize: 'input_norm']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 5[Ridge: 'predictor']
+    4[DoDivideBySize: 'input_norm'] -- y --&gt; 5[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[Ridge: 'predictor']
+    5[Ridge: 'predictor'] -- y --&gt; 6[UndoDivideBySize: 'output']
+    4[DoDivideBySize: 'input_norm'] -- sizes --&gt; 6[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 5[Ridge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    6[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id44">
+<h3>Transforms<a class="headerlink" href="#id44" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>Ridge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="bxtal-soap-longrange-cross-ext-rr">
+<h2>bxtal_soap_longrange_cross_ext_rr<a class="headerlink" href="#bxtal-soap-longrange-cross-ext-rr" title="Permalink to this heading"></a></h2>
+<p>‘No summary’</p>
+<p>Model Type: ‘Not Specified’</p>
+<p>‘No extended summary’</p>
+<section id="id45">
+<h3>Pipeline Graph<a class="headerlink" href="#id45" title="Permalink to this heading"></a></h3>
+<div class="mermaid">
+            flowchart TD
+subgraph Model [bxtal_soap_longrange_cross_ext_rr]
+    0[ExtXyzInput: 'input'] -- meta --&gt; 0[ExtXyzInput: 'input']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 1[UniversalSoapGylmxx: 'descriptor_atomic']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- X --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    1[UniversalSoapGylmxx: 'descriptor_atomic'] -- T --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 2[ReduceTypedMatrix: 'descriptor']
+    2[ReduceTypedMatrix: 'descriptor'] -- X --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 3[WhitenMatrix: 'whiten']
+    0[ExtXyzInput: 'input'] -- configs --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 4[DoDivideBySize: 'input_norm']
+    0[ExtXyzInput: 'input'] -- y --&gt; 4[DoDivideBySize: 'input_norm']
+    3[WhitenMatrix: 'whiten'] -- X --&gt; 5[Ridge: 'predictor']
+    4[DoDivideBySize: 'input_norm'] -- y --&gt; 5[Ridge: 'predictor']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 5[Ridge: 'predictor']
+    5[Ridge: 'predictor'] -- y --&gt; 6[UndoDivideBySize: 'output']
+    4[DoDivideBySize: 'input_norm'] -- sizes --&gt; 6[UndoDivideBySize: 'output']
+    0[ExtXyzInput: 'input'] -- meta --&gt; 6[UndoDivideBySize: 'output']
+end
+subgraph Hyper [GridHyper]
+    HyperParams --- alpha ---&gt; 5[Ridge: 'predictor']
+end
+subgraph Outputs [Outputs]
+    6[UndoDivideBySize: 'output'] -- y --&gt; y[y]
+end
+        </div></section>
+<section id="id46">
+<h3>Transforms<a class="headerlink" href="#id46" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ExtXyzInput<span class="classifier">[‘InputTransform’]</span></dt><dd><p>An ExtXyz Data Input Node.</p>
+</dd>
+<dt>UniversalSoapGylmxx<span class="classifier">[‘UniversalSoapBase’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>ReduceTypedMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>WhitenMatrix<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>DoDivideBySize<span class="classifier">[‘FitTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>Ridge<span class="classifier">[‘SklearnTransform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+<dt>UndoDivideBySize<span class="classifier">[‘Transform’]</span></dt><dd><p>‘No description’</p>
+</dd>
+</dl>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="bxtal_physchem.html" class="btn btn-neutral float-left" title="bxtal_physchem" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dscribe.html" class="btn btn-neutral float-right" title="dscribe" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Carl Poelking.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

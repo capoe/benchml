@@ -1,0 +1,7 @@
+benchml.plugins.plugin\_asap module
+===================================
+
+.. automodule:: benchml.plugins.plugin_asap
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,212 @@
+===================
+bmol_physchem_class
+===================
+
+bmol_physchem_basic_rf_class
+============================
+'No summary'
+
+Model Type: Classification
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bmol_physchem_basic_rf_class]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[Physchem2D: 'Physchem2D']
+        0[ExtXyzInput: 'input'] -- meta --> 1[Physchem2D: 'Physchem2D']
+        0[ExtXyzInput: 'input'] -- configs --> 2[PhyschemUser: 'PhyschemUser']
+        0[ExtXyzInput: 'input'] -- meta --> 2[PhyschemUser: 'PhyschemUser']
+        1[Physchem2D: 'Physchem2D'] -- X --> 3[Concatenate: 'descriptor']
+        2[PhyschemUser: 'PhyschemUser'] -- X --> 3[Concatenate: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 3[Concatenate: 'descriptor']
+        3[Concatenate: 'descriptor'] -- X --> 4[RandomForestClassifier: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 4[RandomForestClassifier: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 4[RandomForestClassifier: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- max_depth ---> 4[RandomForestClassifier: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        4[RandomForestClassifier: 'predictor'] -- z --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+Physchem2D : ['Transform']
+    'No description'
+
+PhyschemUser : ['Transform']
+    'No description'
+
+Concatenate : ['Transform']
+    'No description'
+
+RandomForestClassifier : ['SklearnTransform']
+    'No description'
+
+bmol_physchem_core_rf_class
+===========================
+'No summary'
+
+Model Type: Classification
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bmol_physchem_core_rf_class]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[Physchem2D: 'Physchem2D']
+        0[ExtXyzInput: 'input'] -- meta --> 1[Physchem2D: 'Physchem2D']
+        0[ExtXyzInput: 'input'] -- configs --> 2[PhyschemUser: 'PhyschemUser']
+        0[ExtXyzInput: 'input'] -- meta --> 2[PhyschemUser: 'PhyschemUser']
+        1[Physchem2D: 'Physchem2D'] -- X --> 3[Concatenate: 'descriptor']
+        2[PhyschemUser: 'PhyschemUser'] -- X --> 3[Concatenate: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 3[Concatenate: 'descriptor']
+        3[Concatenate: 'descriptor'] -- X --> 4[RandomForestClassifier: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 4[RandomForestClassifier: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 4[RandomForestClassifier: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- max_depth ---> 4[RandomForestClassifier: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        4[RandomForestClassifier: 'predictor'] -- z --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+Physchem2D : ['Transform']
+    'No description'
+
+PhyschemUser : ['Transform']
+    'No description'
+
+Concatenate : ['Transform']
+    'No description'
+
+RandomForestClassifier : ['SklearnTransform']
+    'No description'
+
+bmol_physchem_logp_rf_class
+===========================
+'No summary'
+
+Model Type: Classification
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bmol_physchem_logp_rf_class]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[Physchem2D: 'Physchem2D']
+        0[ExtXyzInput: 'input'] -- meta --> 1[Physchem2D: 'Physchem2D']
+        0[ExtXyzInput: 'input'] -- configs --> 2[PhyschemUser: 'PhyschemUser']
+        0[ExtXyzInput: 'input'] -- meta --> 2[PhyschemUser: 'PhyschemUser']
+        1[Physchem2D: 'Physchem2D'] -- X --> 3[Concatenate: 'descriptor']
+        2[PhyschemUser: 'PhyschemUser'] -- X --> 3[Concatenate: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 3[Concatenate: 'descriptor']
+        3[Concatenate: 'descriptor'] -- X --> 4[RandomForestClassifier: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 4[RandomForestClassifier: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 4[RandomForestClassifier: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- max_depth ---> 4[RandomForestClassifier: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        4[RandomForestClassifier: 'predictor'] -- z --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+Physchem2D : ['Transform']
+    'No description'
+
+PhyschemUser : ['Transform']
+    'No description'
+
+Concatenate : ['Transform']
+    'No description'
+
+RandomForestClassifier : ['SklearnTransform']
+    'No description'
+
+bmol_physchem_extended_rf_class
+===============================
+'No summary'
+
+Model Type: Classification
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [bmol_physchem_extended_rf_class]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[Physchem2D: 'Physchem2D']
+        0[ExtXyzInput: 'input'] -- meta --> 1[Physchem2D: 'Physchem2D']
+        0[ExtXyzInput: 'input'] -- configs --> 2[PhyschemUser: 'PhyschemUser']
+        0[ExtXyzInput: 'input'] -- meta --> 2[PhyschemUser: 'PhyschemUser']
+        1[Physchem2D: 'Physchem2D'] -- X --> 3[Concatenate: 'descriptor']
+        2[PhyschemUser: 'PhyschemUser'] -- X --> 3[Concatenate: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 3[Concatenate: 'descriptor']
+        3[Concatenate: 'descriptor'] -- X --> 4[RandomForestClassifier: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 4[RandomForestClassifier: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 4[RandomForestClassifier: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- max_depth ---> 4[RandomForestClassifier: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        4[RandomForestClassifier: 'predictor'] -- z --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+Physchem2D : ['Transform']
+    'No description'
+
+PhyschemUser : ['Transform']
+    'No description'
+
+Concatenate : ['Transform']
+    'No description'
+
+RandomForestClassifier : ['SklearnTransform']
+    'No description'
+

@@ -1,0 +1,7 @@
+benchml.predictors.gaussian\_process module
+===========================================
+
+.. automodule:: benchml.predictors.gaussian_process
+   :members:
+   :undoc-members:
+   :show-inheritance:

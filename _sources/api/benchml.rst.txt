@@ -1,0 +1,48 @@
+benchml package
+===============
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   benchml.descriptors
+   benchml.filters
+   benchml.kernels
+   benchml.models
+   benchml.plugins
+   benchml.predictors
+   benchml.test
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   benchml.accumulator
+   benchml.analysis
+   benchml.basic
+   benchml.benchmark
+   benchml.conformal
+   benchml.data
+   benchml.ensemble
+   benchml.hyper
+   benchml.inputs
+   benchml.logger
+   benchml.matrix
+   benchml.pipeline
+   benchml.ptable
+   benchml.readwrite
+   benchml.splits
+   benchml.transforms
+   benchml.utils
+
+Module contents
+---------------
+
+.. automodule:: benchml
+   :members:
+   :undoc-members:
+   :show-inheritance:

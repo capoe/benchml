@@ -1,0 +1,7 @@
+benchml.analysis module
+=======================
+
+.. automodule:: benchml.analysis
+   :members:
+   :undoc-members:
+   :show-inheritance:

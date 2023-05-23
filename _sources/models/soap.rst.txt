@@ -1,0 +1,346 @@
+====
+soap
+====
+
+soap_krr_00
+===========
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [soap_krr_00]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[UniversalSoapGylmxx: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[UniversalSoapGylmxx: 'descriptor']
+        1[UniversalSoapGylmxx: 'descriptor'] -- X --> 2[ReduceTypedMatrix: 'reduce']
+        1[UniversalSoapGylmxx: 'descriptor'] -- T --> 2[ReduceTypedMatrix: 'reduce']
+        0[ExtXyzInput: 'input'] -- meta --> 2[ReduceTypedMatrix: 'reduce']
+        2[ReduceTypedMatrix: 'reduce'] -- X --> 3[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- meta --> 3[WhitenMatrix: 'whiten']
+        3[WhitenMatrix: 'whiten'] -- X --> 4[KernelDot: 'kernel']
+        0[ExtXyzInput: 'input'] -- meta --> 4[KernelDot: 'kernel']
+        4[KernelDot: 'kernel'] -- K --> 5[KernelRidge: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 5[KernelRidge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 5[KernelRidge: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 5[KernelRidge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        5[KernelRidge: 'predictor'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+UniversalSoapGylmxx : ['UniversalSoapBase']
+    'No description'
+
+ReduceTypedMatrix : ['FitTransform']
+    'No description'
+
+WhitenMatrix : ['FitTransform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+soap_krr_01
+===========
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [soap_krr_01]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[UniversalSoapGylmxx: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[UniversalSoapGylmxx: 'descriptor']
+        1[UniversalSoapGylmxx: 'descriptor'] -- X --> 2[ReduceTypedMatrix: 'reduce']
+        1[UniversalSoapGylmxx: 'descriptor'] -- T --> 2[ReduceTypedMatrix: 'reduce']
+        0[ExtXyzInput: 'input'] -- meta --> 2[ReduceTypedMatrix: 'reduce']
+        2[ReduceTypedMatrix: 'reduce'] -- X --> 3[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- meta --> 3[WhitenMatrix: 'whiten']
+        3[WhitenMatrix: 'whiten'] -- X --> 4[KernelDot: 'kernel']
+        0[ExtXyzInput: 'input'] -- meta --> 4[KernelDot: 'kernel']
+        4[KernelDot: 'kernel'] -- K --> 5[KernelRidge: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 5[KernelRidge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 5[KernelRidge: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 5[KernelRidge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        5[KernelRidge: 'predictor'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+UniversalSoapGylmxx : ['UniversalSoapBase']
+    'No description'
+
+ReduceTypedMatrix : ['FitTransform']
+    'No description'
+
+WhitenMatrix : ['FitTransform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+soap_krr_02
+===========
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [soap_krr_02]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[UniversalSoapGylmxx: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[UniversalSoapGylmxx: 'descriptor']
+        1[UniversalSoapGylmxx: 'descriptor'] -- X --> 2[ReduceTypedMatrix: 'reduce']
+        1[UniversalSoapGylmxx: 'descriptor'] -- T --> 2[ReduceTypedMatrix: 'reduce']
+        0[ExtXyzInput: 'input'] -- meta --> 2[ReduceTypedMatrix: 'reduce']
+        2[ReduceTypedMatrix: 'reduce'] -- X --> 3[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- meta --> 3[WhitenMatrix: 'whiten']
+        3[WhitenMatrix: 'whiten'] -- X --> 4[KernelDot: 'kernel']
+        0[ExtXyzInput: 'input'] -- meta --> 4[KernelDot: 'kernel']
+        4[KernelDot: 'kernel'] -- K --> 5[KernelRidge: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 5[KernelRidge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 5[KernelRidge: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 5[KernelRidge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        5[KernelRidge: 'predictor'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+UniversalSoapGylmxx : ['UniversalSoapBase']
+    'No description'
+
+ReduceTypedMatrix : ['FitTransform']
+    'No description'
+
+WhitenMatrix : ['FitTransform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+soap_krr_03
+===========
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [soap_krr_03]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[UniversalSoapGylmxx: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[UniversalSoapGylmxx: 'descriptor']
+        1[UniversalSoapGylmxx: 'descriptor'] -- X --> 2[ReduceTypedMatrix: 'reduce']
+        1[UniversalSoapGylmxx: 'descriptor'] -- T --> 2[ReduceTypedMatrix: 'reduce']
+        0[ExtXyzInput: 'input'] -- meta --> 2[ReduceTypedMatrix: 'reduce']
+        2[ReduceTypedMatrix: 'reduce'] -- X --> 3[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- meta --> 3[WhitenMatrix: 'whiten']
+        3[WhitenMatrix: 'whiten'] -- X --> 4[KernelDot: 'kernel']
+        0[ExtXyzInput: 'input'] -- meta --> 4[KernelDot: 'kernel']
+        4[KernelDot: 'kernel'] -- K --> 5[KernelRidge: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 5[KernelRidge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 5[KernelRidge: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 5[KernelRidge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        5[KernelRidge: 'predictor'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+UniversalSoapGylmxx : ['UniversalSoapBase']
+    'No description'
+
+ReduceTypedMatrix : ['FitTransform']
+    'No description'
+
+WhitenMatrix : ['FitTransform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+soap_krr_04
+===========
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [soap_krr_04]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[UniversalSoapGylmxx: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[UniversalSoapGylmxx: 'descriptor']
+        1[UniversalSoapGylmxx: 'descriptor'] -- X --> 2[ReduceTypedMatrix: 'reduce']
+        1[UniversalSoapGylmxx: 'descriptor'] -- T --> 2[ReduceTypedMatrix: 'reduce']
+        0[ExtXyzInput: 'input'] -- meta --> 2[ReduceTypedMatrix: 'reduce']
+        2[ReduceTypedMatrix: 'reduce'] -- X --> 3[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- meta --> 3[WhitenMatrix: 'whiten']
+        3[WhitenMatrix: 'whiten'] -- X --> 4[KernelDot: 'kernel']
+        0[ExtXyzInput: 'input'] -- meta --> 4[KernelDot: 'kernel']
+        4[KernelDot: 'kernel'] -- K --> 5[KernelRidge: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 5[KernelRidge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 5[KernelRidge: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 5[KernelRidge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        5[KernelRidge: 'predictor'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+UniversalSoapGylmxx : ['UniversalSoapBase']
+    'No description'
+
+ReduceTypedMatrix : ['FitTransform']
+    'No description'
+
+WhitenMatrix : ['FitTransform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+
+soap_krr_05
+===========
+'No summary'
+
+Model Type: 'Not Specified'
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [soap_krr_05]
+        0[ExtXyzInput: 'input'] -- meta --> 0[ExtXyzInput: 'input']
+        0[ExtXyzInput: 'input'] -- configs --> 1[UniversalSoapGylmxx: 'descriptor']
+        0[ExtXyzInput: 'input'] -- meta --> 1[UniversalSoapGylmxx: 'descriptor']
+        1[UniversalSoapGylmxx: 'descriptor'] -- X --> 2[ReduceTypedMatrix: 'reduce']
+        1[UniversalSoapGylmxx: 'descriptor'] -- T --> 2[ReduceTypedMatrix: 'reduce']
+        0[ExtXyzInput: 'input'] -- meta --> 2[ReduceTypedMatrix: 'reduce']
+        2[ReduceTypedMatrix: 'reduce'] -- X --> 3[WhitenMatrix: 'whiten']
+        0[ExtXyzInput: 'input'] -- meta --> 3[WhitenMatrix: 'whiten']
+        3[WhitenMatrix: 'whiten'] -- X --> 4[KernelDot: 'kernel']
+        0[ExtXyzInput: 'input'] -- meta --> 4[KernelDot: 'kernel']
+        4[KernelDot: 'kernel'] -- K --> 5[KernelRidge: 'predictor']
+        0[ExtXyzInput: 'input'] -- y --> 5[KernelRidge: 'predictor']
+        0[ExtXyzInput: 'input'] -- meta --> 5[KernelRidge: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- alpha ---> 5[KernelRidge: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        5[KernelRidge: 'predictor'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExtXyzInput : ['InputTransform']
+    An ExtXyz Data Input Node.
+
+UniversalSoapGylmxx : ['UniversalSoapBase']
+    'No description'
+
+ReduceTypedMatrix : ['FitTransform']
+    'No description'
+
+WhitenMatrix : ['FitTransform']
+    'No description'
+
+KernelDot : ['FitTransform']
+    'No description'
+
+KernelRidge : ['SklearnTransform']
+    'No description'
+

@@ -1,0 +1,7 @@
+benchml.plugins.plugin\_check module
+====================================
+
+.. automodule:: benchml.plugins.plugin_check
+   :members:
+   :undoc-members:
+   :show-inheritance:

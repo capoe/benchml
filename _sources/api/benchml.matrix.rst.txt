@@ -1,0 +1,7 @@
+benchml.matrix module
+=====================
+
+.. automodule:: benchml.matrix
+   :members:
+   :undoc-members:
+   :show-inheritance:

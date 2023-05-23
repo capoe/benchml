@@ -1,0 +1,7 @@
+benchml.plugins.plugin\_soap module
+===================================
+
+.. automodule:: benchml.plugins.plugin_soap
+   :members:
+   :undoc-members:
+   :show-inheritance:

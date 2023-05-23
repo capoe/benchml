@@ -1,0 +1,38 @@
+==============
+xy_classifiers
+==============
+
+xy_rf_class
+===========
+'No summary'
+
+Model Type: Classification
+
+'No extended summary'
+
+Pipeline Graph
+--------------
+.. mermaid::
+
+    flowchart TD
+    subgraph Model [xy_rf_class]
+        0[ExttInput: 'input'] -- X --> 1[RandomForestClassifier: 'predictor']
+        0[ExttInput: 'input'] -- y --> 1[RandomForestClassifier: 'predictor']
+    end
+    subgraph Hyper [GridHyper]
+        HyperParams --- max_depth ---> 1[RandomForestClassifier: 'predictor']
+    end
+    subgraph Outputs [Outputs]
+        1[RandomForestClassifier: 'predictor'] -- y --> y[y]
+    end
+    
+
+
+Transforms
+----------
+ExttInput : ['InputTransform']
+    An EXTendedTxt Data Input Node.
+
+RandomForestClassifier : ['SklearnTransform']
+    'No description'
+

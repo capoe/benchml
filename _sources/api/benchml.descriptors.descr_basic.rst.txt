@@ -1,0 +1,7 @@
+benchml.descriptors.descr\_basic module
+=======================================
+
+.. automodule:: benchml.descriptors.descr_basic
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+benchml.plugins.plugin\_cx module
+=================================
+
+.. automodule:: benchml.plugins.plugin_cx
+   :members:
+   :undoc-members:
+   :show-inheritance:

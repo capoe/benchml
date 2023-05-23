@@ -1,0 +1,7 @@
+benchml.models.mod\_logd module
+===============================
+
+.. automodule:: benchml.models.mod_logd
+   :members:
+   :undoc-members:
+   :show-inheritance:

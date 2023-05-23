@@ -1,0 +1,7 @@
+benchml.predictors.pred\_sklearn module
+=======================================
+
+.. automodule:: benchml.predictors.pred_sklearn
+   :members:
+   :undoc-members:
+   :show-inheritance:

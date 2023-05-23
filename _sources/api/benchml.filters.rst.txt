@@ -1,0 +1,18 @@
+benchml.filters package
+=======================
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   benchml.filters.random_matrix
+
+Module contents
+---------------
+
+.. automodule:: benchml.filters
+   :members:
+   :undoc-members:
+   :show-inheritance:
