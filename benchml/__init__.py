@@ -12,7 +12,7 @@ from benchml.readwrite import load, read, save, write
 from benchml.splits import Split
 from benchml.transforms import Transform
 
-__version__ = "0.6.0"
+__version__ = "0.6.1"
 __all__ = [
     "analysis",
     "benchmark",
