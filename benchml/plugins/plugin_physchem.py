@@ -198,6 +198,10 @@ class Physchem2D(Transform):
     }
     default_args = {"select_predef": "extended", "select": None}
     predefined = {
+        "null": [
+            "n_heavy",
+            "mollogp"
+        ],
         "basic": [
             "tpsa",
             "mollogp",

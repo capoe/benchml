@@ -77,10 +77,12 @@ def check_dscribe_available(obj, require=False):
 try:
     import rdkit.Chem as rchem
     from rdkit.Chem import AllChem as achem, Descriptors as rdesc
+    from rdkit.Chem import rdFingerprintGenerator
 except ImportError:
     rchem = None
     achem = None
     rdesc = None
+    rdFingerprintGenerator = None
 
 
 def check_rdkit_available(obj, require=False):

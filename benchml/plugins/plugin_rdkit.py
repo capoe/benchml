@@ -2,7 +2,7 @@ import numpy as np
 
 from benchml.kernels import KernelDot
 from benchml.pipeline import Macro, Transform
-from benchml.plugins.plugin_check import achem, check_rdkit_available, rchem
+from benchml.plugins.plugin_check import achem, check_rdkit_available, rchem, rdFingerprintGenerator
 from benchml.utils import get_smiles
 
 
@@ -12,7 +12,6 @@ class MorganFP(Transform):
         "length": 2048,
         "normalize": True,
         "useChirality": False,
-        "useFeatures": False,
     }
     allow_stream = {"X"}
     stream_samples = ("X",)
@@ -26,22 +25,17 @@ class MorganFP(Transform):
         self.length = self.args["length"]
         self.normalize = self.args["normalize"]
         self.useChirality = self.args["useChirality"]
-        self.useFeatures = self.args["useFeatures"]
 
     def _map(self, inputs, stream):
         configs = inputs["configs"]
         smiles = [get_smiles(c) for c in configs]
         mols = [rchem.MolFromSmiles(s) for s in smiles]  # pylint: disable=E1101
-        fps = [
-            achem.GetMorganFingerprintAsBitVect(  # pylint: disable=E1101
-                mol,
-                radius=self.radius,
-                nBits=self.length,
-                useChirality=self.useChirality,
-                useFeatures=self.useFeatures,
-            )
-            for mol in mols
-        ]
+        fpgen = rdFingerprintGenerator.GetMorganGenerator(
+            radius=self.radius,
+            fpSize=self.length,
+            includeChirality=self.useChirality,
+        )
+        fps = [ fpgen.GetFingerprint(mol) for mol in mols ]
         fps = np.array(fps, dtype="float64")
         if self.normalize:
             z = 1.0 / (np.sum(fps**2, axis=1) + 1e-10) ** 0.5
